@@ -20,10 +20,11 @@ from dotenv import load_dotenv
 class APIState(TypedDict, total=False):
     selected_nodes: list[int]
     readme_content: str = ""
-    extends: list[str]
-    returns: list[str]
-    uses: list[str]
-    calls: list[str]
+    base: dict[int, str]
+    extends: dict[int, str]
+    returns: dict[int, str]
+    uses: dict[int, str]
+    calls: dict[int, str]
     counter:  Annotated[int, lambda x, y: x + y]
 
 def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, path: str):
@@ -33,8 +34,10 @@ def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, 
     async def fetch_nodes(state: APIState) -> APIState:
         query = f"""
         MATCH (n:{label})<-[:DECLARES]-(n0:File)
-        WHERE public in n.modifiers
-        RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation
+        WHERE 'public' in n.modifiers
+        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
+        RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation,
+               collect(a.source_code)  AS annotation_sources
         """
         records = []
         nodes = []
@@ -45,15 +48,31 @@ def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, 
         records.extend(result2)
         records.extend(result3)
         for record in records:
-            nodes.append(f"nodeId: {record['nodeId']}, name: {record['name']}, modifiers: {record['modifiers']}, semantic_explannation: {record['semantic_explanation']}")
+            nodes.append(f"nodeId: {record['nodeId']}, name: {record['name']}, modifiers: {record['modifiers']}, semantic_explanation: {record['semantic_explanation']}, annotation_sources: {record['annotation_sources']}")
         node_instruction = "\n".join(nodes)
         selected_nodes = await select_api_file_chain.ainvoke({"node_introduction": node_instruction})
-        state["selected_nodes"] = selected_nodes["node_id"]
-        state["counter"] = 0
-        return [Send("generate_extends", state),
-                Send("generate_returns", state),
-                Send("generate_uses", state),
-                Send("generate_calls", state)]
+        update = {
+            "selected_nodes": selected_nodes.get("node_id", []),
+            "counter": 0
+        }
+        return [Send("generate_base", update),
+                Send("generate_extends", update),
+                Send("generate_returns", update),
+                Send("generate_uses", update),
+                Send("generate_calls", update)]
+    
+    async def generate_base(state: APIState) -> APIState:
+        content = {}
+        query = f"""
+        MATCH n
+        WHERE n.nodeId IN {state["selected_nodes"]}
+        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
+        RETURN n.name AS name, n.nodeId AS nodeId,n.source_code AS source_code, collect(a.source_code) AS annotation_sources
+        """
+        result = await neo4j_interface.execute_query(query)
+        for record in result:
+            content[record['nodeId']] = f"nodeId: {record['nodeId']}, name: {record['name']}, source_code: {record['source_code']}, annotation_sources: {record['annotation_sources']}"
+        return {"base": content, "counter": 1}
     
     async def generate_extends(state: APIState) -> APIState:
         query = f"""
@@ -61,53 +80,65 @@ def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, 
         WHERE n.nodeId IN {state["selected_nodes"]}
         RETURN n.name AS name, n.nodeId AS nodeId,n.source_code AS source_code, nf.name AS nf_name, nf.semantic_explanation AS nf_semantic_explanation
         """
-        content = []
+        content = {}
         result = await neo4j_interface.execute_query(query)
         for record in result:
-            content.append(f"nodeId: {record['nodeId']}, name: {record['name']}, source_code: {record['source_code']},\n此类继承{record['nf_name']}, 其语义解释为{record['nf_semantic_explanation']}")
+            if record['nodeId'] in content:
+                content[record['nodeId']] = content[record['nodeId']] + f"\n此类继承{record['nf_name']}, 其语义解释为{record['nf_semantic_explanation']}"
+            else:
+                content[record['nodeId']] = f"\n此类继承{record['nf_name']}, 其语义解释为{record['nf_semantic_explanation']}"
         return {"extends": content, "counter": 1}
     
     async def generate_returns(state: APIState) -> APIState:
         query = f"""
         MATCH n-[:DECLARES*1..]->(n1:Method)-[:RETURNS]->(n2)
         WHERE n.nodeId IN {state["selected_nodes"]}
-        RETRUN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema
+        RETURN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema, n.nodeId AS nodeId
         """
-        content = []
+        content = {}
         result = await neo4j_interface.execute_query(query)
         for record in result:
-            content.append(f"\n此类其中的Method{record['n1_name']}返回类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']}")
+            if record['nodeId'] in content:
+                content[record['nodeId']] = content[record['nodeId']] + f"\n此类其中的Method{record['n1_name']}返回类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']}"
+            else:
+                content[record['nodeId']] = f"\n此类其中的Method{record['n1_name']}返回类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']}"
         return {"returns": content, "counter": 1}
     
     async def generate_uses(state: APIState) -> APIState:
         query = f"""
         MATCH n-[:DECLARES*1..]->(n1:Method)-[:USES]->(n2)
         WHERE n.nodeId IN {state["selected_nodes"]}
-        RETRUN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema
+        RETURN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema, n.nodeId AS nodeId
         """
-        content = []
+        content = {}
         result = await neo4j_interface.execute_query(query)
         for record in result:
-            content.append(f"\n此类其中的Method{record['n1_name']}使用类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']["What"]}")
+            if record['nodeId'] in content:
+                content[record['nodeId']] = content[record['nodeId']] + f"\n此类其中的Method{record['n1_name']}使用类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']["What"]}"
+            else:
+                content[record['nodeId']] = f"\n此类其中的Method{record['n1_name']}使用类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']["What"]}"
         return {"uses": content, "counter": 1}
 
     async def generate_calls(state: APIState) -> APIState:
         query = f"""
         MATCH n-[:DECLARES*1..]->(n1:Method)-[:CALLS]->(n2)
         WHERE n.nodeId IN {state["selected_nodes"]}
-        RETRUN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema
+        RETURN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema, n.nodeId AS nodeId
         """
-        content = []
+        content = {}
         result = await neo4j_interface.execute_query(query)
         for record in result:
-            content.append(f"\n此类其中的Method{record['n1_name']}调用Method为{record['n2_name']}, 此Method其语义解释为{record['n2_sema']["What"]}\n")
+            if record['nodeId'] in content:
+                content[record['nodeId']] = content[record['nodeId']] + f"\n此类其中的Method{record['n1_name']}调用Method为{record['n2_name']}, 此Method其语义解释为{record['n2_sema']["What"]}\n"
+            else:
+                content[record['nodeId']] = f"\n此类其中的Method{record['n1_name']}调用Method为{record['n2_name']}, 此Method其语义解释为{record['n2_sema']["What"]}\n"
         return {"calls": content, "counter": 1}
     
     async def save_doc(state: APIState) -> APIState:
         validator = SimpleMermaidValidator()
         input_content = ["下面是可能包含与对外提供接口/API服务功能的类的介绍"]
         for i in range(len(state["selected_nodes"])):
-            input_content.append(state["extends"][i]+state["returns"][i]+state["uses"][i]+state["calls"][i])
+            input_content.append(state["base"].get([state["selected_nodes"][i]], "")+state["extends"].get([state["selected_nodes"][i]], "")+state["returns"].get([state["selected_nodes"][i]], "")+state["uses"].get([state["selected_nodes"][i]], "")+state["calls"].get([state["selected_nodes"][i]], ""))
         input_content = "\n".join(input_content)
         result = await generate_api_chain.ainvoke({"readme_content": state["readme_content"], "all_content": input_content})
         result_validate = validator.validate_file(result)
@@ -121,34 +152,26 @@ def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, 
         return {"output_filename": path}
     
     def should_continue(state: APIState) -> str:
-        if state.get("counter", 0) == 4:
+        if state.get("counter", 0) == 5:
             return "save_doc"
         else:
             return END
     
     graph = StateGraph(APIState)
     graph.add_node("fetch_nodes", fetch_nodes)
+    graph.add_node("generate_base", generate_base)
     graph.add_node("generate_extends", generate_extends)
     graph.add_node("generate_returns", generate_returns)
     graph.add_node("generate_uses", generate_uses)
     graph.add_node("generate_calls", generate_calls)
     graph.add_node("save_doc", save_doc)
-    graph.add_conditional_edges(
-        "should_continue",
-        should_continue,
-        {
-            "save_doc": "save_doc",
-            END: END
-        }
-    )
-
-    graph.set_entry_point("fetch_nodes")
-    # 4 个 generate 节点由 fetch_nodes 通过 Send 并行下发
-    graph.add_edge("generate_extends", "should_continue")
-    graph.add_edge("generate_returns", "should_continue")
-    graph.add_edge("generate_uses", "should_continue")
-    graph.add_edge("generate_calls", "should_continue")
-
+    graph.add_conditional_edges("generate_base", should_continue, {"save_doc": "save_doc", END: END})
+    graph.add_conditional_edges("generate_extends", should_continue, {"save_doc": "save_doc", END: END})
+    graph.add_conditional_edges("generate_returns", should_continue, {"save_doc": "save_doc", END: END})
+    graph.add_conditional_edges("generate_uses", should_continue, {"save_doc": "save_doc", END: END})
+    graph.add_conditional_edges("generate_calls", should_continue, {"save_doc": "save_doc", END: END})
+    
+    # save_doc 节点是终点
     graph.add_edge("save_doc", END)
 
     app = graph.compile(checkpointer=MemorySaver())
@@ -171,7 +194,6 @@ if __name__ == "__main__":
             print("Neo4j连接失败")
             return
         app = SelectApi_app(llm, neo4j, path)
-        # 使用测试数据
         result = await app.ainvoke(
             {}, 
             config={"configurable": {"thread_id": "standalone-api"}}
