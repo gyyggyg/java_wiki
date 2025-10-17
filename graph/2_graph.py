@@ -4,172 +4,130 @@ import sys
 import os
 import time
 import asyncio
+import json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from langgraph.graph import StateGraph, END, Send
-from langgraph.constants import Send
+from langgraph.graph import StateGraph, END
 from interfaces.simple_validate_mermaid import SimpleMermaidValidator
 from langgraph.checkpoint.memory import MemorySaver
 from interfaces.llm_interface import LLMInterface
 from interfaces.neo4j_interface import Neo4jInterface
-from message_service import MessageService
+from interfaces.message_service import MessageService
 from typing_extensions import TypedDict
 from typing import Annotated
-from chains.prompts.select_api_prompt import API_FILE_PROMPT, API_PROMPT
+from chains.prompts.select_api_prompt import API_FILE_PROMPT, API_CLASS_PROMPT, API_1_PROMPT, API_2_PROMPT
 from chains.common_chains import ChainFactory
 from dotenv import load_dotenv
 class APIState(TypedDict, total=False):
-    selected_nodes: list[int]
+    selected_files: list[str]
+    selected_nodes: list[str]
     readme_content: str = ""
     base: dict[int, str]
-    extends: dict[int, str]
-    returns: dict[int, str]
-    uses: dict[int, str]
-    calls: dict[int, str]
-    counter:  Annotated[int, lambda x, y: x + y]
+
 
 def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, path: str):
     select_api_file_chain = ChainFactory.create_generic_chain(llm_interface, API_FILE_PROMPT)
-    generate_api_chain = ChainFactory.create_generic_chain(llm_interface, API_PROMPT)
+    select_api_class_chain = ChainFactory.create_generic_chain(llm_interface, API_CLASS_PROMPT)
+    generate_api_1_chain = ChainFactory.create_generic_chain(llm_interface, API_1_PROMPT)
+    generate_api_2_chain = ChainFactory.create_generic_chain(llm_interface, API_2_PROMPT)
+
+    async def fetch_files(state: APIState) -> APIState:
+        files = []
+        query = f"""
+        MATCH (n:File)
+        RETURN n.name AS name, n.nodeId AS nodeId, n.module_explaination AS module_explaination
+        """
+        result = await neo4j_interface.execute_query(query)
+        for record in result:
+            files.append(f"fileId: {record['nodeId']}, name: {record['name']}, module_explaination: {record['module_explaination']}")
+        file_instruction = "\n".join(files)
+        selected_files1, selected_files2 = await asyncio.gather(
+            select_api_file_chain.ainvoke({"file_introduction": file_instruction}),
+            select_api_file_chain.ainvoke({"file_introduction": file_instruction}),
+        )
+        selected_files_set = set(json.loads(selected_files1).get("file_id", [])) | set(json.loads(selected_files2).get("file_id", [])) 
+        selected_files = list(selected_files_set)
+        print(selected_files)
+        return {"selected_files": selected_files}
 
     async def fetch_nodes(state: APIState) -> APIState:
-        query = f"""
-        MATCH (n:{label})<-[:DECLARES]-(n0:File)
-        WHERE 'public' in n.modifiers
+        query1 = f"""
+        MATCH (n:Enum)<-[:DECLARES]-(n0:File)
+         WHERE 'public' IN split(replace(n.modifiers, '\n', ' '), ' ') AND n0.nodeId IN {state["selected_files"]}
         OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
         RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation,
                collect(a.source_code)  AS annotation_sources
         """
-        records = []
+        query2 = f"""
+        MATCH (n:Interface)<-[:DECLARES]-(n0:File)
+         WHERE 'public' IN split(replace(n.modifiers, '\n', ' '), ' ') AND n0.nodeId IN {state["selected_files"]}
+        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
+        RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation,
+               collect(a.source_code)  AS annotation_sources
+        """
+        query3 = f"""
+        MATCH (n:Class)<-[:DECLARES]-(n0:File)
+         WHERE 'public' IN split(replace(n.modifiers, '\n', ' '), ' ') AND n0.nodeId IN {state["selected_files"]}
+        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
+        RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation,
+               collect(a.source_code)  AS annotation_sources
+        """
         nodes = []
-        result1 = await neo4j_interface.execute_query(query, {"label": "Enum"})
-        result2 = await neo4j_interface.execute_query(query, {"label": "Interface"})
-        result3 = await neo4j_interface.execute_query(query, {"label": "Class"})
-        records.extend(result1)
-        records.extend(result2)
-        records.extend(result3)
-        for record in records:
-            nodes.append(f"nodeId: {record['nodeId']}, name: {record['name']}, modifiers: {record['modifiers']}, semantic_explanation: {record['semantic_explanation']}, annotation_sources: {record['annotation_sources']}")
-        node_instruction = "\n".join(nodes)
-        selected_nodes = await select_api_file_chain.ainvoke({"node_introduction": node_instruction})
-        update = {
-            "selected_nodes": selected_nodes.get("node_id", []),
-            "counter": 0
-        }
-        return [Send("generate_base", update),
-                Send("generate_extends", update),
-                Send("generate_returns", update),
-                Send("generate_uses", update),
-                Send("generate_calls", update)]
+        result1 = await neo4j_interface.execute_query(query1)
+        result2 = await neo4j_interface.execute_query(query2)
+        result3 = await neo4j_interface.execute_query(query3)
+        for record in result1:
+            nodes.append(record['nodeId'])
+        for record in result2:
+            nodes.append(record['nodeId'])
+        for record in result3:
+            nodes.append(record['nodeId'])
+        return {"selected_nodes": nodes}
+        #     nodes.append(f"nodeId: {record['nodeId']}, name: {record['name']}, modifiers: {record['modifiers']}, semantic_explanation: {(record['semantic_explanation'])}, annotation_sources: {record['annotation_sources']}")
+        # node_instruction = "\n".join(nodes)
+        # selected_nodes = await select_api_class_chain.ainvoke({"node_introduction": node_instruction})
+        # print(selected_nodes)
+        # return {"selected_nodes": json.loads(selected_nodes).get("node_id", [])}
     
     async def generate_base(state: APIState) -> APIState:
         content = {}
         query = f"""
-        MATCH n
+        MATCH (n)<-[:DECLARES]-(n0:File)<-[:CONTAINS]-(nn:Package)
         WHERE n.nodeId IN {state["selected_nodes"]}
-        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
-        RETURN n.name AS name, n.nodeId AS nodeId,n.source_code AS source_code, collect(a.source_code) AS annotation_sources
+        RETURN n.name AS name, n.nodeId AS nodeId,n.source_code AS source_code, n.semantic_explanation AS semantic_explanation, n0.name AS file_name, nn.name AS package_name
         """
         result = await neo4j_interface.execute_query(query)
         for record in result:
-            content[record['nodeId']] = f"nodeId: {record['nodeId']}, name: {record['name']}, source_code: {record['source_code']}, annotation_sources: {record['annotation_sources']}"
-        return {"base": content, "counter": 1}
-    
-    async def generate_extends(state: APIState) -> APIState:
-        query = f"""
-        MATCH n-[:EXTENDS]-> nf
-        WHERE n.nodeId IN {state["selected_nodes"]}
-        RETURN n.name AS name, n.nodeId AS nodeId,n.source_code AS source_code, nf.name AS nf_name, nf.semantic_explanation AS nf_semantic_explanation
-        """
-        content = {}
-        result = await neo4j_interface.execute_query(query)
-        for record in result:
-            if record['nodeId'] in content:
-                content[record['nodeId']] = content[record['nodeId']] + f"\n此类继承{record['nf_name']}, 其语义解释为{record['nf_semantic_explanation']}"
-            else:
-                content[record['nodeId']] = f"\n此类继承{record['nf_name']}, 其语义解释为{record['nf_semantic_explanation']}"
-        return {"extends": content, "counter": 1}
-    
-    async def generate_returns(state: APIState) -> APIState:
-        query = f"""
-        MATCH n-[:DECLARES*1..]->(n1:Method)-[:RETURNS]->(n2)
-        WHERE n.nodeId IN {state["selected_nodes"]}
-        RETURN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema, n.nodeId AS nodeId
-        """
-        content = {}
-        result = await neo4j_interface.execute_query(query)
-        for record in result:
-            if record['nodeId'] in content:
-                content[record['nodeId']] = content[record['nodeId']] + f"\n此类其中的Method{record['n1_name']}返回类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']}"
-            else:
-                content[record['nodeId']] = f"\n此类其中的Method{record['n1_name']}返回类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']}"
-        return {"returns": content, "counter": 1}
-    
-    async def generate_uses(state: APIState) -> APIState:
-        query = f"""
-        MATCH n-[:DECLARES*1..]->(n1:Method)-[:USES]->(n2)
-        WHERE n.nodeId IN {state["selected_nodes"]}
-        RETURN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema, n.nodeId AS nodeId
-        """
-        content = {}
-        result = await neo4j_interface.execute_query(query)
-        for record in result:
-            if record['nodeId'] in content:
-                content[record['nodeId']] = content[record['nodeId']] + f"\n此类其中的Method{record['n1_name']}使用类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']["What"]}"
-            else:
-                content[record['nodeId']] = f"\n此类其中的Method{record['n1_name']}使用类型为{record['n2_name']}, 此类型其语义解释为{record['n2_sema']["What"]}"
-        return {"uses": content, "counter": 1}
-
-    async def generate_calls(state: APIState) -> APIState:
-        query = f"""
-        MATCH n-[:DECLARES*1..]->(n1:Method)-[:CALLS]->(n2)
-        WHERE n.nodeId IN {state["selected_nodes"]}
-        RETURN n1.name AS n1_name, n2.name AS n2_name, n2.semantic_explanation AS n2_sema, n.nodeId AS nodeId
-        """
-        content = {}
-        result = await neo4j_interface.execute_query(query)
-        for record in result:
-            if record['nodeId'] in content:
-                content[record['nodeId']] = content[record['nodeId']] + f"\n此类其中的Method{record['n1_name']}调用Method为{record['n2_name']}, 此Method其语义解释为{record['n2_sema']["What"]}\n"
-            else:
-                content[record['nodeId']] = f"\n此类其中的Method{record['n1_name']}调用Method为{record['n2_name']}, 此Method其语义解释为{record['n2_sema']["What"]}\n"
-        return {"calls": content, "counter": 1}
+            content[record['nodeId']] = f"nodeId: {record['nodeId']}, name: {record['name']}, from_file:{record['file_name']}, package_name:{record['package_name']}, source_code: {record['source_code']}, semantic_explanation: {json.loads(record['semantic_explanation']).get('What', '')}"
+        return {"base": content}
     
     async def save_doc(state: APIState) -> APIState:
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        output_filename = os.path.join(base_dir, path)
+        os.makedirs(os.path.dirname(output_filename), exist_ok=True)
         validator = SimpleMermaidValidator()
         input_content = ["下面是可能包含与对外提供接口/API服务功能的类的介绍"]
         for i in range(len(state["selected_nodes"])):
-            input_content.append(state["base"].get([state["selected_nodes"][i]], "")+state["extends"].get([state["selected_nodes"][i]], "")+state["returns"].get([state["selected_nodes"][i]], "")+state["uses"].get([state["selected_nodes"][i]], "")+state["calls"].get([state["selected_nodes"][i]], ""))
+            input_content.append(state["base"][state["selected_nodes"][i]])
         input_content = "\n".join(input_content)
-        result = await generate_api_chain.ainvoke({"readme_content": state["readme_content"], "all_content": input_content})
-        result_validate = validator.validate_file(result)
-        while not result_validate["result"]:
-            error = result_validate["errors"]
-            error_msg = f"注意: 如果需要生成mermaid语句, 在生成mermaid语句时需要规避的问题例如:{error}"
-            new_content = state["readme_content"] + str(error_msg)
-            result = await generate_api_chain.ainvoke({"readme_content": state["readme_content"], "all_content": input_content})
+        result1 = await generate_api_1_chain.ainvoke({"readme_content": "readme.md", "all_content": input_content})
+        result2 = await generate_api_2_chain.ainvoke({"readme_content": "readme.md", "all_content": input_content, "exist_content": result1})
+        result = result1 + result2
         with open(path, "w", encoding="utf-8") as f:
             f.write(result)
         return {"output_filename": path}
     
-    def should_continue(state: APIState) -> str:
-        if state.get("counter", 0) == 5:
-            return "save_doc"
-        else:
-            return END
+
     
     graph = StateGraph(APIState)
+    graph.add_node("fetch_files", fetch_files)
     graph.add_node("fetch_nodes", fetch_nodes)
     graph.add_node("generate_base", generate_base)
-    graph.add_node("generate_extends", generate_extends)
-    graph.add_node("generate_returns", generate_returns)
-    graph.add_node("generate_uses", generate_uses)
-    graph.add_node("generate_calls", generate_calls)
     graph.add_node("save_doc", save_doc)
-    graph.add_conditional_edges("generate_base", should_continue, {"save_doc": "save_doc", END: END})
-    graph.add_conditional_edges("generate_extends", should_continue, {"save_doc": "save_doc", END: END})
-    graph.add_conditional_edges("generate_returns", should_continue, {"save_doc": "save_doc", END: END})
-    graph.add_conditional_edges("generate_uses", should_continue, {"save_doc": "save_doc", END: END})
-    graph.add_conditional_edges("generate_calls", should_continue, {"save_doc": "save_doc", END: END})
+    graph.set_entry_point("fetch_files")
+    graph.add_edge("fetch_files", "fetch_nodes")
+    graph.add_edge("fetch_nodes", "generate_base")
+    graph.add_edge("generate_base", "save_doc")
+
     
     # save_doc 节点是终点
     graph.add_edge("save_doc", END)
