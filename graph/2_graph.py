@@ -111,7 +111,7 @@ def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, 
         input_content = "\n".join(input_content)
         result1 = await generate_api_1_chain.ainvoke({"readme_content": "readme.md", "all_content": input_content})
         result2 = await generate_api_2_chain.ainvoke({"readme_content": "readme.md", "all_content": input_content, "exist_content": result1})
-        result = result1 + result2
+        result = result1 + result2 + f"\n来源文件id为 {state['selected_files']}"
         with open(path, "w", encoding="utf-8") as f:
             f.write(result)
         return {"output_filename": path}
