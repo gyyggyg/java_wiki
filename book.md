@@ -1,3 +1,30 @@
+```mermaid
+graph TD
+    A[pushOrder]
+    B[saveSourceOrderApply]
+    C[saveInterfaceLog1]
+    D[updateOrderRecordInfo]
+    E[orderDetail]
+    F[saveInterfaceLog2]
+    G[orderDetailHandler]
+    H[updateOrderRecordInfo]
+    I[saveOrderFlowDetail]
+    J[pushOrderStatus]
+    K[cancelOrderApply]
+    L[saveInterfaceLog3]
+    M[updateOrderRecordInfo]
+
+    A --> B
+    A --> C
+    A --> D
+    E --> F
+    E --> G
+    G --> H
+    G --> I
+    G --> J
+    K --> L
+    K --> M
+```
 # 2. 对外提供接口说明文档
 
 ## 1. 功能分析
