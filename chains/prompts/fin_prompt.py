@@ -1,5 +1,5 @@
 from langchain.prompts import PromptTemplate
-
+input_variables=["query", "all_information"],
 
 UML_PROMPT = PromptTemplate(
     input_variables=["node_information"],
