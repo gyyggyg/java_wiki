@@ -1,0 +1,1013 @@
+{
+  "user_query": "代码库中控制订单价格的逻辑有哪些？",
+  "agg_hits": [
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:271",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\PmsMemberPrice.java",
+      "full_name": null,
+      "explaination": "PmsMemberPrice.java是mall电商系统中的一个Java实体类，位于com.macro.mall.model包下，表示针对不同会员等级设定的商品会员价格信息。该类包含了商品ID、会员等级ID、会员等级名称以及对应的会员价格等属性，并实现了Serializable接口，支持对象的序列化。",
+      "agg_label": "File",
+      "agg_label_rank": 1,
+      "agg_global_rank": 1,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:173",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个订单管理服务接口（OmsOrderService），用于电商系统后台管理中订单的业务操作。该接口声明了多种订单相关方法，包括分页查询订单、批量发货、批量关闭订单、批量删除订单、获取订单详情，以及修改订单收货人信息、费用信息和备注等。接口方法部分使用了Spring的@Transactional注解以保证批量操作的数据一致性。",
+      "agg_label": "File",
+      "agg_label_rank": 2,
+      "agg_global_rank": 2,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:571",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\impl\\UmsMemberCouponServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件是mall项目中前台商城模块的会员优惠券管理服务实现类，负责会员优惠券的领取、查询、适用性判断及优惠券码生成等核心业务逻辑。它通过注入多个Mapper和Dao，操作数据库中的优惠券及其历史记录，实现优惠券的领取限制、优惠券列表查询、优惠券与购物车商品匹配及使用状态判断等功能。",
+      "agg_label": "File",
+      "agg_label_rank": 3,
+      "agg_global_rank": 3,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:122",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dao\\PmsMemberPriceDao.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为PmsMemberPriceDao的接口，属于com.macro.mall.dao包，主要负责会员价格管理相关的数据访问操作。该接口提供了一个批量插入会员价格记录的方法insertList，用于一次性将多个PmsMemberPrice对象插入数据库。",
+      "agg_label": "File",
+      "agg_label_rank": 4,
+      "agg_global_rank": 4,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:204",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderReturnReasonServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件是mall电商系统后台管理模块中的一个服务实现类，名为OmsOrderReturnReasonServiceImpl。它实现了OmsOrderReturnReasonService接口，主要负责订单退货原因相关的业务逻辑处理。通过注入的OmsOrderReturnReasonMapper与数据库进行交互，提供了订单退货原因的创建、更新、批量删除、分页查询、批量状态更新以及根据ID查询具体退货原因等功能。该实现基于Spring Boot框架，采用MyBatis作为ORM框架，使用PageHelper进行分页处理。",
+      "agg_label": "File",
+      "agg_label_rank": 5,
+      "agg_global_rank": 5,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:406",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\PmsProductFullReduction.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Java实体类PmsProductFullReduction，用于表示电商系统中商品的满减优惠规则。类中包含唯一标识id、关联商品的productId、满额金额阈值fullPrice和减免金额reducePrice四个属性。该类实现了Serializable接口，支持对象的序列化，便于数据传输和持久化。",
+      "agg_label": "File",
+      "agg_label_rank": 6,
+      "agg_global_rank": 6,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:551",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\OmsPortalOrderService.java",
+      "full_name": null,
+      "explaination": "OmsPortalOrderService接口定义了前台商城系统中订单管理的核心业务逻辑接口，涵盖订单生成、确认、支付回调、超时取消、收货确认、订单查询及删除等关键流程。该接口作为订单子系统的服务层抽象，负责处理用户订单生命周期内的各种操作，确保订单业务的完整性和一致性。",
+      "agg_label": "File",
+      "agg_label_rank": 7,
+      "agg_global_rank": 7,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:171",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderReturnApplyService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderReturnApplyService的Java接口，专注于订单退货申请的管理。它位于mall项目后台管理系统的服务层，提供了退货申请的分页查询、批量删除、状态更新和详细信息获取等核心业务操作方法。",
+      "agg_label": "File",
+      "agg_label_rank": 8,
+      "agg_global_rank": 8,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:408",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\PmsProductLadder.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为PmsProductLadder的Java实体类，属于mall电商系统的数据模型层。该类用于表示商品的阶梯价格策略信息，包含商品ID、满足阶梯条件的商品数量、折扣比例和折后价格等字段。",
+      "agg_label": "File",
+      "agg_label_rank": 9,
+      "agg_global_rank": 9,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:525",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\ConfirmOrderResult.java",
+      "full_name": null,
+      "explaination": "ConfirmOrderResult.java定义了一个用于电商系统订单确认页面的数据封装类，包含购物车中包含优惠的商品列表、用户收货地址列表、可用优惠券详情、积分使用规则、会员积分及订单金额计算明细。该类帮助前台商城系统整合并传递订单确认所需的所有关键数据。",
+      "agg_label": "File",
+      "agg_label_rank": 10,
+      "agg_global_rank": 10,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:206",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderSettingServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsOrderSettingServiceImpl.java是mall后台管理系统中的一个服务实现类，实现了OmsOrderSettingService接口，主要负责订单设置实体的业务逻辑处理。它通过Spring的@Service注解标记为服务组件，并利用@Autowired注入OmsOrderSettingMapper数据访问层，实现对订单设置的查询和更新操作。",
+      "agg_label": "File",
+      "agg_label_rank": 11,
+      "agg_global_rank": 11,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:538",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\PromotionProduct.java",
+      "full_name": null,
+      "explaination": "PromotionProduct.java文件定义了PromotionProduct类，该类继承自PmsProduct，扩展了商品的促销信息，包含商品的SKU库存列表、阶梯价格列表和满减优惠列表，支持丰富的促销策略描述。该类作为前台商城的领域模型，用于封装促销商品的详细信息。",
+      "agg_label": "File",
+      "agg_label_rank": 12,
+      "agg_global_rank": 12,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:315",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\PmsMemberPriceExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了PmsMemberPriceExample类，这是一个典型的MyBatis Generator自动生成的Example类，用于构建针对会员价格表的动态SQL查询条件。该类封装了查询中的排序条件、是否去重标志以及一组以OR逻辑连接的Criteria条件集合。内部包含Criteria和Criterion两个静态类，分别用于构造复杂的查询条件组合和单个查询条件的细节封装。",
+      "agg_label": "File",
+      "agg_label_rank": 13,
+      "agg_global_rank": 13,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:536",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\PmsPortalProductDetail.java",
+      "full_name": null,
+      "explaination": "PmsPortalProductDetail.java定义了一个聚合类，用于封装电商前台商品详情页所需的完整信息集合，包括商品基本信息、品牌信息、商品属性及其值、SKU库存、阶梯价格、满减优惠以及可用优惠券等。该类作为数据传输对象，统一承载商品详情相关的多维度数据，便于前端展示和业务逻辑处理。",
+      "agg_label": "File",
+      "agg_label_rank": 14,
+      "agg_global_rank": 14,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:293",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\mapper\\PmsMemberPriceMapper.java",
+      "full_name": null,
+      "explaination": "该文件定义了PmsMemberPriceMapper接口，作为MyBatis映射接口，提供了针对PmsMemberPrice实体的数据库操作方法，包括基于条件的查询、插入、更新和删除操作，以及基于主键的精准操作。",
+      "agg_label": "File",
+      "agg_label_rank": 15,
+      "agg_global_rank": 15,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:174",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderSettingService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderSettingService的Java接口，属于mall项目的后台管理系统订单管理模块。该接口声明了针对订单设置的两项核心操作：通过ID获取特定订单设置对象，以及根据ID更新订单设置信息。它是订单设置业务逻辑层的抽象，负责封装订单相关时间配置参数的管理。",
+      "agg_label": "File",
+      "agg_label_rank": 16,
+      "agg_global_rank": 16,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:205",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsOrderServiceImpl.java是mall项目后台管理系统中的订单管理服务实现类，负责实现OmsOrderService接口中定义的订单相关业务逻辑。该文件通过注入Mapper和Dao组件，完成订单列表查询、批量发货、订单关闭、删除订单、订单详情查询、更新收货人信息、费用信息及修改订单备注等功能。实现了订单操作的数据库持久化和订单操作历史的记录，支持后台对订单的全生命周期管理。",
+      "agg_label": "File",
+      "agg_label_rank": 17,
+      "agg_global_rank": 17,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:383",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrderItem.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderItem的Java实体类，属于mall电商系统的订单管理模块。该类表示订单中的单个商品项，包含了商品的基本信息（如ID、名称、品牌、图片）、订单相关信息（订单ID和订单编号）、商品规格（SKU ID和条码）、购买数量、价格及多种优惠金额的详细分解（促销、优惠券、积分优惠等）、商品分类、促销活动名称，以及购买该商品所获得的积分奖励和成长值。",
+      "agg_label": "File",
+      "agg_label_rank": 18,
+      "agg_global_rank": 18,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:339",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrderReturnReasonExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderReturnReasonExample的Java类，用于构建针对订单退货原因实体的动态查询条件。它封装了查询的排序、去重标志以及多个Criteria对象（每个Criteria代表一组AND连接的条件），从而支持复杂的查询逻辑（多个Criteria通过OR连接）。内部静态类Criteria继承自GeneratedCriteria，后者定义了丰富的查询条件构造方法，支持字段的等于、不等于、大于、小于、范围、模糊匹配等多种条件类型。Criterion类封装单个查询条件的信息，包括条件表达式、参数值及类型处理器。该类主要用于配合MyBatis框架动态生成SQL语句，实现对订单退货原因表的灵活查询。",
+      "agg_label": "File",
+      "agg_label_rank": 19,
+      "agg_global_rank": 19,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:203",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderReturnApplyServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsOrderReturnApplyServiceImpl.java 是 mall 项目后台管理系统中负责订单退货申请管理的服务实现类。该类实现了 OmsOrderReturnApplyService 接口，提供订单退货申请的分页查询、批量删除、状态更新和详情获取等功能。它利用 Spring 框架的依赖注入机制，注入了数据库访问层的 DAO 和 Mapper 组件，完成对退货申请数据的增删改查操作。",
+      "agg_label": "File",
+      "agg_label_rank": 20,
+      "agg_global_rank": 20,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:172",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderReturnReasonService.java",
+      "full_name": null,
+      "explaination": "该文件定义了OmsOrderReturnReasonService接口，用于管理电商系统中订单退货原因的业务逻辑，封装了退货原因的增删改查及状态管理等功能。",
+      "agg_label": "File",
+      "agg_label_rank": 21,
+      "agg_global_rank": 21,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:524",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\CartPromotionItem.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为CartPromotionItem的Java类，继承自OmsCartItem，表示购物车中的商品项，并扩展了促销相关的信息字段，如促销活动描述、促销减免金额、实际可用库存，以及购买商品赠送的积分和成长值。",
+      "agg_label": "File",
+      "agg_label_rank": 22,
+      "agg_global_rank": 22,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:356",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\SmsCouponProductCategoryRelationExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了SmsCouponProductCategoryRelationExample类，这是一个用于动态构造SQL查询条件的辅助工具类，主要针对mall电商系统中优惠券与商品类别关联关系的数据查询。该类封装了排序条件(orderByClause)、去重(distinct)选项和多个Criteria条件集合(oredCriteria)，支持复杂的多条件组合查询。内部包含抽象类GeneratedCriteria及其子类Criteria，用于定义具体字段的多种查询条件（如等于、不等于、范围、模糊匹配等），以及Criterion类表示单个查询条件。该设计符合MyBatis框架中Example查询对象的规范。",
+      "agg_label": "File",
+      "agg_label_rank": 23,
+      "agg_global_rank": 23,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:219",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\SmsFlashPromotionServiceImpl.java",
+      "full_name": null,
+      "explaination": "SmsFlashPromotionServiceImpl.java 是 mall 项目后台管理系统中限时购活动管理的服务实现类，实现了 SmsFlashPromotionService 接口，负责处理限时购活动的核心业务逻辑，如活动的创建、更新、删除、状态修改、单条记录查询以及分页列表查询。该类通过注入的 SmsFlashPromotionMapper 与数据库交互，利用 MyBatis 框架执行持久化操作，并借助 PageHelper 插件实现分页功能。",
+      "agg_label": "File",
+      "agg_label_rank": 24,
+      "agg_global_rank": 24,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:157",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dto\\PmsProductParam.java",
+      "full_name": null,
+      "explaination": "PmsProductParam.java是mall电商系统后台管理模块中的一个数据传输对象类，继承自PmsProduct类，封装了用于创建和修改商品时的详细请求参数。该类包含商品的阶梯价格、满减价格、会员价格、SKU库存信息、商品参数及自定义规格属性，以及商品与专题和优选专区的关联关系等多个属性列表。通过Lombok自动生成getter/setter等方法，并使用Swagger注解为API文档提供字段说明。",
+      "agg_label": "File",
+      "agg_label_rank": 25,
+      "agg_global_rank": 25,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:213",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\PmsProductServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件是mall项目后台管理系统中商品管理模块的服务实现类PmsProductServiceImpl，负责实现商品相关的业务逻辑。它提供了商品的创建、更新、查询以及商品状态（如审核状态、发布状态、推荐状态、新品状态和删除状态）的批量更新功能。通过依赖多个DAO和Mapper接口，管理商品的基本信息及其会员价格、阶梯价格、满减价格、SKU库存、商品属性、专题关联和优选关联等多方面内容。",
+      "agg_label": "File",
+      "agg_label_rank": 26,
+      "agg_global_rank": 26,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:184",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\SmsFlashPromotionProductRelationService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Java接口SmsFlashPromotionProductRelationService，用于管理商城系统中限时购促销活动与商品之间的关联关系。该接口提供了批量添加关联、更新关联信息、删除关联、获取单个关联详情，以及基于限时购活动和场次进行商品分页查询和统计关联商品数量的方法。",
+      "agg_label": "File",
+      "agg_label_rank": 27,
+      "agg_global_rank": 27,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:416",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\SmsCoupon.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsCoupon的Java模型类，表示电商系统中的优惠券实体。该类包含优惠券的各种属性字段，如优惠券类型、适用平台、数量、金额、领取限制、使用门槛、有效期、使用范围、备注、发行和使用统计数据、领取时间、优惠码以及会员等级限制。它通过标准的getter和setter方法提供字段的访问和修改，并重写了toString方法以便输出对象的字符串表示。",
+      "agg_label": "File",
+      "agg_label_rank": 28,
+      "agg_global_rank": 28,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:422",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\SmsCouponProductRelationExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Java类SmsCouponProductRelationExample，该类是用于构建针对优惠券与商品关联关系的动态SQL查询条件的辅助类。它通过维护一个条件组列表（oredCriteria），支持多组查询条件的逻辑“或”连接，提供了丰富的字段查询方法（如id、couponId、productId、productName、productSn），支持等于、不等于、大于、小于、范围查询、模糊查询等多种条件，主要用于MyBatis框架中动态生成复杂的SQL查询。",
+      "agg_label": "File",
+      "agg_label_rank": 29,
+      "agg_global_rank": 29,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:91",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\OmsOrderReturnApplyController.java",
+      "full_name": null,
+      "explaination": "该文件OmsOrderReturnApplyController.java是mall电商系统后台管理模块中的一个控制器类，专注于处理订单退货申请相关的HTTP请求。它暴露了分页查询退货申请列表、批量删除退货申请、获取退货申请详情和修改退货申请状态等RESTful接口，供前端管理系统调用。",
+      "agg_label": "File",
+      "agg_label_rank": 30,
+      "agg_global_rank": 30,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:280",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\mapper\\OmsOrderItemMapper.java",
+      "full_name": null,
+      "explaination": "OmsOrderItemMapper.java是mall项目中定义的一个MyBatis映射接口，专门用于对订单项（OmsOrderItem）实体进行数据库操作。这个接口包含了订单项的增删改查（CRUD）基本方法，支持通过主键或条件示例进行数据访问。",
+      "agg_label": "File",
+      "agg_label_rank": 31,
+      "agg_global_rank": 31,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:333",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrderReturnReason.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderReturnReason的Java实体类，用于表示商城系统中订单退货原因的相关信息，如退货类型名称、排序权重、状态和创建时间。该类实现了Serializable接口，方便序列化操作，并通过注解为部分字段添加了业务描述。",
+      "agg_label": "File",
+      "agg_label_rank": 32,
+      "agg_global_rank": 32,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:220",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\SmsFlashPromotionSessionServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件SmsFlashPromotionSessionServiceImpl.java是mall-admin项目中限时购促销活动时间场次管理的服务实现类。它实现了SmsFlashPromotionSessionService接口，提供了对限时购场次实体的增删改查及状态更新等操作。该类通过注入MyBatis的Mapper接口SmsFlashPromotionSessionMapper实现数据库持久化访问，同时依赖SmsFlashPromotionProductRelationService统计每个促销场次所关联的商品数量。",
+      "agg_label": "File",
+      "agg_label_rank": 33,
+      "agg_global_rank": 33,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:556",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\UmsMemberCouponService.java",
+      "full_name": null,
+      "explaination": "UmsMemberCouponService.java文件定义了一个用于管理用户优惠券的服务接口，包含添加优惠券、查询优惠券使用历史、根据购物车信息筛选可用优惠券、查询特定商品相关优惠券以及获取用户优惠券列表等方法。该接口作为前台商城系统中用户优惠券业务逻辑的抽象层，连接控制层与数据层，支持优惠券相关功能的实现。",
+      "agg_label": "File",
+      "agg_label_rank": 34,
+      "agg_global_rank": 34,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:552",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\OmsPromotionService.java",
+      "full_name": null,
+      "explaination": "OmsPromotionService.java是mall项目中前台商城系统的一个接口文件，定义了促销管理模块中计算购物车中商品促销信息的服务。该接口提供了一个方法calcCartPromotion，用于接收购物车中的商品列表，并返回包含促销活动信息的购物车商品详情列表。",
+      "agg_label": "File",
+      "agg_label_rank": 35,
+      "agg_global_rank": 35,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:93",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\OmsOrderSettingController.java",
+      "full_name": null,
+      "explaination": "OmsOrderSettingController.java是mall电商系统后台管理模块中的订单设置管理控制器类，负责处理订单设置相关的HTTP请求，提供了获取指定订单设置和修改指定订单设置的RESTful接口。该类通过Spring MVC注解进行URL映射，利用注入的OmsOrderSettingService完成具体业务逻辑，并采用Swagger注解生成接口文档。",
+      "agg_label": "File",
+      "agg_label_rank": 36,
+      "agg_global_rank": 36,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:384",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrderItemExample.java",
+      "full_name": null,
+      "explaination": "OmsOrderItemExample.java是一个基于MyBatis框架自动生成的辅助查询类，用于构建针对电商系统中订单项（OmsOrderItem）表的动态SQL查询条件。该类封装了多组查询条件（Criteria），支持通过OR逻辑组合不同条件集合，并包含排序（orderByClause）和去重（distinct）控制字段。",
+      "agg_label": "File",
+      "agg_label_rank": 37,
+      "agg_global_rank": 37,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:129",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dao\\PmsProductFullReductionDao.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为PmsProductFullReductionDao的Java接口，属于后台管理系统中商品促销模块的数据访问层，专门用于批量插入商品满减优惠信息。",
+      "agg_label": "File",
+      "agg_label_rank": 38,
+      "agg_global_rank": 38,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:549",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\OmsCartItemService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsCartItemService的接口，作为电商系统中购物车模块的服务层接口。它声明了一系列购物车相关的业务操作方法，包括添加商品到购物车、查询购物车列表、获取带促销信息的购物车项、修改商品数量和规格、批量删除商品以及清空购物车等。该接口位于前台商城系统中，承担连接控制层与数据层的职责。",
+      "agg_label": "File",
+      "agg_label_rank": 39,
+      "agg_global_rank": 39,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:420",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\SmsCouponProductCategoryRelation.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsCouponProductCategoryRelation的Java实体类，属于com.macro.mall.model包，用于表示优惠券与商品分类之间的关联关系。该类包含字段id、couponId、productCategoryId、productCategoryName和parentCategoryName，并实现了Serializable接口，支持对象序列化。",
+      "agg_label": "File",
+      "agg_label_rank": 40,
+      "agg_global_rank": 40,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:92",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\OmsOrderReturnReasonController.java",
+      "full_name": null,
+      "explaination": "该文件是mall电商系统后台管理模块中的一个Spring Boot控制器类，名为OmsOrderReturnReasonController，负责处理与订单退货原因相关的HTTP请求。它提供了对退货原因的增删改查及状态修改的RESTful API接口，实现退货原因的管理功能。",
+      "agg_label": "File",
+      "agg_label_rank": 41,
+      "agg_global_rank": 41,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:515",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\controller\\UmsMemberCouponController.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Spring Boot控制器类 UmsMemberCouponController，位于mall电商系统的前台模块中，专注于处理会员优惠券相关的HTTP请求。它提供了会员领取优惠券、查询优惠券历史、获取当前可用优惠券、获取购物车相关优惠券以及根据商品ID查询相关优惠券的RESTful接口。该控制器通过依赖注入调用服务层的UmsMemberCouponService、OmsCartItemService和UmsMemberService完成具体业务逻辑，并统一封装响应结果返回给前端。",
+      "agg_label": "File",
+      "agg_label_rank": 42,
+      "agg_global_rank": 42,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:185",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\SmsFlashPromotionService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个用于管理限时购促销活动的服务接口SmsFlashPromotionService。该接口包含了对限时购活动进行增删改查的核心方法，包括创建活动、更新活动信息、删除活动、修改活动状态、获取活动详情以及基于关键字的分页查询活动列表。",
+      "agg_label": "File",
+      "agg_label_rank": 43,
+      "agg_global_rank": 43,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:134",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dao\\SmsCouponProductCategoryRelationDao.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsCouponProductCategoryRelationDao的接口，用于管理优惠券与商品分类之间的关联关系，主要提供了一个批量插入关联记录的方法insertList。",
+      "agg_label": "File",
+      "agg_label_rank": 44,
+      "agg_global_rank": 44,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:407",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\PmsProductFullReductionExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了PmsProductFullReductionExample类，这是一个用于构建针对商品满减活动数据查询条件的辅助类。它封装了动态SQL查询中的条件构造逻辑，通过多个Criteria对象组合实现复杂的查询条件拼接，支持字段的多种比较操作和逻辑关系。该类主要用于后台管理系统中对商品满减活动的筛选、查询和操作。",
+      "agg_label": "File",
+      "agg_label_rank": 45,
+      "agg_global_rank": 45,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:105",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\SmsFlashPromotionProductRelationController.java",
+      "full_name": null,
+      "explaination": "该文件是mall后台管理系统中的一个Spring Boot控制器类，名为SmsFlashPromotionProductRelationController，专门用于管理限时购促销活动与商品之间的关联关系。它提供了RESTful API接口，支持批量添加关联商品、修改关联关系、删除关联、获取单个关联信息以及分页查询特定限时购活动和场次下的关联商品促销信息。",
+      "agg_label": "File",
+      "agg_label_rank": 46,
+      "agg_global_rank": 46,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:421",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\SmsCouponProductRelation.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsCouponProductRelation的Java实体类，属于mall电商系统的促销管理模块。该类主要用于表示优惠券与商品之间的关联关系，包含了关联记录的唯一标识id、优惠券ID、商品ID、商品名称以及商品编码等属性。",
+      "agg_label": "File",
+      "agg_label_rank": 47,
+      "agg_global_rank": 47,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:218",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\SmsFlashPromotionProductRelationServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件实现了限时购商品关联管理的服务层，提供对秒杀促销商品与促销活动关联关系的增删改查功能，以及分页查询促销商品列表和统计促销商品数量的功能。它通过依赖注入使用MyBatis的Mapper接口和自定义DAO类操作数据库，支持业务逻辑中对限时抢购商品与促销场次的管理。",
+      "agg_label": "File",
+      "agg_label_rank": 48,
+      "agg_global_rank": 48,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:462",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\UmsMemberMemberTagRelationExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了UmsMemberMemberTagRelationExample类，这是一个典型的MyBatis Generator生成的辅助类，用于构造针对会员与会员标签关联关系表的动态SQL查询条件。类中包含排序条件、去重设置以及多个Criteria（查询条件组）集合，支持复杂的查询逻辑组合。内部的Criteria类封装了多种针对字段id、memberId和tagId的查询方法，如等于、不等于、大于、小于、范围查询等。Criterion类则代表单个具体的查询条件。",
+      "agg_label": "File",
+      "agg_label_rank": 49,
+      "agg_global_rank": 49,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:130",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dao\\PmsProductLadderDao.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为PmsProductLadderDao的接口，属于mall-admin后台管理系统中的数据访问层，专门用于针对会员阶梯价格(PmsProductLadder实体)进行数据库操作。接口中提供了一个批量插入方法insertList，用于一次性将多个会员阶梯价格对象插入数据库。",
+      "agg_label": "File",
+      "agg_label_rank": 50,
+      "agg_global_rank": 50,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:510",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\controller\\OmsPortalOrderController.java",
+      "full_name": null,
+      "explaination": "OmsPortalOrderController 是 mall 电商系统前台模块中的订单管理控制器类，负责处理与订单相关的 HTTP 请求。它提供了一系列 RESTful 接口，涵盖订单生命周期的主要操作，包括生成确认订单、创建订单、支付成功回调、取消超时订单、取消指定订单、分页获取订单列表、获取订单详情、用户取消订单、确认收货和删除订单等。",
+      "agg_label": "File",
+      "agg_label_rank": 51,
+      "agg_global_rank": 51,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:519",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\dao\\PortalOrderItemDao.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为PortalOrderItemDao的Java接口，属于mall项目中前台门户模块的DAO层。该接口专注于订单商品信息的批量插入操作，提供了一个insertList方法用于批量将多个OmsOrderItem对象插入数据库。",
+      "agg_label": "File",
+      "agg_label_rank": 52,
+      "agg_global_rank": 52,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:564",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\impl\\OmsCartItemServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsCartItemServiceImpl.java是mall电商系统中负责购物车管理的服务实现类，位于mall-portal模块中。该类实现了OmsCartItemService接口，提供了购物车商品的添加、查询、更新数量、删除、促销信息计算、属性更新和清空等核心业务逻辑。通过注入数据访问层（OmsCartItemMapper）、商品数据访问（PortalProductDao）、促销服务（OmsPromotionService）及会员服务（UmsMemberService），实现购物车与会员及促销规则的有效关联。",
+      "agg_label": "File",
+      "agg_label_rank": 53,
+      "agg_global_rank": 53,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:300",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\mapper\\PmsProductFullReductionMapper.java",
+      "full_name": null,
+      "explaination": "该文件定义了PmsProductFullReductionMapper接口，使用MyBatis框架映射数据库操作，专门用于对商品满减优惠信息（PmsProductFullReduction实体）进行CRUD（增删改查）操作。接口方法包括基于条件和主键的查询、插入、更新和删除，方便后台商品管理模块对满减数据的持久化访问。",
+      "agg_label": "File",
+      "agg_label_rank": 54,
+      "agg_global_rank": 54,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:566",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\impl\\OmsPortalOrderServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsPortalOrderServiceImpl.java 是mall电商系统前台商城模块中订单管理的核心服务实现类，基于Spring Boot和MyBatis框架。它实现了OmsPortalOrderService接口，负责处理用户订单的全生命周期业务逻辑，包括订单确认、生成、支付成功处理、超时取消、取消订单、确认收货、订单查询、订单详情及删除等功能。该类整合会员服务、购物车服务、优惠券管理、库存管理、订单数据库操作及消息队列等多个组件，完成从购物车商品选中到订单创建、库存锁定、支付状态更新、积分和优惠券使用、订单状态流转、库存恢复和延迟取消订单消息发送的完整流程。",
+      "agg_label": "File",
+      "agg_label_rank": 55,
+      "agg_global_rank": 55,
+      "source_q_id": "Q2",
+      "source_q_query": "订单价格计算与促销优惠相关的服务类之间的调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:374",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrderSettingExample.java",
+      "full_name": null,
+      "explaination": "该文件OmsOrderSettingExample.java定义了一个用于构造订单设置表查询条件的辅助类，主要用于MyBatis框架中的Example模式。它通过内部的Criteria类封装了一组查询条件，支持多组Criteria间的OR逻辑组合，从而灵活拼接复杂的SQL查询语句。该类包含对订单设置表各字段的多种查询条件方法（如等于、大于、范围等），方便后台订单管理模块按需查询订单设置数据。",
+      "agg_label": "File",
+      "agg_label_rank": 56,
+      "agg_global_rank": 56,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:567",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\impl\\OmsPromotionServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件OmsPromotionServiceImpl.java是mall电商系统中前台商城模块的促销管理服务实现类。它实现了OmsPromotionService接口，负责根据购物车中的商品列表计算各种促销优惠信息，生成包含促销详情的购物车商品促销项列表。",
+      "agg_label": "File",
+      "agg_label_rank": 57,
+      "agg_global_rank": 57,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:308",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\mapper\\SmsCouponMapper.java",
+      "full_name": null,
+      "explaination": "SmsCouponMapper.java是mall电商系统中针对优惠券（SmsCoupon）实体的MyBatis映射接口，定义了对优惠券数据库表进行基本CRUD操作的方法。该接口包括按条件统计优惠券数量、插入新优惠券、根据条件或主键查询优惠券、更新优惠券信息以及删除优惠券记录等方法。",
+      "agg_label": "File",
+      "agg_label_rank": 58,
+      "agg_global_rank": 58,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:102",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\SmsCouponController.java",
+      "full_name": null,
+      "explaination": "SmsCouponController.java 是 mall 项目后台管理系统中优惠券管理模块的控制器类，基于 Spring Boot 框架实现，负责处理所有与优惠券相关的 HTTP 请求接口。该类定义了优惠券的增删改查操作接口，包括添加优惠券、删除优惠券、修改优惠券、分页查询优惠券列表和获取单个优惠券详细信息。接口返回统一封装的 CommonResult 对象，便于前端统一处理响应结果。通过注入的 SmsCouponService 实现具体业务逻辑，符合典型的 Spring MVC 设计模式。该文件使用了 Swagger 注解支持自动生成接口文档。",
+      "agg_label": "File",
+      "agg_label_rank": 59,
+      "agg_global_rank": 59,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:183",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\SmsCouponService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsCouponService的Java接口，属于mall电商系统后台管理模块中的优惠券管理功能。接口声明了一组用于优惠券增删改查的服务方法，包括创建优惠券、删除优惠券、更新优惠券信息、分页获取优惠券列表以及获取优惠券详情。",
+      "agg_label": "File",
+      "agg_label_rank": 60,
+      "agg_global_rank": 60,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:464",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\UmsMemberProductCategoryRelationExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Java类UmsMemberProductCategoryRelationExample，用于在MyBatis框架中动态构造针对会员与商品分类关系表的复杂数据库查询条件。它通过内部的Criteria和Criterion类封装各种查询条件，支持对字段id、memberId和productCategoryId进行多样化的查询操作，如等于、不等于、范围查询、列表查询等。",
+      "agg_label": "File",
+      "agg_label_rank": 61,
+      "agg_global_rank": 61,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:237",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\test\\com\\macro\\mall\\PmsDaoTests.java",
+      "full_name": null,
+      "explaination": "该文件是mall项目中com.macro.mall包下的一个Spring Boot测试类，名为PmsDaoTests。它主要用于对电商系统中的会员价格数据访问对象（PmsMemberPriceDao）和商品数据访问对象（PmsProductDao）进行单元测试，验证批量插入会员价格和获取指定商品更新信息的功能是否正确。",
+      "agg_label": "File",
+      "agg_label_rank": 62,
+      "agg_global_rank": 62,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:301",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\mapper\\PmsProductLadderMapper.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为PmsProductLadderMapper的MyBatis接口，负责对PmsProductLadder实体对应的数据库表执行标准的增删改查操作，包括按条件查询、按主键操作等。它是mall电商系统商品管理模块中商品阶梯价格数据访问层的核心组件。",
+      "agg_label": "File",
+      "agg_label_rank": 63,
+      "agg_global_rank": 63,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:365",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrderSetting.java",
+      "full_name": null,
+      "explaination": "OmsOrderSetting.java 是 mall 项目中的一个 Java 实体类，定义了电商系统中订单相关的各种时间配置参数，涵盖秒杀订单超时时间、正常订单超时时间、发货后自动确认收货时间、自动完成交易时间以及订单完成后自动好评时间等。这些配置以分钟或天为单位，反映了系统对订单生命周期中不同阶段的时间控制策略。",
+      "agg_label": "File",
+      "agg_label_rank": 64,
+      "agg_global_rank": 64,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:161",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dto\\SmsCouponParam.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsCouponParam的Java类，该类继承自SmsCoupon，实现了对优惠券信息的扩展封装，特别是将优惠券与具体商品及商品分类的绑定关系封装在了类的成员变量中。它位于后台管理系统的数据传输对象包中，主要用于在系统内部或API接口中传递优惠券及其关联商品和分类的详细信息。",
+      "agg_label": "File",
+      "agg_label_rank": 65,
+      "agg_global_rank": 65,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:409",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\PmsProductLadderExample.java",
+      "full_name": null,
+      "explaination": "该文件定义了PmsProductLadderExample类及其内部类，用于在MyBatis框架下动态构造针对商品阶梯价格（PmsProductLadder）实体的SQL查询条件。它支持设置排序字段、是否去重以及多个Criteria条件组的组合，每个Criteria封装了商品阶梯价格相关字段（如id、productId、count、discount、price）的多种查询条件（等值、不等、范围查询等），以满足电商系统中商品阶梯定价策略的数据查询需求。",
+      "agg_label": "File",
+      "agg_label_rank": 66,
+      "agg_global_rank": 66,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:454",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\UmsIntegrationConsumeSetting.java",
+      "full_name": null,
+      "explaination": "UmsIntegrationConsumeSetting.java是mall项目中的一个实体模型类，表示会员积分消费的设置配置。该类定义了积分抵扣规则的多个属性，如每一元消费所需扣减的积分数量、每笔订单最高可抵用积分百分比、积分使用的最小单位以及积分是否能与优惠券同时使用等。它通过私有字段和对应的getter/setter方法封装这些属性，并实现Serializable接口支持序列化。",
+      "agg_label": "File",
+      "agg_label_rank": 67,
+      "agg_global_rank": 67,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:217",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\SmsCouponServiceImpl.java",
+      "full_name": null,
+      "explaination": "SmsCouponServiceImpl.java是mall项目后台管理系统中优惠券管理模块的核心服务实现类。该类基于Spring Boot框架，实现了SmsCouponService接口，负责优惠券的创建、删除、更新、分页查询及获取详细信息等业务逻辑。它通过依赖注入多个MyBatis Mapper和Dao，操作优惠券表及其与商品和商品分类的关联表，实现对优惠券数据的增删改查。",
+      "agg_label": "File",
+      "agg_label_rank": 68,
+      "agg_global_rank": 68,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:467",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\UmsMemberRuleSetting.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Java类 UmsMemberRuleSetting，属于电商系统的会员管理模块中的模型层。该类封装了会员积分和成长值规则的相关配置信息，如连续签到奖励、消费积分比例、最低订单金额门槛、每单积分上限以及规则类型等属性。",
+      "agg_label": "File",
+      "agg_label_rank": 69,
+      "agg_global_rank": 69,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中涉及订单价格控制、计算、优惠等业务逻辑的主要代码实现在哪里？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:418",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\SmsCouponHistory.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsCouponHistory的Java实体类，用于在mall电商系统中记录优惠券的领取和使用历史信息。它包含优惠券ID、会员ID、优惠券编码、领取人昵称、获取类型、领取时间、使用状态、使用时间、相关订单ID和订单编号等字段。",
+      "agg_label": "File",
+      "agg_label_rank": 70,
+      "agg_global_rank": 70,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:461",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\UmsMemberMemberTagRelation.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Java实体类UmsMemberMemberTagRelation，用于表示电商系统中会员（UmsMember）与会员标签之间的多对多关联关系。类中包含id、memberId和tagId三个字段，分别表示关联记录的唯一标识、关联的会员ID和标签ID。该实体类支持序列化，适合用于持久化和数据传输。",
+      "agg_label": "File",
+      "agg_label_rank": 71,
+      "agg_global_rank": 71,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:540",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\SmsCouponHistoryDetail.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Java类SmsCouponHistoryDetail，继承自SmsCouponHistory，表示优惠券领取历史的详细信息。该类不仅包含优惠券领取的基本历史信息，还扩展了优惠券本身的信息以及该优惠券关联的商品和商品分类列表。通过这种设计，可以在前台商城系统中方便地获取和展示用户领取的优惠券及其关联的商品和分类信息。",
+      "agg_label": "File",
+      "agg_label_rank": 72,
+      "agg_global_rank": 72,
+      "source_q_id": "Q3",
+      "source_q_query": "订单价格计算涉及到的优惠券、会员价、满减与阶梯价等特殊价格策略的实现细节和主要数据结构。"
+    }
+  ]
+}

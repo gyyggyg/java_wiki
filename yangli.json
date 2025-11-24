@@ -1,35 +1,38 @@
 [
     {
         "type":"section",
-        "id":"6.",
-        "title":"数据结构说明",
+        "id":"1",
+        "title":"6.数据结构说明",
         "content":[
             {
                 "type":"text",
-                "meta":"markdown",
-                "content":[
-                    "下面是所有内容",
-                    "这是内容包括"],
+                "id":"2",
+                "content":{
+                    "markdown":"下面是内容"
+                },
                 "source_id":["566"]
             },
             {
                 "type":"section",
-                "id":"1.1 ",
-                "title":"标题1.1",
-                "content":[]                
+                "id":"3",
+                "title":"1.1 标题",
+                "content":[]             
             }
 
         ]
     },
     {
         "type":"section",
-        "id":"2",
-        "title":"",
+        "id":"4",
+        "title":"7. 标题",
         "content":[
             {
                 "type":"chart",
-                "meta":"mermaid",
-                "content":[""],
+                "id":"5",
+                "content":{
+                    "mapping":{"A1":"H1", "A2":"H2", "A3":"H3", "B1":"H4", "B1_1":"H5", "B1_2":"H6", "B1_3":"H7", "B1_4":"H8", "B1_5":"H9", "B1_6":"H10", "B1_7":"H11", "C1":"H12", "C2":"H13", "C3":"H14"},
+                    "mermaid":"flowchart TD\n    direction TB\n\n    subgraph Initialization[\"初始化阶段\"]\n        A1[\"打开日志文件\\n(准备记录IO延迟)\"]\n        A2[\"分配SSD缓存内存\\n并初始化缓存内容\"]\n        A3[\"初始化计时器和请求数量\\n确定处理请求总数\"]\n    end\n\n    subgraph MainLoop[\"主循环处理请求\"]\n        B1[\"循环读取Trace直到结束或达到请求数\"]\n        B1_1[\"读取Trace请求\\n检测读取错误\"]\n        B1_2[\"跳过指定行数\"]\n        B1_3[\"计算数据偏移\\n检测缓存是否已满\\n报告缓存状态\"]\n        B1_4[\"写请求处理\\n调用写缓存关键操作\"]\n        B1_5[\"读请求处理\\n调用读缓存关键操作\"]\n        B1_6[\"异常请求处理\\n检测无效操作\\n错误退出\"]\n        B1_7[\"周期性统计报告\\n输出缓存性能和仿真信息\"]\n    end\n\n    subgraph Cleanup[\"资源释放与结束\"]\n        C1[\"结束计时\\n统计总Trace处理时间\\n输出最终缓存状态\"]\n        C2[\"仿真模式下通知子进程结束\"]\n        C3[\"释放缓存内存\\n关闭文件资源\"]\n    end\n\n    %% 连接关系\n    A1 --> A2 --> A3 --> B1\n    B1 --> B1_1 --> B1_2 --> B1_3\n    B1_3 --> B1_4\n    B1_3 --> B1_5\n    B1_3 --> B1_6\n    B1_4 --> B1_7\n    B1_5 --> B1_7\n    B1_7 --> B1\n    B1_6 -.-> ErrorNode\n    B1 --> C1 --> C2 --> C3\n\n    %% 关键操作节点样式\n    style B1_4 fill:#0af,stroke:#036,stroke-width:4px\n    style B1_5 fill:#0af,stroke:#036,stroke-width:4px\n\n    %% 决策节点样式\n    style B1_3 fill:#fff,stroke:#333,stroke-width:2px\n\n    %% 错误处理节点\n    ErrorNode[\"错误退出\\n无效请求操作\"]\n    style ErrorNode fill:#fbb,stroke:#a00,stroke-width:3px,stroke-dasharray: 5 5\n\n    %% 路径样式\n    linkStyle default stroke:#333,stroke-width:2px\n    linkStyle 6 stroke:#f00,stroke-width:2px,stroke-dasharray: 5 5\n"
+                },
                 "source_id":["566"]
             }
         ]
