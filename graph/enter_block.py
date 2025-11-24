@@ -12,10 +12,9 @@ from interfaces.simple_validate_mermaid import SimpleMermaidValidator
 from langgraph.checkpoint.memory import MemorySaver
 from interfaces.llm_interface import LLMInterface
 from interfaces.neo4j_interface import Neo4jInterface
-from interfaces.message_service import MessageService
 from typing_extensions import TypedDict
 from typing import Annotated
-from chains.prompts.select_api_prompt import SELECT_BLOCK_PROMPT, SELECT_FILE_PROMPT
+from chains.prompts.select_block_file import SELECT_BLOCK_PROMPT, SELECT_FILE_PROMPT
 from chains.common_chains import ChainFactory
 from dotenv import load_dotenv
 class NodeState(TypedDict, total=False):
@@ -47,21 +46,24 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
             chains = ""
             for node in result:
                 if node["name"] != "root":
-                    chains += f"node['name']<-[:f2c]-"
+                    chains += f"{node['name']}<-[:f2c]-"
                 else:
                     chains += f"root\n"
                 if node["nodeId"] not in node_sema:
                     node_sema[node["nodeId"]] = f"name: {node['name']}, semantic_explanation: {node['semantic_explanation']}"
             relations.append(chains)
+            print(relations)
         for node_id, info in node_sema.items():
             all_info.append(f"nodeId: {node_id}, {info}")
         all_info = "\n".join(all_info)
+        print(all_info)
         selected_blocks = await select_block_chain.ainvoke({"query": query, "relation": "\n".join(relations), "all_information": all_info})
-        return {"selected_blocks": selected_blocks.get("block_id", [])}
+        print(json.loads(selected_blocks))
+        return {"selected_blocks": json.loads(selected_blocks).get("block_id", [])}
     
     async def select_file(state: NodeState) -> NodeState:
         neo4j_query2="""
-        MATCH (n:Block {nodeId: $block_id})-[:f2c*](m:File)
+        MATCH (n:Block {nodeId: $block_id})-[:f2c*]->(m:File)
         RETURN m.name AS name, m.nodeId AS nodeId, m.module_explaination AS module_explaination
         """
         all_info = []
@@ -71,8 +73,13 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
             for record in result:
                 all_info.append(f"nodeId: {record['nodeId']}, name: {record['name']}, module_explaination: {record['module_explaination']}")
         all_information = "\n".join(all_info)
+        out_path = os.path.join(os.path.dirname(__file__), "out2.md")
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(all_information)
         selected_files_node = await select_file_chain.ainvoke({"query": query, "all_information": all_information})
-        files = set(file_list | selected_files_node.get("file_id", []))
+        print(json.loads(selected_files_node))
+        files = set(file_list) | set(json.loads(selected_files_node).get("file_id", []))
+        print(files,len(files))
         return {"selected_files": list(files)}
     
     graph = StateGraph(NodeState)
@@ -95,12 +102,12 @@ if __name__ == "__main__":
         user = os.environ.get("WIKI_NEO4J_USER")
         password = os.environ.get("WIKI_NEO4J_PASSWORD")
         neo4j = Neo4jInterface(uri, user, password)
-        query = "test query"
-        file_list = []
+        query = "代码中与订单提交有关的逻辑有哪些？"
+        file_list = [90, 91, 92, 93, 105, 111, 112, 121, 142, 143, 144, 145, 148, 171, 172, 173, 174, 203, 204, 205, 206, 381, 383, 432, 494, 495, 496, 509, 510, 511, 525, 533, 535, 550, 551, 559, 566]
         if not await neo4j.test_connection():
             print("Neo4j连接失败")
             return
-        app = Node_app(llm, neo4j, query)
+        app = Node_app(llm, neo4j, query, file_list)
         result = await app.ainvoke(
             {}, 
             config={"configurable": {"thread_id": "standalone-api"}}

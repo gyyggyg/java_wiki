@@ -12,7 +12,7 @@ SELECT_BLOCK_PROMPT = PromptTemplate(
 我已将一个Java项目切分为Class/Enum/Interface/File/Method/Field等类型的代码片段, 每个片段对应一个Neo4j节点。
 相关的File节点进行了聚类，在上层有个Block类型的节点。Block和File节点的关系是f2c。
 
-你的任务是根据用户的查询（query），结合层级关系和语义解释，筛选出最相关的Block节点（功能模块）。
+你的任务是根据用户的查询（query），结合层级关系和语义解释，筛选出每个链条上最相关的Block节点（功能模块）。
 
 【输入信息说明】
 1. **query**: 用户的查询问题或需求。
@@ -23,8 +23,9 @@ SELECT_BLOCK_PROMPT = PromptTemplate(
 【筛选规则】
 1. **理解意图**: 分析用户的 `query` 到底在问什么（是具体的业务逻辑、数据结构，还是宏观的架构）。
 2. **链条筛选**: 针对输入的每一条 `relation` 链条，必须且只能选出该链条上一个最相关的 Block。
-3. **结合层级**: 利用 `relation` 判断 Block 的层级。通常情况下，中间层级的 Block (如业务模块) 比 根节点(Root) 或 过于底层的通用 Block 更具区分度。
+3. **结合层级**: 利用 `relation` 分析 Block 的层级。
 4. **语义匹配**: 仔细阅读 `all_information` 中的语义解释，找出功能描述与 `query` 高度重合的 Block。
+5. **注意事项**: 每个链条第一个节点为File节点，最后一个为root节点，你要筛选返回的是他们中间的Block节点，而不能是这两个节点之一。
 
 【输入内容】
 用户查询 (query):
@@ -43,7 +44,7 @@ Block详细信息 (all_information):
 ```
 
 【输出要求】
-请严格按照以下JSON格式返回最相关的Block节点的ID列表，**不要包含任何其他解释、前言或Markdown标记**：
+请严格按照以下JSON格式返回每个链条上和query最相关的Block节点的ID列表，**不要包含任何其他解释、前言或Markdown标记**：
 
 {{"block_id": [nodeId1, nodeId2, ...]}}
 

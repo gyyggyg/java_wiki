@@ -1,0 +1,523 @@
+{
+  "user_query": "代码中与订单提交有关的逻辑有哪些？",
+  "agg_hits": [
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:525",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\ConfirmOrderResult.java",
+      "full_name": null,
+      "explaination": "ConfirmOrderResult.java定义了一个用于电商系统订单确认页面的数据封装类，包含购物车中包含优惠的商品列表、用户收货地址列表、可用优惠券详情、积分使用规则、会员积分及订单金额计算明细。该类帮助前台商城系统整合并传递订单确认所需的所有关键数据。",
+      "agg_label": "File",
+      "agg_label_rank": 1,
+      "agg_global_rank": 1,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:205",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsOrderServiceImpl.java是mall项目后台管理系统中的订单管理服务实现类，负责实现OmsOrderService接口中定义的订单相关业务逻辑。该文件通过注入Mapper和Dao组件，完成订单列表查询、批量发货、订单关闭、删除订单、订单详情查询、更新收货人信息、费用信息及修改订单备注等功能。实现了订单操作的数据库持久化和订单操作历史的记录，支持后台对订单的全生命周期管理。",
+      "agg_label": "File",
+      "agg_label_rank": 2,
+      "agg_global_rank": 2,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:510",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\controller\\OmsPortalOrderController.java",
+      "full_name": null,
+      "explaination": "OmsPortalOrderController 是 mall 电商系统前台模块中的订单管理控制器类，负责处理与订单相关的 HTTP 请求。它提供了一系列 RESTful 接口，涵盖订单生命周期的主要操作，包括生成确认订单、创建订单、支付成功回调、取消超时订单、取消指定订单、分页获取订单列表、获取订单详情、用户取消订单、确认收货和删除订单等。",
+      "agg_label": "File",
+      "agg_label_rank": 3,
+      "agg_global_rank": 3,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:173",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个订单管理服务接口（OmsOrderService），用于电商系统后台管理中订单的业务操作。该接口声明了多种订单相关方法，包括分页查询订单、批量发货、批量关闭订单、批量删除订单、获取订单详情，以及修改订单收货人信息、费用信息和备注等。接口方法部分使用了Spring的@Transactional注解以保证批量操作的数据一致性。",
+      "agg_label": "File",
+      "agg_label_rank": 4,
+      "agg_global_rank": 4,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:91",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\OmsOrderReturnApplyController.java",
+      "full_name": null,
+      "explaination": "该文件OmsOrderReturnApplyController.java是mall电商系统后台管理模块中的一个控制器类，专注于处理订单退货申请相关的HTTP请求。它暴露了分页查询退货申请列表、批量删除退货申请、获取退货申请详情和修改退货申请状态等RESTful接口，供前端管理系统调用。",
+      "agg_label": "File",
+      "agg_label_rank": 5,
+      "agg_global_rank": 5,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:171",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderReturnApplyService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderReturnApplyService的Java接口，专注于订单退货申请的管理。它位于mall项目后台管理系统的服务层，提供了退货申请的分页查询、批量删除、状态更新和详细信息获取等核心业务操作方法。",
+      "agg_label": "File",
+      "agg_label_rank": 6,
+      "agg_global_rank": 6,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:90",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\OmsOrderController.java",
+      "full_name": null,
+      "explaination": "该文件是mall项目后台管理系统中的订单管理控制器类，名为OmsOrderController。它基于Spring Boot框架，使用Spring MVC注解定义RESTful HTTP接口，负责处理订单相关的业务请求，如订单查询、批量发货、关闭订单、删除订单、获取订单详情、修改收货人信息、修改订单费用信息和备注订单等。通过依赖注入调用OmsOrderService服务层实现具体业务逻辑，统一使用CommonResult和CommonPage封装响应结果和分页处理。该控制器还结合Swagger和OpenAPI注解生成接口文档，方便前后端及第三方调用。",
+      "agg_label": "File",
+      "agg_label_rank": 7,
+      "agg_global_rank": 7,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:93",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\OmsOrderSettingController.java",
+      "full_name": null,
+      "explaination": "OmsOrderSettingController.java是mall电商系统后台管理模块中的订单设置管理控制器类，负责处理订单设置相关的HTTP请求，提供了获取指定订单设置和修改指定订单设置的RESTful接口。该类通过Spring MVC注解进行URL映射，利用注入的OmsOrderSettingService完成具体业务逻辑，并采用Swagger注解生成接口文档。",
+      "agg_label": "File",
+      "agg_label_rank": 8,
+      "agg_global_rank": 8,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:551",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\OmsPortalOrderService.java",
+      "full_name": null,
+      "explaination": "OmsPortalOrderService接口定义了前台商城系统中订单管理的核心业务逻辑接口，涵盖订单生成、确认、支付回调、超时取消、收货确认、订单查询及删除等关键流程。该接口作为订单子系统的服务层抽象，负责处理用户订单生命周期内的各种操作，确保订单业务的完整性和一致性。",
+      "agg_label": "File",
+      "agg_label_rank": 9,
+      "agg_global_rank": 9,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:535",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\OrderParam.java",
+      "full_name": null,
+      "explaination": "OrderParam.java是mall项目中前台商城模块的一个领域模型类，用于封装用户在生成订单时提交的参数信息，包括收货地址ID、优惠券ID、使用的积分数、支付方式以及被选中的购物车商品ID列表。该类通过Lombok注解简化了代码编写，并使用Swagger注解为API文档提供描述。",
+      "agg_label": "File",
+      "agg_label_rank": 10,
+      "agg_global_rank": 10,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:92",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\OmsOrderReturnReasonController.java",
+      "full_name": null,
+      "explaination": "该文件是mall电商系统后台管理模块中的一个Spring Boot控制器类，名为OmsOrderReturnReasonController，负责处理与订单退货原因相关的HTTP请求。它提供了对退货原因的增删改查及状态修改的RESTful API接口，实现退货原因的管理功能。",
+      "agg_label": "File",
+      "agg_label_rank": 11,
+      "agg_global_rank": 11,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:203",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderReturnApplyServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsOrderReturnApplyServiceImpl.java 是 mall 项目后台管理系统中负责订单退货申请管理的服务实现类。该类实现了 OmsOrderReturnApplyService 接口，提供订单退货申请的分页查询、批量删除、状态更新和详情获取等功能。它利用 Spring 框架的依赖注入机制，注入了数据库访问层的 DAO 和 Mapper 组件，完成对退货申请数据的增删改查操作。",
+      "agg_label": "File",
+      "agg_label_rank": 12,
+      "agg_global_rank": 12,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:204",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderReturnReasonServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件是mall电商系统后台管理模块中的一个服务实现类，名为OmsOrderReturnReasonServiceImpl。它实现了OmsOrderReturnReasonService接口，主要负责订单退货原因相关的业务逻辑处理。通过注入的OmsOrderReturnReasonMapper与数据库进行交互，提供了订单退货原因的创建、更新、批量删除、分页查询、批量状态更新以及根据ID查询具体退货原因等功能。该实现基于Spring Boot框架，采用MyBatis作为ORM框架，使用PageHelper进行分页处理。",
+      "agg_label": "File",
+      "agg_label_rank": 13,
+      "agg_global_rank": 13,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:494",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\component\\CancelOrderReceiver.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为CancelOrderReceiver的Spring组件类，作为RabbitMQ消息队列'mall.order.cancel'的监听器，用于接收订单取消消息（订单ID），并调用后台订单服务OmsPortalOrderService的cancelOrder方法执行订单取消操作，同时通过日志记录该处理流程。",
+      "agg_label": "File",
+      "agg_label_rank": 14,
+      "agg_global_rank": 14,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:511",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\controller\\OmsPortalOrderReturnApplyController.java",
+      "full_name": null,
+      "explaination": "该文件是电商系统前台商城中的一个控制器类，负责处理用户提交的订单退货申请请求。通过Spring Boot的注解配置，暴露了一个REST接口供前端调用，接收退货申请参数，调用业务服务层进行处理，并返回统一格式的响应结果。",
+      "agg_label": "File",
+      "agg_label_rank": 15,
+      "agg_global_rank": 15,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:566",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\impl\\OmsPortalOrderServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsPortalOrderServiceImpl.java 是mall电商系统前台商城模块中订单管理的核心服务实现类，基于Spring Boot和MyBatis框架。它实现了OmsPortalOrderService接口，负责处理用户订单的全生命周期业务逻辑，包括订单确认、生成、支付成功处理、超时取消、取消订单、确认收货、订单查询、订单详情及删除等功能。该类整合会员服务、购物车服务、优惠券管理、库存管理、订单数据库操作及消息队列等多个组件，完成从购物车商品选中到订单创建、库存锁定、支付状态更新、积分和优惠券使用、订单状态流转、库存恢复和延迟取消订单消息发送的完整流程。",
+      "agg_label": "File",
+      "agg_label_rank": 16,
+      "agg_global_rank": 16,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:144",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dto\\OmsOrderQueryParam.java",
+      "full_name": null,
+      "explaination": "OmsOrderQueryParam.java定义了一个Java类，用于在mall后台管理系统中封装订单查询时所需的多种参数，包括订单编号、收货人关键词、订单状态、订单类型、订单来源以及订单提交时间。该类作为数据传输对象（DTO）使用，方便前端向后端传递订单查询条件。",
+      "agg_label": "File",
+      "agg_label_rank": 17,
+      "agg_global_rank": 17,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:495",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\component\\CancelOrderSender.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为CancelOrderSender的Spring组件，负责通过AMQP模板向配置好的RabbitMQ延迟队列发送取消订单的消息。消息内容是订单ID，发送时设置了消息的过期时间以实现延迟消费。",
+      "agg_label": "File",
+      "agg_label_rank": 18,
+      "agg_global_rank": 18,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:174",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderSettingService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderSettingService的Java接口，属于mall项目的后台管理系统订单管理模块。该接口声明了针对订单设置的两项核心操作：通过ID获取特定订单设置对象，以及根据ID更新订单设置信息。它是订单设置业务逻辑层的抽象，负责封装订单相关时间配置参数的管理。",
+      "agg_label": "File",
+      "agg_label_rank": 19,
+      "agg_global_rank": 19,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:559",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\impl\\AlipayServiceImpl.java",
+      "full_name": null,
+      "explaination": "该文件是mall项目中支付宝支付服务的具体实现类AlipayServiceImpl，负责处理支付宝支付相关业务逻辑，包括生成电脑网站支付请求表单、手机网站支付请求表单、处理支付宝异步回调通知验证及订单状态更新、查询支付交易状态等。它基于支付宝官方SDK构建，集成了支付请求参数组装、签名验证和响应解析等流程。",
+      "agg_label": "File",
+      "agg_label_rank": 20,
+      "agg_global_rank": 20,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:206",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\impl\\OmsOrderSettingServiceImpl.java",
+      "full_name": null,
+      "explaination": "OmsOrderSettingServiceImpl.java是mall后台管理系统中的一个服务实现类，实现了OmsOrderSettingService接口，主要负责订单设置实体的业务逻辑处理。它通过Spring的@Service注解标记为服务组件，并利用@Autowired注入OmsOrderSettingMapper数据访问层，实现对订单设置的查询和更新操作。",
+      "agg_label": "File",
+      "agg_label_rank": 21,
+      "agg_global_rank": 21,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:145",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dto\\OmsOrderReturnApplyResult.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderReturnApplyResult的Java类，继承自OmsOrderReturnApply，用于封装电商系统中订单退货申请的完整结果信息。该类在继承退货申请基本属性的基础上，增加了一个companyAddress字段，以存储公司的收货地址信息。",
+      "agg_label": "File",
+      "agg_label_rank": 22,
+      "agg_global_rank": 22,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:112",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\SmsHomeRecommendSubjectController.java",
+      "full_name": null,
+      "explaination": "SmsHomeRecommendSubjectController是mall电商系统后台管理模块中的一个Spring Boot控制器类，负责管理首页专题推荐功能的RESTful接口。它提供了添加专题推荐、修改专题推荐排序、批量删除专题推荐、批量修改推荐状态以及分页查询专题推荐列表等功能。该控制器通过依赖注入SmsHomeRecommendSubjectService来调用业务逻辑层，实现对专题推荐数据的操作。",
+      "agg_label": "File",
+      "agg_label_rank": 23,
+      "agg_global_rank": 23,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:172",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\service\\OmsOrderReturnReasonService.java",
+      "full_name": null,
+      "explaination": "该文件定义了OmsOrderReturnReasonService接口，用于管理电商系统中订单退货原因的业务逻辑，封装了退货原因的增删改查及状态管理等功能。",
+      "agg_label": "File",
+      "agg_label_rank": 24,
+      "agg_global_rank": 24,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:105",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\SmsFlashPromotionProductRelationController.java",
+      "full_name": null,
+      "explaination": "该文件是mall后台管理系统中的一个Spring Boot控制器类，名为SmsFlashPromotionProductRelationController，专门用于管理限时购促销活动与商品之间的关联关系。它提供了RESTful API接口，支持批量添加关联商品、修改关联关系、删除关联、获取单个关联信息以及分页查询特定限时购活动和场次下的关联商品促销信息。",
+      "agg_label": "File",
+      "agg_label_rank": 25,
+      "agg_global_rank": 25,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:142",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dto\\OmsOrderDeliveryParam.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderDeliveryParam的Java数据传输对象（DTO）类，用于封装订单发货过程中需要传递的物流相关参数，包括订单ID、物流公司名称和物流单号。该类通过Lombok自动生成getter和setter方法，并使用Swagger注解提供API文档支持。",
+      "agg_label": "File",
+      "agg_label_rank": 26,
+      "agg_global_rank": 26,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:121",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dao\\OmsOrderReturnApplyDao.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderReturnApplyDao的接口，属于mall-admin后台管理系统中的订单退货申请管理模块。该接口包含两个方法：getList用于根据查询参数筛选订单退货申请列表，返回符合条件的退货申请集合；getDetail用于根据退货申请ID获取该申请的详细信息，包括退货申请基本信息及相关的公司收货地址信息。",
+      "agg_label": "File",
+      "agg_label_rank": 27,
+      "agg_global_rank": 27,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:148",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dto\\OmsUpdateStatusParam.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsUpdateStatusParam的Java数据传输对象（DTO）类，用于封装订单服务单状态更新时所需的请求参数，包括服务单号、收货地址关联ID、退款金额、处理备注、处理人、收货备注、收货人以及申请状态等字段。该类通过Lombok自动生成getter和setter方法，同时利用Swagger注解描述字段信息，方便接口文档生成。",
+      "agg_label": "File",
+      "agg_label_rank": 28,
+      "agg_global_rank": 28,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:143",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\dto\\OmsOrderDetail.java",
+      "full_name": null,
+      "explaination": "OmsOrderDetail.java是mall项目后台管理系统中定义的一个订单详情数据传输对象（DTO）类。该类继承自基础订单实体类OmsOrder，扩展了订单的详细信息，主要包括订单商品列表（orderItemList）和订单操作记录列表（historyList）。通过继承和扩展，OmsOrderDetail能够完整表示一个订单的全部信息，便于后台管理系统在处理订单详情时使用。",
+      "agg_label": "File",
+      "agg_label_rank": 29,
+      "agg_global_rank": 29,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:111",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin\\src\\main\\java\\com\\macro\\mall\\controller\\SmsHomeRecommendProductController.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个Spring Boot控制器类SmsHomeRecommendProductController，负责处理电商后台管理系统中首页人气推荐商品模块的HTTP请求。它提供了添加推荐商品、修改推荐排序、批量删除推荐、批量修改推荐状态以及分页查询推荐商品的RESTful接口。",
+      "agg_label": "File",
+      "agg_label_rank": 30,
+      "agg_global_rank": 30,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:496",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\component\\OrderTimeOutCancelTask.java",
+      "full_name": null,
+      "explaination": "OrderTimeOutCancelTask.java定义了一个定时任务类OrderTimeOutCancelTask，该类负责定期扫描商城系统中超时未支付的订单，并自动执行取消操作，同时释放对应的库存锁定。该类基于Spring框架的定时任务机制实现，利用了OmsPortalOrderService提供的业务方法来完成订单取消和库存释放。",
+      "agg_label": "File",
+      "agg_label_rank": 31,
+      "agg_global_rank": 31,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:383",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrderItem.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrderItem的Java实体类，属于mall电商系统的订单管理模块。该类表示订单中的单个商品项，包含了商品的基本信息（如ID、名称、品牌、图片）、订单相关信息（订单ID和订单编号）、商品规格（SKU ID和条码）、购买数量、价格及多种优惠金额的详细分解（促销、优惠券、积分优惠等）、商品分类、促销活动名称，以及购买该商品所获得的积分奖励和成长值。",
+      "agg_label": "File",
+      "agg_label_rank": 32,
+      "agg_global_rank": 32,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:432",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\SmsHomeAdvertise.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为SmsHomeAdvertise的Java实体类，属于电商系统的模型层，用于表示首页轮播广告的各种属性信息。该类包含广告的唯一标识、名称、轮播位置类型（如PC首页或APP首页）、广告图片、起止时间、上线状态、点击数、下单数、跳转链接、备注和排序字段等。",
+      "agg_label": "File",
+      "agg_label_rank": 33,
+      "agg_global_rank": 33,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:381",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-mbg\\src\\main\\java\\com\\macro\\mall\\model\\OmsOrder.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsOrder的Java实体类，代表mall电商系统中的订单数据模型。该类包含订单的多维度信息，包括订单标识、用户信息、优惠抵扣、支付方式、订单状态、物流信息、发票信息以及收货地址等。通过实现Serializable接口和使用Swagger注解，方便订单数据的序列化传输和API文档生成。",
+      "agg_label": "File",
+      "agg_label_rank": 34,
+      "agg_global_rank": 34,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:509",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\controller\\OmsCartItemController.java",
+      "full_name": null,
+      "explaination": "OmsCartItemController.java是mall电商系统中购物车管理的Spring Boot控制器类，位于前台模块。该类通过REST API接口提供购物车相关操作，包括添加商品到购物车、获取当前会员购物车列表及促销信息、修改购物车中商品的数量和规格、删除指定商品以及清空购物车等。它依赖于注入的OmsCartItemService处理购物车业务逻辑，并通过UmsMemberService获取当前登录会员信息，最终封装统一的响应结果返回给前端。",
+      "agg_label": "File",
+      "agg_label_rank": 35,
+      "agg_global_rank": 35,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:533",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\domain\\OmsOrderDetail.java",
+      "full_name": null,
+      "explaination": "OmsOrderDetail.java是电商系统mall项目中前台商城模块的一个领域模型类，继承自OmsOrder，表示包含订单基本信息及详细商品列表的订单详情实体。该文件定义了一个新增字段orderItemList，用于存储订单中所有商品的具体信息。",
+      "agg_label": "File",
+      "agg_label_rank": 36,
+      "agg_global_rank": 36,
+      "source_q_id": "Q1",
+      "source_q_query": "电商系统中与订单提交（下单、创建订单）业务逻辑直接相关的核心代码分布在哪些类、接口和实现中？"
+    },
+    {
+      "id": "4:4d223634-b219-4ecc-9aad-8f0ea39f0ed1:550",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal\\src\\main\\java\\com\\macro\\mall\\portal\\service\\OmsPortalOrderReturnApplyService.java",
+      "full_name": null,
+      "explaination": "该文件定义了一个名为OmsPortalOrderReturnApplyService的Java接口，属于电商系统前台商城模块中的订单退货管理服务层。接口提供了提交订单退货申请的抽象方法，支持用户在前台系统发起退货请求。",
+      "agg_label": "File",
+      "agg_label_rank": 37,
+      "agg_global_rank": 37,
+      "source_q_id": "Q2",
+      "source_q_query": "订单提交流程涉及的各主要服务（如订单服务、数据访问、参数校验、调用链）及其相互调用和依赖关系是怎样的？"
+    }
+  ]
+}
