@@ -46,17 +46,16 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
             chains = ""
             for node in result:
                 if node["name"] != "root":
-                    chains += f"{node['name']}<-[:f2c]-"
+                    chains += f"{node['nodeId']}<-[:f2c]-"
                 else:
                     chains += f"root\n"
                 if node["nodeId"] not in node_sema:
                     node_sema[node["nodeId"]] = f"name: {node['name']}, semantic_explanation: {node['semantic_explanation']}"
             relations.append(chains)
-            print(relations)
+        print(relations)
         for node_id, info in node_sema.items():
             all_info.append(f"nodeId: {node_id}, {info}")
         all_info = "\n".join(all_info)
-        print(all_info)
         selected_blocks = await select_block_chain.ainvoke({"query": query, "relation": "\n".join(relations), "all_information": all_info})
         print(json.loads(selected_blocks))
         return {"selected_blocks": json.loads(selected_blocks).get("block_id", [])}
@@ -103,7 +102,7 @@ if __name__ == "__main__":
         password = os.environ.get("WIKI_NEO4J_PASSWORD")
         neo4j = Neo4jInterface(uri, user, password)
         query = "代码中与订单提交有关的逻辑有哪些？"
-        file_list = [90, 91, 92, 93, 105, 111, 112, 121, 142, 143, 144, 145, 148, 171, 172, 173, 174, 203, 204, 205, 206, 381, 383, 432, 494, 495, 496, 509, 510, 511, 525, 533, 535, 550, 551, 559, 566]
+        file_list = [90, 91, 92, 93, 105, 111, 112, 121, 142, 143, 144, 145, 148, 171, 172, 173, 174, 203, 204, 205 , 206, 381, 383, 432, 494, 495, 496, 509, 510, 511, 525, 533, 535, 550, 551, 559, 566]
         if not await neo4j.test_connection():
             print("Neo4j连接失败")
             return
