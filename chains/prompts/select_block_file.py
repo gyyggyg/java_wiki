@@ -21,11 +21,10 @@ SELECT_BLOCK_PROMPT = PromptTemplate(
 3. **all_information**: 包含链条上各个Block节点的详细信息，格式通常包含 `node_id` (节点ID), `name` (名称), `semantic_explanation` (语义解释)。
 
 【筛选规则】
-1. **理解意图**: 分析用户的 `query` 到底在问什么（是具体的业务逻辑、数据结构，还是宏观的架构）。
-2. **链条筛选**: 针对输入的每一条 `relation` 链条，必须且只能选出该链条上一个最相关的 Block。
-3. **结合层级**: 利用 `relation` 分析 Block 的层级。
-4. **语义匹配**: 仔细阅读 `all_information` 中的语义解释，找出功能描述与 `query` 高度重合的 Block。
-5. **注意事项**: 每个链条第一个节点为File节点，最后一个为root节点，你要筛选返回的是他们中间的Block节点，而不能是这两个节点之一。
+1. **理解意图**: 仔细阅读 `all_information` 中的语义解释，找出功能描述能回答 `query` 的 Block。
+2. **注意事项**: 每个链条第一个节点为File节点，最后一个为root节点，你要筛选返回的是他们中间的Block节点，而不能是这两个节点之一。
+3. **避免父子**: 你最后返回的所有Block列表, 不应出现在某一链条上有上下级关系的多个Block，如果链条1所选Block a是链条2 所选Block b的下级，应该统一都为Block b.
+4. **链条筛选**: 针对输入的每一条 `relation` 链条，必须选出该链条上一个最相关的 Block。
 
 【输入内容】
 用户查询 (query):
@@ -46,10 +45,10 @@ Block详细信息 (all_information):
 【输出要求】
 请严格按照以下JSON格式返回每个链条上和query最相关的Block节点的ID列表，**不要包含任何其他解释、前言或Markdown标记**：
 
-{{"block_id": [nodeId1, nodeId2, ...]}}
+{{"block_id": [nodeId1, nodeId2, ...],"reason":"选择每个nodeId对应的block节点的原因，可以多条原因，用逗号分隔"}}
 
 示例输出：
-{{"block_id": [101, 205]}}
+{{"block_id": [101, 205],"reason":"选择101号block节点的原因是：101号block节点是订单提交的入口，205号block节点是订单提交的出口"}}
 """
 )
 
@@ -68,11 +67,9 @@ SELECT_FILE_PROMPT = PromptTemplate(
 
 【筛选规则】
 1. **精准匹配**: 用户的 `query` 可能涉及具体的类名、方法功能或业务流程。
-2. **语义分析**: 阅读 `all_information` 中每个文件的语义解释。
+2. **语义分析**: 阅读 `all_information` 中每个文件的语义解释，只要跟用户query相关，能帮助用户理解需求和使用代码就选入。
     - 如果文件实现了 `query` 中提到的功能，选入。
     - 如果文件定义了 `query` 中涉及的核心数据模型，选入。
-    - 忽略那些仅提及相关词汇但实际功能无关的工具类或通用类（除非 Query 明确询问工具类）。
-3. **宁缺毋滥**: 只返回真正相关的文件 ID。
 
 【输入内容】
 用户查询 (query):
@@ -88,9 +85,9 @@ SELECT_FILE_PROMPT = PromptTemplate(
 【输出要求】
 请严格按照以下JSON格式返回最相关的File节点的ID列表，**不要包含任何其他解释、前言或Markdown标记**：
 
-{{"file_id": [fileId1, fileId2, ...]}}
+{{"file_id": [fileId1, fileId2, ...],"reason":"选择/不选择每个nodeId对应的file节点的原因，可以多条原因，用逗号分隔，要给出每一个文件选/不选的解释"}}
 
 示例输出：
-{{"file_id": [3001, 4052, 5009]}}
+{{"file_id": [3001, 4052, 5009], ,"reason":"选择3001，4052，5009因为其功能描述字段xxx和用户问题高度相关，不选择91因为其功能为xx, 不选择92原因是xx"}}
 """
 )
