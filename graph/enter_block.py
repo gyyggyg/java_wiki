@@ -5,7 +5,7 @@ import os
 import time
 import asyncio
 import json
-from collections import defaultdict
+from collections import defaultdict, deque
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from langgraph.graph import StateGraph, END
 from interfaces.simple_validate_mermaid import SimpleMermaidValidator
@@ -14,7 +14,7 @@ from interfaces.llm_interface import LLMInterface
 from interfaces.neo4j_interface import Neo4jInterface
 from typing_extensions import TypedDict
 from typing import Annotated
-from chains.prompts.select_block_file import SELECT_BLOCK_PROMPT, SELECT_FILE_PROMPT
+from chains.prompts.select_block_file import SELECT_BLOCK_PROMPT, SELECT_FILE_PROMPT, FETCH_BLOCK1_PROMPT, FETCH_BLOCK2_PROMPT
 from chains.common_chains import ChainFactory
 from dotenv import load_dotenv
 class NodeState(TypedDict, total=False):
@@ -26,10 +26,10 @@ class NodeState(TypedDict, total=False):
 def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query: str, file_list: list[int]):
     select_block_chain = ChainFactory.create_generic_chain(llm_interface, SELECT_BLOCK_PROMPT)
     select_file_chain = ChainFactory.create_generic_chain(llm_interface, SELECT_FILE_PROMPT)
-    fetch_block1_chain = ChainFactory.create_generic_chain(llm_interface, SELECT_BLOCK_PROMPT)
-    fetch_block2_chain = ChainFactory.create_generic_chain(llm_interface, SELECT_BLOCK_PROMPT)
+    fetch_block1_chain = ChainFactory.create_generic_chain(llm_interface, FETCH_BLOCK1_PROMPT)
+    fetch_block2_chain = ChainFactory.create_generic_chain(llm_interface, FETCH_BLOCK2_PROMPT)
     async def decision_making(state: NodeState) -> NodeState:
-        if state["file_list"] :
+        if file_list:
             return {"choice": 1}
         else:
             return {"choice": 0}
@@ -58,11 +58,13 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
                 block_info[record["n1_nodeId"]] = f"name:{record['n1_name']}, semantic_explanation:{record['n1_sema']}"           
         for key, value in child_dict.items():
             relation_1.append(f"{key}:{value}\n")
+        print(relation_1)
         for key, value in block_info.items():
             info_1.append(f"id:{key},{value}\n")
         high_father = await fetch_block1_chain.ainvoke({"query": query, "relation": "\n".join(relation_1), "all_information": "\n".join(info_1)})
+        print(high_father)
         chosen_list = json.loads(high_father)["node_id"]
-        query = """
+        query0 = """
         MATCH (n) 
         WHERE n.nodeId = $node_id 
         RETURN n.name AS name, n.semantic_explanation AS semantic_explanation, coalesce(n.child_blocks, []) as child_blocks, labels(n) AS labels
@@ -73,31 +75,32 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         info_2 = []
         relation_2 = []
         for node_id in chosen_list:
-            nodeId = node_id if node_id.isdigit() else json.loads(node_id)
-            result = await neo4j_interface.execute_query(query, {"node_id": nodeId})
+            nodeId = int(node_id)
+            result = await neo4j_interface.execute_query(query0, {"node_id": nodeId})
             if result[0]["labels"] == ["File"]:
                 returns_file.append(nodeId)
             else:
                 high_father_list.append(nodeId)
         for nodeId in high_father_list:
             relation_2.append(f"下面是以id为{nodeId}顶点的树的信息：\n")
-            result = await neo4j_interface.execute_query(query, {"node_id": nodeId})
+            result = await neo4j_interface.execute_query(query0, {"node_id": nodeId})
             child_blocks = result[0]["child_blocks"]
             relation_2.append(f"id为{nodeId}的节点可以划分为子节点{child_blocks}\n")
             info_2.append(f"id:{nodeId}, name:{result[0]['name']}, semantic_explanation:{result[0]['semantic_explanation']}\n")
             queue = deque([])
             for item in child_blocks:
-                queue.append(json.loads(item)["nodeId"])
+                queue.append(int(json.loads(item)["nodeId"]))
             while queue:
                 current = queue.popleft()
-                result = await neo4j_interface.execute_query(query, {"node_id": current})
+                result = await neo4j_interface.execute_query(query0, {"node_id": int(current)})
                 if result[0]["labels"] == ["Block"]:
                     child_blocks = result[0]["child_blocks"]
                     relation_2.append(f"id为{current}的节点可以划分为子节点{child_blocks}\n")
                     info_2.append(f"id:{current}, name:{result[0]['name']}, semantic_explanation:{result[0]['semantic_explanation']}\n")
                     for item in child_blocks:
-                        queue.append(json.loads(item)["nodeId"])
+                        queue.append(int(json.loads(item)["nodeId"]))
             resultt = await fetch_block2_chain.ainvoke({"query": query, "relation": "\n".join(relation_2), "all_information": "\n".join(info_2)})
+            print(resultt)
             returns_block.extend(json.loads(resultt)["block_id"])
         return {"selected_blocks" : returns_block, "selected_files" : returns_file}
 
@@ -157,14 +160,23 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         print(files,len(files))
         return {"selected_files": list(files)}
     
+    # 定义条件路由函数
+    def route_decision(state: NodeState) -> str:
+        """根据 choice 的值决定下一个节点"""
+        if state["choice"] == 1:
+            return "select_block"
+        else:
+            return "fetch_block"
+
     graph = StateGraph(NodeState)
     graph.add_node("decision_making", decision_making)
     graph.add_node("fetch_block", fetch_block)
     graph.add_node("select_block", select_block)
     graph.add_node("select_file", select_file)
-    graph.add_edge("decision_making", "select_block", condition=lambda state: state["choice"] == 1)
-    graph.add_edge("decision_making", "fetch_block", condition=lambda state: state["choice"] == 0)
-    graph.set_entry_point("select_block")
+    graph.set_entry_point("decision_making")
+
+    # 使用 add_conditional_edges 实现条件路由
+    graph.add_conditional_edges("decision_making", route_decision)
     graph.add_edge("select_block", "select_file")
     graph.add_edge("fetch_block", END)
     graph.add_edge("select_file", END)
@@ -183,7 +195,8 @@ if __name__ == "__main__":
         password = os.environ.get("WIKI_NEO4J_PASSWORD")
         neo4j = Neo4jInterface(uri, user, password)
         query = "代码中与订单提交有关的逻辑有哪些？"
-        file_list = [90, 91, 92, 93, 105, 111, 112, 121, 142, 143, 144, 145, 148, 171, 172, 173, 174, 203, 204, 205 , 206, 381, 383, 432, 494, 495, 496, 509, 510, 511, 525, 533, 535, 550, 551, 559, 566]
+        # file_list = [90, 91, 92, 93, 105, 111, 112, 121, 142, 143, 144, 145, 148, 171, 172, 173, 174, 203, 204, 205 , 206, 381, 383, 432, 494, 495, 496, 509, 510, 511, 525, 533, 535, 550, 551, 559, 566]
+        file_list = []
         if not await neo4j.test_connection():
             print("Neo4j连接失败")
             return
