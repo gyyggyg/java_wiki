@@ -1,0 +1,1922 @@
+﻿[
+  {
+    "n.nodeId": 18423,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/validator/",
+    "n.module_explaination": "该模块组合了自定义状态标志校验注解和其实现类，用于基于javax.validation框架对业务字段或参数的取值范围进行声明式校验，确保数据的有效性和一致性，提升代码复用性和可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18467\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"345\"}",
+      "{\"nodeId\": \"344\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18424,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/config/",
+    "n.module_explaination": "该模块统一管理mall-admin模块下的所有Spring相关系统配置，包括阿里云OSS客户端配置、安全认证与权限控制、全局CORS跨域策略、MyBatis集成及Swagger API文档配置等。通过集中配置，提升系统配置的可维护性和一致性，简化配置文件结构，方便后续扩展和统一管理。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18467\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"347\"}",
+      "{\"nodeId\": \"350\"}",
+      "{\"nodeId\": \"349\"}",
+      "{\"nodeId\": \"346\"}",
+      "{\"nodeId\": \"348\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18425,
+    "n.name": "HomePortalRecommendationController",
+    "n.module_explaination": "该控制器整合了首页推荐品牌、新品、人气推荐商品、专题推荐和轮播广告的管理功能，统一提供首页各类推荐内容的增删改查、排序、批量管理及分页查询等RESTful接口。通过合并实现首页推荐内容管理的接口统一，提升代码复用性，方便前端调用和后端维护。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"353\"}",
+      "{\"nodeId\": \"356\"}",
+      "{\"nodeId\": \"357\"}",
+      "{\"nodeId\": \"369\"}",
+      "{\"nodeId\": \"364\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18426,
+    "n.name": "ProductComprehensiveManagementController",
+    "n.module_explaination": "该控制器统一管理商品相关的分类、品牌、属性、属性分类、SKU库存及商品本体的所有增删改查、批量操作和分页查询接口。通过合并，前端可通过同一控制器访问商品多维度的管理功能，提升开发效率和模块一致性，便于业务扩展和维护。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"366\"}",
+      "{\"nodeId\": \"373\"}",
+      "{\"nodeId\": \"361\"}",
+      "{\"nodeId\": \"358\"}",
+      "{\"nodeId\": \"359\"}",
+      "{\"nodeId\": \"371\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18427,
+    "n.name": "OrderAndAfterSalesManagementController",
+    "n.module_explaination": "该控制器整合订单管理、退货申请、退货原因、订单设置以及公司收货地址的所有管理接口，支持订单及售后流程全链路的统一管理。合并后接口集中，便于前后端协作和业务流程优化，实现订单与售后相关的统一入口。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"378\"}",
+      "{\"nodeId\": \"374\"}",
+      "{\"nodeId\": \"381\"}",
+      "{\"nodeId\": \"351\"}",
+      "{\"nodeId\": \"367\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18428,
+    "n.name": "AdminPermissionAndRoleManagementController",
+    "n.module_explaination": "该控制器统一管理后台用户、角色、菜单、资源、资源分类与会员等级等权限相关模块的增删改查、分配等功能，整合后台权限体系，提升权限管理的集中性和一致性，便于权限分配、菜单配置与用户管理的流程优化。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"360\"}",
+      "{\"nodeId\": \"382\"}",
+      "{\"nodeId\": \"372\"}",
+      "{\"nodeId\": \"376\"}",
+      "{\"nodeId\": \"363\"}",
+      "{\"nodeId\": \"354\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18429,
+    "n.name": "FlashPromotionFullProcessController",
+    "n.module_explaination": "该控制器整合了限时购活动、活动场次及商品关联的全流程管理接口，统一提供创建、管理、关联与查询等功能，实现限时购促销活动的集中式管理与业务流程优化。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"379\"}",
+      "{\"nodeId\": \"362\"}",
+      "{\"nodeId\": \"355\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18430,
+    "n.name": "CouponAndHistoryManagementController",
+    "n.module_explaination": "该控制器统一管理优惠券的增删改查及优惠券领取历史的分页查询，便于前端或其他服务统一访问优惠券相关所有管理和数据查询接口，提升业务整合度。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"352\"}",
+      "{\"nodeId\": \"380\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18431,
+    "n.name": "SubjectAndPreferenceAreaManagementController",
+    "n.module_explaination": "该控制器统一管理商品专题和商品优选专区的内容查询与管理，便于前端通过统一接口获取和维护营销内容展示数据，提升内容运营效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"375\"}",
+      "{\"nodeId\": \"377\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18432,
+    "n.name": "UnifiedObjectStorageController",
+    "n.module_explaination": "该控制器统一管理项目内所有对象存储（如MinIO和阿里云OSS）的文件上传、删除、策略生成和回调等接口，为业务系统提供一站式的对象存储管理入口，便于统一维护和扩展不同存储服务的对接能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18433\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"365\"}",
+      "{\"nodeId\": \"368\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18433,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/controller/",
+    "n.module_explaination": "这些模块通过各类功能的整合与接口统一，旨在提升系统的模块化和业务集中管理能力，简化前后端协作流程，增强可维护性和扩展性。它们覆盖商品、订单、权限、营销、内容及存储等核心业务场景，统一提供高效、规范的管理入口。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18467\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18432\"}",
+      "{\"nodeId\": \"18429\"}",
+      "{\"nodeId\": \"18427\"}",
+      "{\"nodeId\": \"18426\"}",
+      "{\"nodeId\": \"18428\"}",
+      "{\"nodeId\": \"18425\"}",
+      "{\"nodeId\": \"18430\"}",
+      "{\"nodeId\": \"18431\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18434,
+    "n.name": "ProductExtendedQueryAndRelationDao",
+    "n.module_explaination": "合并后的模块专注于商品及其属性、分类、属性分类、属性与分类关系等相关的自定义数据查询和管理操作，统一处理商品模块下复杂的查询与数据结构获取逻辑，提升DAO层的聚合性和维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18437\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"427\"}",
+      "{\"nodeId\": \"414\"}",
+      "{\"nodeId\": \"66\"}",
+      "{\"nodeId\": \"274\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18435,
+    "n.name": "BatchPersistenceAndRelationDao",
+    "n.module_explaination": "合并后的模块专注于各业务实体（商品SKU库存、商品满减、属性值、会员价格、阶梯价格、分类属性关系、优惠券与商品/分类/关系、专题与商品、优选区域与商品、订单操作记录等）的批量插入及关系批量管理，统一批量持久化操作，提高性能和代码维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18437\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"430\"}",
+      "{\"nodeId\": \"425\"}",
+      "{\"nodeId\": \"415\"}",
+      "{\"nodeId\": \"417\"}",
+      "{\"nodeId\": \"429\"}",
+      "{\"nodeId\": \"428\"}",
+      "{\"nodeId\": \"426\"}",
+      "{\"nodeId\": \"416\"}",
+      "{\"nodeId\": \"418\"}",
+      "{\"nodeId\": \"419\"}",
+      "{\"nodeId\": \"424\"}",
+      "{\"nodeId\": \"421\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18436,
+    "n.name": "MallAdminBusinessEntityDaoGroup",
+    "n.module_explaination": "该模块统一管理商城后台各类业务实体（如订单、退货申请、优惠券、用户角色关系、限时购商品关系等）的自定义DAO数据访问操作，聚合不同业务领域的数据查询、批量插入与管理逻辑，实现DAO层的结构优化和维护便利。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18437\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"432\"}",
+      "{\"nodeId\": \"420\"}",
+      "{\"nodeId\": \"423\"}",
+      "{\"nodeId\": \"431\"}",
+      "{\"nodeId\": \"422\"}",
+      "{\"nodeId\": \"433\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18437,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/dao/",
+    "n.module_explaination": "这些模块共同致力于整合和优化商品及商城后台各类业务实体的数据访问操作，通过统一管理复杂查询、批量持久化和实体关系处理，提高DAO层的聚合性、性能和维护效率，简化了数据结构的获取与管理流程。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18467\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18436\"}",
+      "{\"nodeId\": \"18435\"}",
+      "{\"nodeId\": \"18434\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18438,
+    "n.name": "ProductModificationParamAndResultDTO",
+    "n.module_explaination": "该合并模块统一封装用于商品创建、修改操作的请求和响应参数对象。PmsProductParam负责商品的多维度参数封装，PmsProductResult扩展用于商品修改后的结果返回，两者结合便于前端和后端对商品维护接口的数据结构进行一致、完整的管理和复用，提升接口设计的规范性与可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"323\"}",
+      "{\"nodeId\": \"317\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18439,
+    "n.name": "OssUploadInteractionDTOs",
+    "n.module_explaination": "该合并模块封装OSS文件上传业务中涉及的回调参数、上传授权返回结果及上传完成回调结果等多种交互数据对象。统一管理OSS上传的请求与响应参数，便于文件上传、回调及授权流程的数据传递和接口规范化，简化前后端及服务间的交互开发，提升系统维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"318\"}",
+      "{\"nodeId\": \"327\"}",
+      "{\"nodeId\": \"322\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18440,
+    "n.name": "ProductCategoryParamAndChildrenDTO",
+    "n.module_explaination": "该合并模块统一管理商品分类的参数传输对象，包括商品分类的新增、更新参数以及带有子分类的分类层级结构。通过合并实现商品分类参数与其层级结构的整体封装，便于前后端数据交互和分类树的处理，提高分类管理的灵活性和系统扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"333\"}",
+      "{\"nodeId\": \"338\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18441,
+    "n.name": "OrderOperationParamAndResultDTOs",
+    "n.module_explaination": "该合并模块统一封装了订单管理相关的参数和结果对象，包括订单详情、费用变更、发货、收货人信息、订单状态更新、退货申请及其结果等多种订单业务操作的数据传输对象。通过整体管理订单操作相关DTO，简化了参数传递和数据结构维护，提升了订单模块前后端交互的规范性和系统可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"295\"}",
+      "{\"nodeId\": \"320\"}",
+      "{\"nodeId\": \"321\"}",
+      "{\"nodeId\": \"325\"}",
+      "{\"nodeId\": \"329\"}",
+      "{\"nodeId\": \"337\"}",
+      "{\"nodeId\": \"328\"}",
+      "{\"nodeId\": \"340\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18442,
+    "n.name": "ProductAttributeAndCategoryDTOs",
+    "n.module_explaination": "该合并模块统一封装商品属性与属性分类相关的数据传输对象，包括商品属性参数、商品属性分类及其下属属性列表、以及商品分类属性信息。通过合并，简化了商品属性及分类管理时的数据结构交互，提高了商品属性模块的扩展性、可维护性和前后端协作效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"343\"}",
+      "{\"nodeId\": \"335\"}",
+      "{\"nodeId\": \"334\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18443,
+    "n.name": "MinioStorageInteractionDTOs",
+    "n.module_explaination": "该合并模块封装Minio文件存储相关的业务数据对象，包括文件上传返回结果和存储桶访问策略配置。统一管理Minio上传结果与策略配置DTO，便于文件存储模块的数据传递、接口定义及策略管理，提高系统的可扩展性和维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"336\"}",
+      "{\"nodeId\": \"339\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18444,
+    "n.name": "AdminAccountSecurityParamDTOs",
+    "n.module_explaination": "该合并模块封装管理员账号安全相关的请求参数对象，包括管理员登录和密码修改所需的参数DTO。通过合并，便于统一管理账号认证与安全模块的数据结构，提升接口一致性和安全性校验的代码复用度。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"341\"}",
+      "{\"nodeId\": \"326\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18445,
+    "n.name": "BusinessFeatureParamAndResultDTOs",
+    "n.module_explaination": "该合并模块统一封装商城各类核心业务功能（如促销、优惠券、品牌管理、商品查询、菜单、管理员注册等）涉及的参数和结果数据传输对象。通过合并，集中管理业务功能相关DTO，规范数据传递结构，提升接口一致性、复用性和系统可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18446\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"342\"}",
+      "{\"nodeId\": \"331\"}",
+      "{\"nodeId\": \"319\"}",
+      "{\"nodeId\": \"332\"}",
+      "{\"nodeId\": \"316\"}",
+      "{\"nodeId\": \"330\"}",
+      "{\"nodeId\": \"181\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18446,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/dto/",
+    "n.module_explaination": "这些合并模块旨在规范和统一各业务领域（如商品、订单、文件存储、管理员账号及核心业务功能）相关的数据传输对象封装，实现前后端接口参数和结果结构的一致性、复用性与可维护性，从而提升系统开发效率和扩展能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18467\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18439\"}",
+      "{\"nodeId\": \"18438\"}",
+      "{\"nodeId\": \"18443\"}",
+      "{\"nodeId\": \"18445\"}",
+      "{\"nodeId\": \"18441\"}",
+      "{\"nodeId\": \"18444\"}",
+      "{\"nodeId\": \"18442\"}",
+      "{\"nodeId\": \"18440\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18447,
+    "n.name": "HomePromotionRecommendationServiceImpl.java",
+    "n.module_explaination": "该合并模块统一实现商城首页广告、品牌推荐、新品推荐、人气推荐商品和专题推荐等推荐展示的核心业务逻辑，支持批量增删改查、排序管理、推荐状态控制及分页过滤，集中管理首页各类推荐内容，提升维护效率和业务一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18460\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"461\"}",
+      "{\"nodeId\": \"438\"}",
+      "{\"nodeId\": \"448\"}",
+      "{\"nodeId\": \"454\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18448,
+    "n.name": "ProductCoreServiceImpl.java",
+    "n.module_explaination": "该合并模块负责商品管理子系统中商品基本信息、属性信息和SKU库存的统一业务逻辑处理，实现商品创建、更新、查询、删除、属性管理和库存管理等核心功能，集中封装商品多维度数据的持久化和维护，提升代码复用性和业务一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"456\"}",
+      "{\"nodeId\": \"434\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18449,
+    "n.name": "ProductAttributeAndCategoryServiceImpl.java",
+    "n.module_explaination": "该合并模块统一实现商品属性及属性分类的增删改查、分页和关联查询等业务逻辑，为商品属性的管理和分类提供一致的服务接口，便于扩展和维护商品属性体系。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18459\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"462\"}",
+      "{\"nodeId\": \"440\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18450,
+    "n.name": "OrderAndReturnServiceImpl.java",
+    "n.module_explaination": "该合并模块实现订单管理主流程、退货申请和退货原因的统一业务逻辑，负责订单生命周期的完整处理，包括订单操作、退货流程、退货原因维护等，提升订单管理相关功能的一致性和可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"467\"}",
+      "{\"nodeId\": \"455\"}",
+      "{\"nodeId\": \"452\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18451,
+    "n.name": "FlashPromotionManagementServiceImpl.java",
+    "n.module_explaination": "该合并模块实现限时购（秒杀）活动管理、场次管理和商品与场次关联的统一业务逻辑，支持限时购活动的创建、修改、删除、状态变更、场次管理和商品关联等操作，方便统一管理促销活动流程。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"459\"}",
+      "{\"nodeId\": \"466\"}",
+      "{\"nodeId\": \"443\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18452,
+    "n.name": "AdminAuthorizationManagementServiceImpl.java",
+    "n.module_explaination": "该合并模块集中实现后台管理员、角色、菜单、资源及资源分类等权限相关的业务逻辑，支持权限分配、角色管理、菜单树维护、资源及分类的增删改查等功能，提升权限体系的统一性和扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"445\"}",
+      "{\"nodeId\": \"460\"}",
+      "{\"nodeId\": \"436\"}",
+      "{\"nodeId\": \"446\"}",
+      "{\"nodeId\": \"458\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18453,
+    "n.name": "ProductBrandAndCategoryServiceImpl.java",
+    "n.module_explaination": "该合并模块统一实现商品品牌和商品分类的创建、更新、删除、分页查询、批量状态更新和层级结构管理等业务逻辑，便于集中管理商品品牌与分类体系，提升系统维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18459\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"449\"}",
+      "{\"nodeId\": \"444\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18454,
+    "n.name": "MemberAndLevelServiceImpl.java",
+    "n.module_explaination": "该合并模块集中实现会员等级和会员用户相关的业务逻辑，包括会员注册、登录、权限、角色管理及会员等级的增删改查，提升会员体系功能的一致性和扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"453\"}",
+      "{\"nodeId\": \"442\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18455,
+    "n.name": "CompanyAndPreferenceAreaServiceImpl.java",
+    "n.module_explaination": "该合并模块统一实现公司收货地址和商品优选区域的列表查询等基础业务逻辑，便于维护和扩展公司及优选区域相关数据管理功能。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"447\"}",
+      "{\"nodeId\": \"450\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18456,
+    "n.name": "ProductSubjectAndRecommendationServiceImpl.java",
+    "n.module_explaination": "该合并模块统一实现商品专题及首页专题推荐的业务逻辑，支持专题增删改查、分页查询及首页推荐管理，提升专题相关业务的一致性和扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18460\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"464\"}",
+      "{\"nodeId\": \"441\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18457,
+    "n.name": "CouponAndCouponHistoryServiceImpl.java",
+    "n.module_explaination": "该合并模块统一实现优惠券的创建、更新、删除、查询及优惠券领取记录的分页查询和条件过滤等业务逻辑，提升优惠券相关业务的管理效率和扩展能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"465\"}",
+      "{\"nodeId\": \"435\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18458,
+    "n.name": "MallCoreServiceImpl",
+    "n.module_explaination": "该合并模块统一封装商城业务核心服务的具体实现，包括对象存储（如阿里云OSS）文件上传、订单设置管理等业务逻辑，通过集中维护service实现层，提升各类核心业务流程的标准化和可扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"437\"}",
+      "{\"nodeId\": \"439\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18459,
+    "n.name": "ProductAttributeBrandCategoryServiceImpl",
+    "n.module_explaination": "该合并模块统一实现商品属性、品牌及商品分类的增删改查、分页、关联和层级管理等业务逻辑，集中管理商品属性、品牌和分类体系，便于扩展和维护商品多维度属性体系，提升系统的一致性和维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18449\"}",
+      "{\"nodeId\": \"18453\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18460,
+    "n.name": "HomeAndSubjectRecommendationServiceImpl",
+    "n.module_explaination": "该合并模块统一实现商城首页推荐、商品专题推荐及相关内容的业务逻辑，支持推荐内容的批量增删改查、排序管理、状态控制及分页过滤，集中管理首页及专题推荐内容，提升维护效率和业务一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18461\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18447\"}",
+      "{\"nodeId\": \"18456\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18461,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/service/impl/",
+    "n.module_explaination": "这些根模块均通过整合各自领域的核心业务逻辑，实现了商城系统商品、订单、促销、权限、会员、优惠券、内容推荐等主要功能的统一管理和标准化服务，提升了模块的复用性、一致性和可维护性，便于系统的扩展和高效运营。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18466\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18451\"}",
+      "{\"nodeId\": \"18450\"}",
+      "{\"nodeId\": \"18455\"}",
+      "{\"nodeId\": \"18448\"}",
+      "{\"nodeId\": \"18458\"}",
+      "{\"nodeId\": \"18452\"}",
+      "{\"nodeId\": \"18459\"}",
+      "{\"nodeId\": \"18457\"}",
+      "{\"nodeId\": \"18460\"}",
+      "{\"nodeId\": \"18454\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18462,
+    "n.name": "HomeContentRecommendationService",
+    "n.module_explaination": "该接口整合了商城首页各类内容推荐的核心业务操作，包括新品推荐、人气推荐商品、品牌推荐和专题推荐的批量管理、排序控制、状态更新和分页查询等功能。通过统一的服务接口规范，提高了首页内容推荐的模块化、可维护性和扩展性，方便业务层对各类推荐内容的集中管理和灵活调用，提升了系统内容运营效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18466\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"385\"}",
+      "{\"nodeId\": \"407\"}",
+      "{\"nodeId\": \"388\"}",
+      "{\"nodeId\": \"413\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18463,
+    "n.name": "ProductAttributeAndCategoryService",
+    "n.module_explaination": "该接口将商品属性和商品属性分类的管理职能合并，统一提供商品属性、属性分类的增删改查、批量操作、分页查询以及分类与属性关联等一体化操作入口。通过整合商品属性体系相关业务逻辑，简化了上层调用流程，增强了属性管理的业务一致性和灵活性，有助于商城后台对商品属性体系的高效维护。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18466\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"397\"}",
+      "{\"nodeId\": \"399\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18464,
+    "n.name": "MallAdminDomainServiceInterfaces",
+    "n.module_explaination": "该模块整合了商城后台管理系统中各主要领域（如商品、订单、品牌、分类、促销、优惠券、资源、菜单、角色、会员等）的核心服务接口，将其业务抽象和服务层契约统一管理，规范领域服务的增删改查、批量、分页、状态管理等操作，提升了接口复用性、维护性和系统一致性，便于后续扩展和模块管理。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18466\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"398\"}",
+      "{\"nodeId\": \"400\"}",
+      "{\"nodeId\": \"408\"}",
+      "{\"nodeId\": \"411\"}",
+      "{\"nodeId\": \"384\"}",
+      "{\"nodeId\": \"410\"}",
+      "{\"nodeId\": \"394\"}",
+      "{\"nodeId\": \"390\"}",
+      "{\"nodeId\": \"406\"}",
+      "{\"nodeId\": \"402\"}",
+      "{\"nodeId\": \"412\"}",
+      "{\"nodeId\": \"386\"}",
+      "{\"nodeId\": \"393\"}",
+      "{\"nodeId\": \"395\"}",
+      "{\"nodeId\": \"403\"}",
+      "{\"nodeId\": \"405\"}",
+      "{\"nodeId\": \"401\"}",
+      "{\"nodeId\": \"409\"}",
+      "{\"nodeId\": \"404\"}",
+      "{\"nodeId\": \"396\"}",
+      "{\"nodeId\": \"391\"}",
+      "{\"nodeId\": \"389\"}",
+      "{\"nodeId\": \"392\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18465,
+    "n.name": "MallAdminSupportServiceInterfaces",
+    "n.module_explaination": "该模块整合了后台管理系统中对象存储服务（OSS）与后台管理员缓存管理等核心支持服务的接口抽象，统一提供对象存储上传策略、回调处理、管理员及其权限相关缓存的管理等业务操作。通过合并相关服务接口，实现支持服务的集中管理和标准化，提升系统的模块化、可维护性和扩展性，并为后续功能扩展和多实现支持打下基础。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18466\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"370\"}",
+      "{\"nodeId\": \"387\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18466,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/service/",
+    "n.module_explaination": "这些模块通过整合和标准化商城各领域的核心业务与支持服务接口，实现了商品、订单、促销、权限、会员、内容推荐等主要功能的一体化管理，提高了系统的复用性、一致性和可维护性。统一的服务抽象和集中管理方式便于后续扩展，支持高效运营和灵活的业务需求响应。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18467\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18464\"}",
+      "{\"nodeId\": \"18465\"}",
+      "{\"nodeId\": \"18463\"}",
+      "{\"nodeId\": \"18462\"}",
+      "{\"nodeId\": \"18461\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18467,
+    "n.name": "mall-admin/src/main/java/com/macro/mall/",
+    "n.module_explaination": "这些模块共同构建了一个高内聚、可扩展的商城后台管理系统，涵盖了应用启动、配置管理、数据访问、业务逻辑、接口传输、安全认证及数据校验等核心领域。它们通过分层设计和职责划分，实现了系统的统一入口、集中配置、标准化服务和安全机制，确保了系统的高效开发、易维护性和业务一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18468\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"383\"}",
+      "{\"nodeId\": \"315\"}",
+      "{\"nodeId\": \"18423\"}",
+      "{\"nodeId\": \"18424\"}",
+      "{\"nodeId\": \"18437\"}",
+      "{\"nodeId\": \"18466\"}",
+      "{\"nodeId\": \"18446\"}",
+      "{\"nodeId\": \"18433\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18468,
+    "n.name": "mall-admin/src/",
+    "n.module_explaination": "这些模块共同致力于构建和保障商城后台管理系统的核心功能，通过分层架构实现了数据访问、业务逻辑处理、配置管理和安全校验等关键职责，同时借助自动化测试确保数据操作的正确性和系统的稳定性，从而提升系统的可维护性与可靠性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18549\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"314\"}",
+      "{\"nodeId\": \"18467\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18469,
+    "n.name": "mall-common/src/main/java/com/macro/mall/common/config/",
+    "n.module_explaination": "这些模块共同致力于为项目提供统一、标准化的基础配置，分别涵盖了Redis缓存与数据交互、以及Swagger接口文档的自动化生成与安全管理，从而降低各业务模块的开发复杂度，提高系统的可维护性与扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18475\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"57\"}",
+      "{\"nodeId\": \"56\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18470,
+    "n.name": "mall-common/src/main/java/com/macro/mall/common/domain/",
+    "n.module_explaination": "这些模块共同致力于提升系统配置和日志管理的规范性与可维护性，通过集中封装Swagger文档配置和Controller层操作日志，便于项目统一管理相关数据，增强代码复用性与运维分析能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18475\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"54\"}",
+      "{\"nodeId\": \"53\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18471,
+    "n.name": "ApiResponseAndErrorCodeCore",
+    "n.module_explaination": "该模块统一封装和管理API接口的响应结构（包括通用数据返回格式和状态码），并集中定义和实现错误码接口及常用状态码枚举，实现接口返回的规范化、错误码的集中管理和代码的高可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18472\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"60\"}",
+      "{\"nodeId\": \"61\"}",
+      "{\"nodeId\": \"59\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18472,
+    "n.name": "mall-common/src/main/java/com/macro/mall/common/api/",
+    "n.module_explaination": "这些模块的共同目标是为系统提供统一、规范的接口响应结构，包括分页数据和通用的API返回格式与错误码管理，从而简化业务逻辑、提升代码复用性与维护性，并增强系统的灵活性与一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18475\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"62\"}",
+      "{\"nodeId\": \"18471\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18473,
+    "n.name": "mall-common/src/main/java/com/macro/mall/common/exception/",
+    "n.module_explaination": "该模块集成了API异常的自定义定义、断言式抛出与全局统一处理，提供标准化的业务异常管理体系，实现从异常的产生、抛出到全局捕获和格式化返回的全流程统一，提升系统健壮性和开发维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18475\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"51\"}",
+      "{\"nodeId\": \"50\"}",
+      "{\"nodeId\": \"52\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18474,
+    "n.name": "mall-common/src/main/java/com/macro/mall/common/service/",
+    "n.module_explaination": "该模块统一封装了对Redis数据库的访问接口（RedisService）及其基于Spring Data Redis的实现（RedisServiceImpl），支持多种数据结构的常用操作，旨在为业务系统提供便捷、类型通用且可替换的Redis访问服务，降低系统对底层Redis实现的耦合度。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18475\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"64\"}",
+      "{\"nodeId\": \"63\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18475,
+    "n.name": "mall-common/src/main/java/com/macro/mall/common/",
+    "n.module_explaination": "这些模块协同为项目提供了统一的基础配置、接口响应、异常管理、日志采集和通用工具，实现了对底层资源（如Redis）、接口规范、日志与异常的标准化封装，大幅提升了业务开发的便捷性、系统维护的统一性与可扩展性，促进了代码复用与企业级应用的规范化。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18549\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"58\"}",
+      "{\"nodeId\": \"55\"}",
+      "{\"nodeId\": \"18470\"}",
+      "{\"nodeId\": \"18472\"}",
+      "{\"nodeId\": \"18469\"}",
+      "{\"nodeId\": \"18474\"}",
+      "{\"nodeId\": \"18473\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18476,
+    "n.name": "GenericEntityExampleQueryBuilder",
+    "n.module_explaination": "该模块整合并通用化了原有各业务实体的Example动态查询条件辅助类，支持针对不同数据库表（如订单、商品、优惠券、会员、日志等）以配置化方式灵活构建SQL查询条件、排序和去重等。通过统一的条件拼接、分组、AND/OR逻辑管理等能力，避免重复代码，大幅提升了项目中各实体动态查询的开发效率和可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18495\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"237\"}",
+      "{\"nodeId\": \"154\"}",
+      "{\"nodeId\": \"74\"}",
+      "{\"nodeId\": \"305\"}",
+      "{\"nodeId\": \"187\"}",
+      "{\"nodeId\": \"264\"}",
+      "{\"nodeId\": \"302\"}",
+      "{\"nodeId\": \"285\"}",
+      "{\"nodeId\": \"209\"}",
+      "{\"nodeId\": \"306\"}",
+      "{\"nodeId\": \"169\"}",
+      "{\"nodeId\": \"310\"}",
+      "{\"nodeId\": \"226\"}",
+      "{\"nodeId\": \"262\"}",
+      "{\"nodeId\": \"168\"}",
+      "{\"nodeId\": \"160\"}",
+      "{\"nodeId\": \"301\"}",
+      "{\"nodeId\": \"215\"}",
+      "{\"nodeId\": \"179\"}",
+      "{\"nodeId\": \"202\"}",
+      "{\"nodeId\": \"227\"}",
+      "{\"nodeId\": \"309\"}",
+      "{\"nodeId\": \"199\"}",
+      "{\"nodeId\": \"185\"}",
+      "{\"nodeId\": \"162\"}",
+      "{\"nodeId\": \"270\"}",
+      "{\"nodeId\": \"174\"}",
+      "{\"nodeId\": \"228\"}",
+      "{\"nodeId\": \"299\"}",
+      "{\"nodeId\": \"222\"}",
+      "{\"nodeId\": \"116\"}",
+      "{\"nodeId\": \"271\"}",
+      "{\"nodeId\": \"290\"}",
+      "{\"nodeId\": \"257\"}",
+      "{\"nodeId\": \"255\"}",
+      "{\"nodeId\": \"312\"}",
+      "{\"nodeId\": \"177\"}",
+      "{\"nodeId\": \"173\"}",
+      "{\"nodeId\": \"191\"}",
+      "{\"nodeId\": \"213\"}",
+      "{\"nodeId\": \"240\"}",
+      "{\"nodeId\": \"153\"}",
+      "{\"nodeId\": \"282\"}",
+      "{\"nodeId\": \"288\"}",
+      "{\"nodeId\": \"203\"}",
+      "{\"nodeId\": \"313\"}",
+      "{\"nodeId\": \"225\"}",
+      "{\"nodeId\": \"268\"}",
+      "{\"nodeId\": \"277\"}",
+      "{\"nodeId\": \"65\"}",
+      "{\"nodeId\": \"161\"}",
+      "{\"nodeId\": \"267\"}",
+      "{\"nodeId\": \"300\"}",
+      "{\"nodeId\": \"286\"}",
+      "{\"nodeId\": \"253\"}",
+      "{\"nodeId\": \"175\"}",
+      "{\"nodeId\": \"194\"}",
+      "{\"nodeId\": \"250\"}",
+      "{\"nodeId\": \"278\"}",
+      "{\"nodeId\": \"293\"}",
+      "{\"nodeId\": \"186\"}",
+      "{\"nodeId\": \"176\"}",
+      "{\"nodeId\": \"273\"}",
+      "{\"nodeId\": \"170\"}",
+      "{\"nodeId\": \"298\"}",
+      "{\"nodeId\": \"183\"}",
+      "{\"nodeId\": \"254\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18477,
+    "n.name": "GenericEntityExampleQueryBuilder",
+    "n.module_explaination": "该模块整合并通用化了原有各业务实体的Example动态查询条件辅助类，支持针对不同数据库表（如订单、商品、优惠券、会员、日志等）以配置化方式灵活构建SQL查询条件、排序和去重等。通过统一的条件拼接、分组、AND/OR逻辑管理等能力，避免重复代码，大幅提升了项目中各实体动态查询的开发效率和可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18495\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"297\"}",
+      "{\"nodeId\": \"283\"}",
+      "{\"nodeId\": \"242\"}",
+      "{\"nodeId\": \"189\"}",
+      "{\"nodeId\": \"284\"}",
+      "{\"nodeId\": \"241\"}",
+      "{\"nodeId\": \"229\"}",
+      "{\"nodeId\": \"207\"}",
+      "{\"nodeId\": \"279\"}",
+      "{\"nodeId\": \"252\"}",
+      "{\"nodeId\": \"261\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18478,
+    "n.name": "EntityRelationModels",
+    "n.module_explaination": "该合并模块封装了电商系统各业务对象之间的多对多或关联关系映射，包括管理员与角色、角色与资源、角色与菜单、会员与标签、商品分类与属性、会员与商品分类、管理员与权限、专题与产品、会员与任务、商品与优惠券、优惠券与商品/分类/会员等。通过标准化关系实体结构，便于数据库表的统一映射和业务逻辑的批量管理。合并实现有助于减少冗余代码，提升关系型数据操作的灵活性和系统可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"218\"}",
+      "{\"nodeId\": \"291\"}",
+      "{\"nodeId\": \"211\"}",
+      "{\"nodeId\": \"269\"}",
+      "{\"nodeId\": \"178\"}",
+      "{\"nodeId\": \"296\"}",
+      "{\"nodeId\": \"231\"}",
+      "{\"nodeId\": \"233\"}",
+      "{\"nodeId\": \"276\"}",
+      "{\"nodeId\": \"182\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18479,
+    "n.name": "ProductDiscountStrategyModels",
+    "n.module_explaination": "该合并模块统一封装了商品的多种优惠定价策略，包括会员价格、满减优惠、阶梯价等实体模型，用于支持商品价格在不同业务场景下的灵活调整。通过合并管理，便于业务层统一处理各类商品优惠策略，提升促销规则的扩展性和维护效率，满足电商系统多样化的营销需求。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"294\"}",
+      "{\"nodeId\": \"146\"}",
+      "{\"nodeId\": \"198\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18480,
+    "n.name": "ProductAttributeAndSkuModels",
+    "n.module_explaination": "该合并模块统一封装了商品属性管理相关的数据结构，包括商品属性定义、属性值、SKU库存、以及分类与属性的关联关系。通过合并这些模型，系统能够灵活管理商品的多规格、多参数信息，满足商品扩展属性、SKU库存和属性分类映射等业务需求，提升商品数据模型的完整性和扩展能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"208\"}",
+      "{\"nodeId\": \"219\"}",
+      "{\"nodeId\": \"224\"}",
+      "{\"nodeId\": \"292\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18481,
+    "n.name": "OrderDomainModels",
+    "n.module_explaination": "该合并模块涵盖了订单业务相关的核心数据结构，包括订单主数据、购物车、订单商品项、订单操作历史、退货申请与原因、订单设置及公司地址等。合并后可统一支撑订单全生命周期管理、退换货流程、订单配置等功能，方便业务逻辑层集中处理订单相关操作，提升订单数据的一致性和业务流转的高效性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"245\"}",
+      "{\"nodeId\": \"217\"}",
+      "{\"nodeId\": \"260\"}",
+      "{\"nodeId\": \"246\"}",
+      "{\"nodeId\": \"206\"}",
+      "{\"nodeId\": \"244\"}",
+      "{\"nodeId\": \"256\"}",
+      "{\"nodeId\": \"184\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18482,
+    "n.name": "CouponDomainModels",
+    "n.module_explaination": "该合并模块统一封装了优惠券核心模型、与产品/分类/会员的关联关系，以及优惠券领取和使用的历史记录。通过合并管理，方便优惠券的发放、使用、关联与统计等全流程业务操作，提升促销模块的整体一致性和业务流程的自动化，满足多样化营销活动的需求。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"192\"}",
+      "{\"nodeId\": \"223\"}",
+      "{\"nodeId\": \"210\"}",
+      "{\"nodeId\": \"272\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18483,
+    "n.name": "MemberGrowthAndPointHistoryModels",
+    "n.module_explaination": "该合并模块统一封装了会员积分、成长值的历史变更记录，以及积分抵扣设置和积分成长规则等数据模型。合并后可集中管理会员成长与激励体系的相关数据，支持积分发放、消耗、抵扣和成长值的业务规则配置，提升会员体系的可扩展性和激励策略的灵活性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"303\"}",
+      "{\"nodeId\": \"263\"}",
+      "{\"nodeId\": \"266\"}",
+      "{\"nodeId\": \"248\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18484,
+    "n.name": "MemberCoreModels",
+    "n.module_explaination": "该合并模块统一封装了会员基础数据模型，包括会员信息、等级、统计数据、收货地址和登录日志等。通过合并管理，方便系统进行会员档案、行为分析、积分成长和收货配送等基础业务，提升会员数据的一致性和服务的个性化能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"258\"}",
+      "{\"nodeId\": \"311\"}",
+      "{\"nodeId\": \"232\"}",
+      "{\"nodeId\": \"239\"}",
+      "{\"nodeId\": \"193\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18485,
+    "n.name": "CmsContentModels",
+    "n.module_explaination": "该合并模块统一封装了内容管理系统中的帮助、帮助分类、专题、专题分类、话题、话题分类及评论等核心数据模型。通过合并管理，便于内容的组织、分类、评论与展示，支持内容发布、评论互动、分类检索等CMS业务需求，提升内容管理的整体效率和一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18493\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"197\"}",
+      "{\"nodeId\": \"200\"}",
+      "{\"nodeId\": \"287\"}",
+      "{\"nodeId\": \"172\"}",
+      "{\"nodeId\": \"235\"}",
+      "{\"nodeId\": \"204\"}",
+      "{\"nodeId\": \"265\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18486,
+    "n.name": "HomeRecommendationModels",
+    "n.module_explaination": "该合并模块统一封装了商城首页各类推荐与展示数据模型，包括推荐商品、新品、品牌、广告和主题等。通过合并管理，方便首页内容的统一推荐、排序与展示，满足首页个性化推荐、广告投放和品牌营销的业务需求，提升首页内容管理的灵活性和运营能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"214\"}",
+      "{\"nodeId\": \"259\"}",
+      "{\"nodeId\": \"180\"}",
+      "{\"nodeId\": \"230\"}",
+      "{\"nodeId\": \"221\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18487,
+    "n.name": "ProductAlbumModels",
+    "n.module_explaination": "该合并模块统一封装了商品相册及其图片的相关数据模型。通过合并管理，便于系统集中处理商品图片的批量存储、展示和关联，提升商品多媒体信息的管理效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"307\"}",
+      "{\"nodeId\": \"251\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18488,
+    "n.name": "ProductCoreAndReviewDomainModels",
+    "n.module_explaination": "该合并模块统一封装了电商系统中的商品核心数据结构及其相关管理模型，包括品牌、商品本体、商品分类、商品审核记录、商品评论及评论回复、商品操作日志、运费模板等。通过合并管理，便于业务层统一处理商品全生命周期、分类、审核、评价、物流等相关操作，提升商品中心模块的数据一致性和业务流的高效性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"238\"}",
+      "{\"nodeId\": \"275\"}",
+      "{\"nodeId\": \"220\"}",
+      "{\"nodeId\": \"196\"}",
+      "{\"nodeId\": \"280\"}",
+      "{\"nodeId\": \"188\"}",
+      "{\"nodeId\": \"247\"}",
+      "{\"nodeId\": \"216\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18489,
+    "n.name": "AdminUserAndPermissionDomainModels",
+    "n.module_explaination": "该合并模块统一封装了后台用户与权限管理相关的数据模型，包括管理员、角色、权限、菜单、资源、资源分类、会员任务及管理员登录日志等。通过合并管理，便于系统统一进行权限分配、角色授权、菜单与资源管理、用户管理和行为审计，提升权限管理模块的整体一致性和安全可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"171\"}",
+      "{\"nodeId\": \"308\"}",
+      "{\"nodeId\": \"304\"}",
+      "{\"nodeId\": \"243\"}",
+      "{\"nodeId\": \"212\"}",
+      "{\"nodeId\": \"205\"}",
+      "{\"nodeId\": \"249\"}",
+      "{\"nodeId\": \"281\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18490,
+    "n.name": "FlashPromotionAndSessionModels",
+    "n.module_explaination": "该合并模块统一封装了限时促销（秒杀）活动及其时间场次相关的数据模型，方便系统对秒杀活动的基本信息、时间段、启用状态等进行统一管理与调度，提升促销活动业务模块的整体可维护性和扩展能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18494\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"234\"}",
+      "{\"nodeId\": \"236\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18491,
+    "n.name": "FlashPromotionRelationAndLogModels",
+    "n.module_explaination": "该合并模块统一封装了限时促销（秒杀）活动中的商品关联关系及操作日志数据模型，便于系统统一管理促销商品的分配、库存、价格、限购等规则以及用户订阅、消息发送等日志记录，提升限时促销业务模块的数据一致性和追溯性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18494\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"289\"}",
+      "{\"nodeId\": \"195\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18492,
+    "n.name": "CmsContentAndCommentModels",
+    "n.module_explaination": "该合并模块统一封装了内容管理系统中的内容偏好区域和评论数据模型，便于系统统一管理内容发布、区域展示与评论互动，提升内容管理模块的业务一致性和维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18493\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"190\"}",
+      "{\"nodeId\": \"201\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18493,
+    "n.name": "CmsContentAndCommentDomainModels",
+    "n.module_explaination": "该合并模块统一封装了内容管理系统的核心数据模型，包括帮助、专题、话题、评论、内容偏好区域等，通过合并管理，便于系统统一实现内容发布、分类、评论互动、区域展示等功能，提升内容管理的整体效率、一致性和维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18485\"}",
+      "{\"nodeId\": \"18492\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18494,
+    "n.name": "FlashPromotionFullDomainModels",
+    "n.module_explaination": "该合并模块统一封装了限时促销（秒杀）活动及其全部相关数据模型，包括基础信息、时间场次、商品关联、库存、价格、限购规则以及操作日志、用户订阅等。通过合并管理，便于促销活动全流程的统一运维、规则配置和数据追溯，提升促销业务模块的可扩展性和维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18490\"}",
+      "{\"nodeId\": \"18491\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18495,
+    "n.name": "GenericEntityExampleQueryBuilder",
+    "n.module_explaination": "该模块整合并通用化了各业务实体的 Example 动态查询条件辅助类，支持针对不同数据库表以配置化方式灵活构建 SQL 查询条件、排序和去重等。通过统一条件拼接、分组、AND/OR 逻辑管理，避免重复代码，大幅提升各实体动态查询的开发效率和可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18496\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18477\"}",
+      "{\"nodeId\": \"18476\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18496,
+    "n.name": "mall-mbg/src/main/java/com/macro/mall/model/",
+    "n.module_explaination": "这些合并模块统一封装和管理了电商系统各核心业务领域的数据模型及其关联关系，旨在提升数据结构的标准化、业务逻辑的集中处理和系统的可扩展性。通过对商品、订单、会员、权限、促销、内容等主要业务线的模型整合，系统能够更高效地支持复杂业务流程、灵活应对多变的业务需求，并大幅简化维护与开发工作量。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18499\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18483\"}",
+      "{\"nodeId\": \"18486\"}",
+      "{\"nodeId\": \"18495\"}",
+      "{\"nodeId\": \"18482\"}",
+      "{\"nodeId\": \"18487\"}",
+      "{\"nodeId\": \"18493\"}",
+      "{\"nodeId\": \"18478\"}",
+      "{\"nodeId\": \"18484\"}",
+      "{\"nodeId\": \"18494\"}",
+      "{\"nodeId\": \"18481\"}",
+      "{\"nodeId\": \"18488\"}",
+      "{\"nodeId\": \"18480\"}",
+      "{\"nodeId\": \"18479\"}",
+      "{\"nodeId\": \"18489\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18497,
+    "n.name": "mall-mbg/src/main/java/com/macro/mall/mapper/",
+    "n.module_explaination": "本组包含所有基于MyBatis框架的标准实体CRUD操作Mapper接口，统一负责实体对象与数据库表之间的增删改查（包括基于主键和条件的批量/单条操作、BLOB字段处理、动态SQL、选择性更新等），通过接口抽象实现持久层与业务逻辑层解耦，规范和简化数据访问，提升开发效率和代码维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18499\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"97\"}",
+      "{\"nodeId\": \"89\"}",
+      "{\"nodeId\": \"165\"}",
+      "{\"nodeId\": \"111\"}",
+      "{\"nodeId\": \"104\"}",
+      "{\"nodeId\": \"86\"}",
+      "{\"nodeId\": \"131\"}",
+      "{\"nodeId\": \"143\"}",
+      "{\"nodeId\": \"134\"}",
+      "{\"nodeId\": \"137\"}",
+      "{\"nodeId\": \"94\"}",
+      "{\"nodeId\": \"100\"}",
+      "{\"nodeId\": \"148\"}",
+      "{\"nodeId\": \"123\"}",
+      "{\"nodeId\": \"164\"}",
+      "{\"nodeId\": \"110\"}",
+      "{\"nodeId\": \"126\"}",
+      "{\"nodeId\": \"124\"}",
+      "{\"nodeId\": \"115\"}",
+      "{\"nodeId\": \"156\"}",
+      "{\"nodeId\": \"95\"}",
+      "{\"nodeId\": \"140\"}",
+      "{\"nodeId\": \"93\"}",
+      "{\"nodeId\": \"119\"}",
+      "{\"nodeId\": \"96\"}",
+      "{\"nodeId\": \"129\"}",
+      "{\"nodeId\": \"85\"}",
+      "{\"nodeId\": \"99\"}",
+      "{\"nodeId\": \"145\"}",
+      "{\"nodeId\": \"135\"}",
+      "{\"nodeId\": \"109\"}",
+      "{\"nodeId\": \"125\"}",
+      "{\"nodeId\": \"120\"}",
+      "{\"nodeId\": \"107\"}",
+      "{\"nodeId\": \"92\"}",
+      "{\"nodeId\": \"87\"}",
+      "{\"nodeId\": \"128\"}",
+      "{\"nodeId\": \"103\"}",
+      "{\"nodeId\": \"155\"}",
+      "{\"nodeId\": \"151\"}",
+      "{\"nodeId\": \"159\"}",
+      "{\"nodeId\": \"101\"}",
+      "{\"nodeId\": \"158\"}",
+      "{\"nodeId\": \"102\"}",
+      "{\"nodeId\": \"157\"}",
+      "{\"nodeId\": \"144\"}",
+      "{\"nodeId\": \"130\"}",
+      "{\"nodeId\": \"167\"}",
+      "{\"nodeId\": \"127\"}",
+      "{\"nodeId\": \"113\"}",
+      "{\"nodeId\": \"122\"}",
+      "{\"nodeId\": \"147\"}",
+      "{\"nodeId\": \"152\"}",
+      "{\"nodeId\": \"88\"}",
+      "{\"nodeId\": \"132\"}",
+      "{\"nodeId\": \"117\"}",
+      "{\"nodeId\": \"118\"}",
+      "{\"nodeId\": \"139\"}",
+      "{\"nodeId\": \"91\"}",
+      "{\"nodeId\": \"149\"}",
+      "{\"nodeId\": \"150\"}",
+      "{\"nodeId\": \"142\"}",
+      "{\"nodeId\": \"98\"}",
+      "{\"nodeId\": \"90\"}",
+      "{\"nodeId\": \"108\"}",
+      "{\"nodeId\": \"138\"}",
+      "{\"nodeId\": \"121\"}",
+      "{\"nodeId\": \"105\"}",
+      "{\"nodeId\": \"136\"}",
+      "{\"nodeId\": \"166\"}",
+      "{\"nodeId\": \"114\"}",
+      "{\"nodeId\": \"141\"}",
+      "{\"nodeId\": \"133\"}",
+      "{\"nodeId\": \"163\"}",
+      "{\"nodeId\": \"112\"}",
+      "{\"nodeId\": \"106\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18498,
+    "n.name": "MyBatisCodegenWithSwaggerSupport",
+    "n.module_explaination": "本模块统一封装了MyBatis自动代码生成相关的核心功能，包括自定义注释生成（支持基于数据库字段备注自动添加Swagger注解）以及代码生成工具入口。通过整合注释增强与代码生成流程，简化了基于数据库表结构的实体、Mapper、映射文件等的自动生成，并实现了接口文档与实体类的无缝集成，极大提升开发效率与文档质量。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18499\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"83\"}",
+      "{\"nodeId\": \"84\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18499,
+    "n.name": "mall-mbg/src/main/java/com/macro/mall/",
+    "n.module_explaination": "这些模块共同致力于实现电商系统核心数据模型的标准化管理、高效的数据访问操作以及自动化的代码与文档生成，从而提升系统的开发效率、可维护性和灵活应对复杂业务变化的能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18549\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18497\"}",
+      "{\"nodeId\": \"18496\"}",
+      "{\"nodeId\": \"18498\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18500,
+    "n.name": "mall-demo/src/main/java/com/macro/mall/demo/config/",
+    "n.module_explaination": "该模块统一管理Spring Boot项目中与MyBatis、Spring Security、RestTemplate和Swagger相关的核心配置，通过集中配置的方式简化各大框架与Spring的集成，提升项目的可维护性、模块化和扩展性。适用于需要对应用框架进行统一配置和管理的场景。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18504\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"471\"}",
+      "{\"nodeId\": \"470\"}",
+      "{\"nodeId\": \"324\"}",
+      "{\"nodeId\": \"472\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18501,
+    "n.name": "mall-demo/src/main/java/com/macro/mall/demo/service/",
+    "n.module_explaination": "该模块将品牌（PmsBrand）相关的业务服务接口及其具体实现逻辑整合在一起，统一管理品牌的增删改查操作，实现服务层的抽象与具体执行。通过接口与实现的合并，便于品牌业务逻辑的集中维护、复用和扩展，提升了模块化和系统解耦性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18504\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"476\"}",
+      "{\"nodeId\": \"477\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18502,
+    "n.name": "mall-demo/src/main/java/com/macro/mall/demo/validator/",
+    "n.module_explaination": "该模块集成了自定义状态标记校验注解及其对应的校验器实现，统一用于对业务模型中状态标记字段的合规性校验，确保数据有效性与一致性，便于在Spring等框架中复用和维护。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18504\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"463\"}",
+      "{\"nodeId\": \"451\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18503,
+    "n.name": "mall-demo/src/main/java/com/macro/mall/demo/controller/",
+    "n.module_explaination": "该模块合并了所有Spring MVC控制器的演示代码，集中展示了多种RESTful接口的实现与调用方式，包括品牌管理相关的增删改查接口及通过RestTemplate实现的远程服务调用接口。统一封装请求处理、响应结果及接口文档注解，便于开发者学习和复用典型REST接口开发模式，并提升代码模块化和维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18504\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"473\"}",
+      "{\"nodeId\": \"474\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18504,
+    "n.name": "mall-demo/src/main/java/com/macro/mall/demo/",
+    "n.module_explaination": "这些模块共同致力于构建一个结构清晰、分层合理的Spring Boot电商演示应用，通过统一的入口类、集中配置、分层业务与数据管理、认证授权支持及高内聚的接口实现，实现了应用的快速启动、功能模块的灵活扩展和核心业务的高效维护。同时，模块间通过解耦和数据校验等手段，提升了系统的可维护性、安全性和健壮性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18505\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"457\"}",
+      "{\"nodeId\": \"475\"}",
+      "{\"nodeId\": \"469\"}",
+      "{\"nodeId\": \"18501\"}",
+      "{\"nodeId\": \"18500\"}",
+      "{\"nodeId\": \"18502\"}",
+      "{\"nodeId\": \"18503\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18505,
+    "n.name": "mall-demo/src/",
+    "n.module_explaination": "这些模块协同构建了一个分层清晰、易于维护和扩展的Spring Boot电商演示应用，涵盖了应用的核心功能实现、集中配置管理及基础测试保障，确保系统具备良好的启动性能、安全性和日志可观测性，为后续开发和运维提供了坚实基础。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18549\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"468\"}",
+      "{\"nodeId\": \"18504\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18506,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/repository/",
+    "n.module_explaination": "该模块聚合了会员商品浏览历史、品牌关注、商品收藏等会员行为相关的MongoDB数据访问接口。通过统一的Repository接口，提供对不同会员行为数据的增删查改、分页查询和批量操作，简化数据访问逻辑，提升开发和维护效率，适用于所有与会员行为相关的数据持久化需求。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18533\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"494\"}",
+      "{\"nodeId\": \"495\"}",
+      "{\"nodeId\": \"496\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18507,
+    "n.name": "MemberBehaviorMongoModels",
+    "n.module_explaination": "该合并模块集成了会员行为相关的MongoDB领域模型，包括会员商品浏览历史、品牌关注和商品收藏等数据结构。通过统一封装会员行为数据，便于行为分析、个性化推荐和高效的数据检索与管理，提升系统的扩展性和维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18512\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"499\"}",
+      "{\"nodeId\": \"513\"}",
+      "{\"nodeId\": \"504\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18508,
+    "n.name": "HomePageContentDomainModels",
+    "n.module_explaination": "该合并模块面向商城门户首页内容的数据模型，统一封装首页所需的各类内容数据（包括轮播、品牌、专题、秒杀活动等）。通过整合首页内容和秒杀活动相关结构，提升前后端数据交互的统一性和首页内容管理的灵活性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18512\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"487\"}",
+      "{\"nodeId\": \"500\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18509,
+    "n.name": "CartProductPromotionDomainModels",
+    "n.module_explaination": "该合并模块涵盖购物车商品及其促销信息的数据模型，既包含商品详细属性和库存，又整合了促销活动相关字段。统一管理购物车商品和促销业务模型，方便促销展示、优惠计算和库存核查，提升购物车数据结构的完整性和业务扩展能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18512\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"502\"}",
+      "{\"nodeId\": \"515\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18510,
+    "n.name": "PromotionProductDomainModels",
+    "n.module_explaination": "该合并模块统一封装商城中各类促销商品的数据结构，包括秒杀商品和一般促销商品模型。通过继承基础商品并扩展促销相关字段，为各类促销活动提供统一的数据支撑和业务处理能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18512\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"498\"}",
+      "{\"nodeId\": \"514\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18511,
+    "n.name": "OrderDomainModels",
+    "n.module_explaination": "该合并模块统一封装商城门户系统中订单相关的核心领域数据模型，包括订单详情、订单确认结果、下单参数、退货申请参数等。通过集中管理订单业务各环节所需的数据结构，提升订单处理、展示及业务逻辑的协同效率，便于前后端数据交互的标准化和后续功能扩展。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18512\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"497\"}",
+      "{\"nodeId\": \"510\"}",
+      "{\"nodeId\": \"509\"}",
+      "{\"nodeId\": \"505\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18512,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/domain/",
+    "n.module_explaination": "这些模块共同致力于为商城门户系统构建和封装各类核心领域模型，包括商品、促销、订单、会员、支付、消息队列等业务数据结构，通过标准化和聚合相关业务对象，提升前后端交互的一致性、业务处理的高效性以及系统的可维护性和扩展能力。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18533\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"507\"}",
+      "{\"nodeId\": \"508\"}",
+      "{\"nodeId\": \"506\"}",
+      "{\"nodeId\": \"512\"}",
+      "{\"nodeId\": \"511\"}",
+      "{\"nodeId\": \"501\"}",
+      "{\"nodeId\": \"18510\"}",
+      "{\"nodeId\": \"18508\"}",
+      "{\"nodeId\": \"18509\"}",
+      "{\"nodeId\": \"18507\"}",
+      "{\"nodeId\": \"18511\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18513,
+    "n.name": "AlipayIntegrationConfig",
+    "n.module_explaination": "本配置类统一管理支付宝相关的配置参数（如网关地址、应用ID、密钥等），并基于这些参数创建AlipayClient客户端Bean，服务于支付模块的支付宝功能。通过Spring的依赖注入机制，实现参数与客户端实例的解耦，提升配置灵活性及代码可维护性，满足不同环境下的支付宝服务集成需求。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18515\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"520\"}",
+      "{\"nodeId\": \"522\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18514,
+    "n.name": "MallPortalGlobalSpringConfig",
+    "n.module_explaination": "该模块统一整合mall-portal模块下的所有全局Spring配置类，包括MyBatis、RabbitMQ、Spring Security、CORS、Jackson、Swagger和定时任务等相关配置。通过集中管理各类配置Bean和注解，实现数据库持久化、消息队列、认证安全、跨域访问、JSON序列化、API文档生成与调度任务等功能的统一集成和配置，提升系统的模块化、可维护性与开发效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18515\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"518\"}",
+      "{\"nodeId\": \"503\"}",
+      "{\"nodeId\": \"519\"}",
+      "{\"nodeId\": \"524\"}",
+      "{\"nodeId\": \"517\"}",
+      "{\"nodeId\": \"523\"}",
+      "{\"nodeId\": \"521\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18515,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/config/",
+    "n.module_explaination": "这些模块旨在通过集中管理和整合关键配置参数及全局配置类，提升系统各项服务（如支付、消息队列、安全、定时任务等）的灵活集成与可维护性，实现不同环境下的高效配置与依赖解耦，促进系统整体的模块化与开发效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18533\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18513\"}",
+      "{\"nodeId\": \"18514\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18516,
+    "n.name": "MemberPortalAggregateController",
+    "n.module_explaination": "该模块整合了会员相关的所有RESTful控制器，包括会员信息、收货地址、优惠券、浏览历史、品牌关注和商品收藏等功能。统一对外提供会员操作的API接口，规范接口风格，便于前后端协作和系统维护。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18519\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"540\"}",
+      "{\"nodeId\": \"532\"}",
+      "{\"nodeId\": \"539\"}",
+      "{\"nodeId\": \"529\"}",
+      "{\"nodeId\": \"533\"}",
+      "{\"nodeId\": \"537\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18517,
+    "n.name": "OrderAndCartPortalController",
+    "n.module_explaination": "该模块整合了订单和购物车相关的RESTful接口，包括订单管理、购物车操作以及订单退货申请等功能，实现订单业务全流程的统一入口，提升系统的一致性和模块化。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18519\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"535\"}",
+      "{\"nodeId\": \"530\"}",
+      "{\"nodeId\": \"536\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18518,
+    "n.name": "PortalDisplayAggregateController",
+    "n.module_explaination": "该模块聚合了首页内容、品牌展示和商品管理等门户展示相关的RESTful接口，统一面向前端或客户端提供门户展示数据服务，方便数据整合和页面开发。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18519\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"528\"}",
+      "{\"nodeId\": \"538\"}",
+      "{\"nodeId\": \"534\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18519,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/controller/",
+    "n.module_explaination": "这些模块共同致力于为商城门户系统提供统一、标准化的对外RESTful接口，分别聚焦于支付、会员、订单购物车和门户展示等核心业务的分层管理与整合。通过接口聚合与职责分离，提升了系统的可维护性、一致性和模块化，便于前后端协作和功能扩展。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18533\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"531\"}",
+      "{\"nodeId\": \"18518\"}",
+      "{\"nodeId\": \"18517\"}",
+      "{\"nodeId\": \"18516\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18520,
+    "n.name": "PortalOrderAndCartAggregateDao",
+    "n.module_explaination": "该接口聚合了前台订单管理、订单商品批量操作、购物车商品数据访问及会员优惠券领取记录管理等核心数据访问功能。通过统一的DAO接口，能高效支持商城前台订单流转、购物车管理、商品促销信息和优惠券历史等业务场景的数据查询与持久化操作，便于维护和扩展核心业务的数据层逻辑。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18521\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"560\"}",
+      "{\"nodeId\": \"559\"}",
+      "{\"nodeId\": \"558\"}",
+      "{\"nodeId\": \"561\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18521,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/dao/",
+    "n.module_explaination": "这些模块共同致力于为商城前台系统提供统一、高效的数据访问层，涵盖首页内容、订单、购物车及促销等核心业务的数据查询与管理，通过接口抽象实现业务逻辑与数据持久化操作的解耦，提升系统的可维护性和扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18533\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"562\"}",
+      "{\"nodeId\": \"18520\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18522,
+    "n.name": "MemberBehaviorDataServiceImpl",
+    "n.module_explaination": "该合并模块专注于管理会员的各类行为数据，包括品牌关注、商品浏览历史及商品收藏功能。通过统一的业务逻辑实现会员行为数据的增删查清，依赖当前登录会员身份，支持MongoDB及关系型数据库的数据存取，便于集中维护和扩展会员行为相关功能，提升用户体验和系统数据一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18526\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"564\"}",
+      "{\"nodeId\": \"571\"}",
+      "{\"nodeId\": \"573\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18523,
+    "n.name": "PortalMemberDomainServiceImpl",
+    "n.module_explaination": "该合并模块负责商城门户前台会员领域的核心业务逻辑实现，包括会员账户管理、会员收货地址、会员数据缓存、会员优惠券等功能。通过集中封装和管理会员相关的业务操作，提升系统的可维护性和扩展性，确保会员数据一致性和安全性，优化用户体验。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18526\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"566\"}",
+      "{\"nodeId\": \"572\"}",
+      "{\"nodeId\": \"565\"}",
+      "{\"nodeId\": \"556\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18524,
+    "n.name": "PortalOrderAndPromotionServiceImpl",
+    "n.module_explaination": "该合并模块集中实现了商城门户前台的订单全生命周期管理、购物车业务、促销优惠计算及订单退货申请等核心服务。通过统一整合订单与促销相关的业务逻辑，简化接口调用，提升订单处理流程的完整性、灵活性和系统维护效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18526\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"575\"}",
+      "{\"nodeId\": \"568\"}",
+      "{\"nodeId\": \"569\"}",
+      "{\"nodeId\": \"574\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18525,
+    "n.name": "PortalContentAndProductServiceImpl",
+    "n.module_explaination": "该合并模块负责商城门户前台商品管理、品牌管理及首页内容展示相关的全部核心业务逻辑。通过集中处理商品检索、品牌推荐、首页内容聚合等服务，优化前端内容渲染效率，提升系统的业务扩展能力和用户体验。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18526\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"567\"}",
+      "{\"nodeId\": \"570\"}",
+      "{\"nodeId\": \"557\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18526,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/",
+    "n.module_explaination": "这些模块共同致力于实现和完善商城门户前台的核心业务，包括会员管理、支付、订单、促销、内容与商品等主要功能，旨在通过业务逻辑的集中封装提升系统的可维护性、安全性和扩展性，并优化用户体验和数据一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18531\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"563\"}",
+      "{\"nodeId\": \"18523\"}",
+      "{\"nodeId\": \"18525\"}",
+      "{\"nodeId\": \"18522\"}",
+      "{\"nodeId\": \"18524\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18527,
+    "n.name": "MemberPersonalizationService",
+    "n.module_explaination": "该服务统一管理会员个性化行为数据，包括浏览历史、商品收藏以及品牌关注等。通过提供统一的增删查改与清空接口，方便系统对会员相关个性化数据进行集中管理，实现个性化推荐、兴趣分析和会员行为追踪等功能，提升会员体验和业务数据价值。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18531\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"546\"}",
+      "{\"nodeId\": \"547\"}",
+      "{\"nodeId\": \"549\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18528,
+    "n.name": "MemberCoreService",
+    "n.module_explaination": "该服务聚合了会员账户的核心业务逻辑，包括会员基本信息管理、收货地址管理、优惠券管理和会员缓存等功能，为门户系统提供统一、完整且高效的会员服务抽象接口，支持会员数据的全生命周期管理和高效访问，提升系统的模块聚合度和维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18531\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"545\"}",
+      "{\"nodeId\": \"543\"}",
+      "{\"nodeId\": \"548\"}",
+      "{\"nodeId\": \"555\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18529,
+    "n.name": "PortalOrderAndReturnService",
+    "n.module_explaination": "该服务统一抽象门户订单全生命周期管理及订单退货管理相关业务逻辑，涵盖订单创建、支付、取消、确认收货、查询、删除和退货申请等功能，为前端系统提供一站式订单操作接口，简化业务调用并提升维护性和扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18531\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"542\"}",
+      "{\"nodeId\": \"541\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18530,
+    "n.name": "CartAndPromotionService",
+    "n.module_explaination": "该服务整合了购物车商品管理与购物车促销计算相关的所有业务逻辑，包括商品的增删改查、促销信息计算等，为前端提供一体化的购物车及促销操作接口，简化购物车与促销业务的整合和维护。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18531\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"553\"}",
+      "{\"nodeId\": \"544\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18531,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/service/",
+    "n.module_explaination": "这些模块共同致力于为商城门户前台提供核心业务能力的服务抽象与实现，涵盖品牌、商品、会员、订单、支付、内容及促销等主要领域，通过接口和模块化设计实现前后端解耦、业务逻辑集中封装与统一对外服务，提升系统的可维护性、可扩展性和前端数据交互的一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18533\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"554\"}",
+      "{\"nodeId\": \"550\"}",
+      "{\"nodeId\": \"552\"}",
+      "{\"nodeId\": \"551\"}",
+      "{\"nodeId\": \"18529\"}",
+      "{\"nodeId\": \"18527\"}",
+      "{\"nodeId\": \"18526\"}",
+      "{\"nodeId\": \"18528\"}",
+      "{\"nodeId\": \"18530\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18532,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/component/",
+    "n.module_explaination": "该组件整合了订单自动取消相关的所有处理逻辑，包括订单取消消息的延迟发送、RabbitMQ队列的异步监听与处理、以及定时扫描超时未支付订单并自动取消。通过统一管理订单取消的发送、接收与超时处理，提升系统的异步处理能力、库存管理效率和业务流程自动化程度。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18533\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"526\"}",
+      "{\"nodeId\": \"525\"}",
+      "{\"nodeId\": \"527\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18533,
+    "n.name": "mall-portal/src/main/java/com/macro/mall/portal/",
+    "n.module_explaination": "这些模块共同构建了商城门户系统的核心架构，涵盖了应用启动、配置管理、领域模型、数据访问、业务服务、接口暴露和异步处理等关键层次。它们通过分层与模块化设计，实现了系统的高内聚、低耦合，提升了开发效率、可维护性和业务扩展能力，确保前后端协作和各类业务流程能够高效、灵活地运行。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18535\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"493\"}",
+      "{\"nodeId\": \"516\"}",
+      "{\"nodeId\": \"18506\"}",
+      "{\"nodeId\": \"18521\"}",
+      "{\"nodeId\": \"18515\"}",
+      "{\"nodeId\": \"18531\"}",
+      "{\"nodeId\": \"18512\"}",
+      "{\"nodeId\": \"18519\"}",
+      "{\"nodeId\": \"18532\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18534,
+    "n.name": "mall-portal/src/test/java/com/macro/mall/portal/",
+    "n.module_explaination": "这些模块主要负责通过自动化测试确保Spring Boot应用能够正常启动及其关键的数据访问逻辑能够正确执行，从而保障系统的基础稳定性和核心业务功能的可靠性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18535\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"491\"}",
+      "{\"nodeId\": \"492\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18535,
+    "n.name": "mall-portal/src/",
+    "n.module_explaination": "这些模块共同构成了商城门户系统的核心基础，涵盖应用架构设计、业务逻辑实现及自动化测试，旨在确保系统高效运行、易于维护并具备良好的可扩展性和稳定性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18549\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18533\"}",
+      "{\"nodeId\": \"18534\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18536,
+    "n.name": "mall-search/src/main/java/com/macro/mall/search/service/",
+    "n.module_explaination": "本模块整合了商品搜索相关的接口定义与基于Elasticsearch的具体实现，涵盖商品数据与Elasticsearch索引的同步管理、批量导入/删除、复杂条件分页搜索、推荐与信息聚合等功能，实现了高效、灵活且可扩展的商品搜索服务。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18540\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"488\"}",
+      "{\"nodeId\": \"490\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18537,
+    "n.name": "mall-search/src/main/java/com/macro/mall/search/domain/",
+    "n.module_explaination": "该模块统一封装商品搜索系统中涉及的商品主实体、商品关联信息（如品牌、分类、属性）以及商品属性值的数据结构，为基于Elasticsearch的商品检索、聚合、过滤等功能提供结构化数据支持，实现高效、灵活的搜索业务需求。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18540\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"482\"}",
+      "{\"nodeId\": \"483\"}",
+      "{\"nodeId\": \"481\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18538,
+    "n.name": "mall-search/src/main/java/com/macro/mall/search/config/",
+    "n.module_explaination": "本模块统一管理mall-search子系统中与第三方框架（如MyBatis、Swagger）集成相关的Spring配置，集中配置Mapper扫描路径、API文档生成等功能，提升配置一致性和系统可维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18540\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"484\"}",
+      "{\"nodeId\": \"485\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18539,
+    "n.name": "EsProductElasticsearchDataAccess",
+    "n.module_explaination": "本模块整合了所有商品与Elasticsearch索引间的数据访问能力，包括基于Spring Data Elasticsearch的自动化Repository接口以及自定义DAO接口，统一为上层业务提供商品的索引增删查改、条件搜索和数据同步等功能，提升搜索模块数据层的可维护性与扩展性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18540\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"489\"}",
+      "{\"nodeId\": \"480\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18540,
+    "n.name": "mall-search/src/main/java/com/macro/mall/search/",
+    "n.module_explaination": "这些模块共同致力于实现高效、灵活且可扩展的商品搜索服务，通过整合Spring Boot、Elasticsearch等技术，涵盖商品数据结构封装、搜索业务逻辑、数据访问、接口暴露及系统配置等全流程，保障商品搜索功能的完整性、易用性和系统间协同。整体设计注重模块解耦、职责清晰，便于维护和扩展。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18541\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"479\"}",
+      "{\"nodeId\": \"486\"}",
+      "{\"nodeId\": \"18537\"}",
+      "{\"nodeId\": \"18538\"}",
+      "{\"nodeId\": \"18539\"}",
+      "{\"nodeId\": \"18536\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18541,
+    "n.name": "mall-search/src/",
+    "n.module_explaination": "这些模块围绕商品搜索服务的实现与保障展开，采用Spring Boot与Elasticsearch等技术，涵盖搜索相关的业务逻辑、数据结构、数据访问以及系统测试，确保商品搜索功能的高效性、准确性与可维护性，并通过单元测试验证系统集成的稳定性和一致性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18549\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"478\"}",
+      "{\"nodeId\": \"18540\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18542,
+    "n.name": "mall-security/src/main/java/com/macro/mall/security/util/",
+    "n.module_explaination": "这些模块共同致力于为系统的安全管理提供基础支持，通过工具类的方式简化了对Spring容器Bean的获取以及JWT令牌的生成、验证和管理流程，从而提升了系统安全性、灵活性和开发效率。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18548\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"69\"}",
+      "{\"nodeId\": \"68\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18543,
+    "n.name": "DynamicSecurityAuthorizationBundle",
+    "n.module_explaination": "该模块整合了动态权限决策管理器、动态权限过滤器、权限元数据加载器以及动态权限服务接口，旨在为系统提供完整的基于Spring Security的动态权限控制能力。通过对HTTP请求路径进行动态权限校验、实时加载和管理权限规则，并结合灵活可扩展的权限数据服务，实现权限决策、过滤和加载的全链路无缝集成，满足复杂业务场景下权限频繁变更和动态授权的需求，有效提升系统安全性、灵活性和易维护性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18545\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"76\"}",
+      "{\"nodeId\": \"77\"}",
+      "{\"nodeId\": \"75\"}",
+      "{\"nodeId\": \"79\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18544,
+    "n.name": "RestfulSecurityExceptionHandlers",
+    "n.module_explaination": "该模块整合了Spring Security的访问拒绝处理器和认证入口处理器，统一处理无权限（403）和未认证/Token失效（401）等安全异常场景，返回RESTful风格的JSON格式错误响应。通过自定义响应内容和HTTP状态码，提升前后端分离系统下的异常处理一致性和用户体验，并支持跨域访问和安全性保障，便于前端统一处理和展示权限相关错误信息。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18545\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"80\"}",
+      "{\"nodeId\": \"81\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18545,
+    "n.name": "mall-security/src/main/java/com/macro/mall/security/component/",
+    "n.module_explaination": "这些模块协同构建了基于Spring Security的安全认证与权限控制体系，通过JWT令牌实现无状态身份认证，动态管理和校验权限规则，并对安全相关异常进行统一RESTful响应处理，从而提升系统的安全性、灵活性和前后端交互体验，满足分布式及复杂业务场景下的安全需求。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18548\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"78\"}",
+      "{\"nodeId\": \"18544\"}",
+      "{\"nodeId\": \"18543\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18546,
+    "n.name": "mall-security/src/main/java/com/macro/mall/security/config/",
+    "n.module_explaination": "合并后的模块涵盖Spring Security通用配置、安全策略、免认证URL白名单、以及Redis缓存集成等所有安全相关的核心配置。该模块统一管理安全组件Bean的定义与注册，实现JWT无状态认证、动态权限、异常处理、忽略路径和缓存配置的集中设置，提升安全配置的灵活性、可维护性和系统性能，有效支撑项目的完整安全框架。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18548\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"72\"}",
+      "{\"nodeId\": \"70\"}",
+      "{\"nodeId\": \"73\"}",
+      "{\"nodeId\": \"71\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18547,
+    "n.name": "CacheExceptionHandlingModule",
+    "n.module_explaination": "该模块集成了缓存操作中异常标记（@CacheException注解）与统一异常拦截处理（RedisCacheAspect切面），实现了对缓存相关方法的异常识别、捕获及特定处理机制，提升系统在缓存服务异常场景下的稳定性和灵活性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18548\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"82\"}",
+      "{\"nodeId\": \"67\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18548,
+    "n.name": "mall-security/src/main/java/com/macro/mall/security/",
+    "n.module_explaination": "这些模块共同构建了系统的安全与缓存管理基础框架，涵盖了安全认证、权限控制、异常处理、配置管理以及缓存异常监控等核心职责，通过整合Spring Security与Redis相关机制，有效提升了系统的安全性、灵活性和稳定性。",
+    "n.parent_blocks": [
+      "{\"nodeId\": \"18549\"}"
+    ],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18546\"}",
+      "{\"nodeId\": \"18545\"}",
+      "{\"nodeId\": \"18542\"}",
+      "{\"nodeId\": \"18547\"}"
+    ]
+  },
+  {
+    "n.nodeId": 18549,
+    "n.name": "root",
+    "n.module_explaination": "这些根模块共同构建了一个分层、模块化的电商系统基础设施，涵盖了后台管理、门户、搜索、安全、公共组件等核心领域，通过标准化的数据访问、安全认证、配置管理和自动化测试，提升了系统的可维护性、扩展性与稳定性，支持高效开发与企业级应用需求。",
+    "n.parent_blocks": [],
+    "n.child_blocks": [
+      "{\"nodeId\": \"18499\"}",
+      "{\"nodeId\": \"18548\"}",
+      "{\"nodeId\": \"18505\"}",
+      "{\"nodeId\": \"18541\"}",
+      "{\"nodeId\": \"18475\"}",
+      "{\"nodeId\": \"18468\"}",
+      "{\"nodeId\": \"18535\"}"
+    ]
+  }
+]

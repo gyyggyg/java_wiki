@@ -105,14 +105,12 @@ FETCH_BLOCK1_PROMPT = PromptTemplate(
 【输入信息说明】
 1. **query**: 用户的查询问题或需求。
 2. **relation**: 展示了前三层Block的父子关系，格式为 `father_id : child_id_list`。这表示某个父Block节点包含哪些子Block节点。
-   **注意**：这里只包含前三层Block的层级关系（root层、第一层、第二层）。
-3. **all_information**: 包含前三层Block节点的详细信息，格式为 `id:{{nodeId}},name:{{name}},semantic_explanation:{{semantic_explanation}}`。
+3. **all_information**: 包含前=Block节点的详细信息，格式为 `id:{{nodeId}},name:{{name}},semantic_explanation:{{semantic_explanation}}`。
 
 【筛选规则】
 1. **理解意图**: 仔细阅读 `all_information` 中每个Block的语义解释，找出功能描述能回答 `query` 的 Block。
-2. **层级范围**: 只从前三层Block（root、第一层、第二层）中选择，不包括更深层的Block。
-3. **多选允许**: 可以选择多个相关Block节点（不唯一），只要它们的功能描述与query相关即可。
-4. **语义匹配**: 优先选择语义解释与用户query高度相关的Block节点。
+2. **多选允许**: 可以选择多个相关Block节点（不唯一）。
+3. **避免直系关系**: 当同时选中了直系父节点和子节点，则只保留父节点。
 
 【输入内容】
 用户查询 (query):
@@ -153,20 +151,14 @@ FETCH_BLOCK2_PROMPT = PromptTemplate(
 【输入信息说明】
 1. **query**: 用户的查询问题或需求。
 2. **relation**: 展示了以某个Block节点为顶点的完整子树结构，包含该子树中所有Block节点的父子关系。
-   格式示例：`下面是以id为{{nodeId}}顶点的树的信息：\nid为{{nodeId}}的节点可以划分为子节点{{child_blocks}}\n...`
-   **注意**：`relation` 描述了整个子树的结构，包括所有层级的父子关系。
 3. **all_information**: 包含子树中所有Block节点的详细信息，格式为 `id:{{nodeId}},name:{{name}},semantic_explanation:{{semantic_explanation}}`。
 
 【筛选规则】
 1. **理解意图**: 仔细阅读 `all_information` 中每个Block的语义解释，找出功能描述能回答 `query` 的 Block。
-2. **避免直系关系（关键规则）**: 
-   - 如果选择的Block中有父子关系（直系关系），**必须只保留父节点（顶层节点）**，删除子节点。
-   - 例如：如果block a有两个子block c和d，block c有子block e和f，block d有子block g和h。
-     如果模型判断应该选择block c和block e，那么block c和block e是直系关系（父子关系），
-     应该只保留顶层的block c，删除block e。
-   - 但如果选择的是block e和block h，它们不是直系关系（它们分别属于不同的分支），可以都保留。
+2. **避免直系关系（关键规则）**:
+   - 如果选择的Block中有父子关系（直系关系），**必须只保留父节点（顶层节点）**，删除子节点。。
 3. **树结构理解**: 必须理解 `relation` 中描述的树结构，识别哪些Block之间存在父子关系。
-4. **语义匹配**: 优先选择语义解释与用户query高度相关的Block节点。
+4. **允许弃选**: 如果某个Block树上的节点全部与用户query无关，可以弃选，返回空列表。
 
 【输入内容】
 用户查询 (query):
@@ -185,7 +177,7 @@ Block详细信息 (all_information):
 ```
 
 【输出要求】
-请严格按照以下JSON格式返回与query最相关的Block节点的ID列表，**不要包含任何其他解释、前言或Markdown标记**：
+请严格按照以下JSON格式返回与query相关的Block节点的ID列表，**不要包含任何其他解释、前言或Markdown标记**：
 
 {{"block_id": [nodeId1, nodeId2, ...],"reason":"选择每个nodeId对应的block节点的原因，可以多条原因，用逗号分隔。如果排除了某些直系关系的子节点，请说明原因"}}
 
@@ -193,3 +185,153 @@ Block详细信息 (all_information):
 {{"block_id": [101, 205],"reason":"选择101号block节点的原因是：101号block节点是订单提交的入口模块。选择205号block节点的原因是：205号block节点是订单提交的出口模块。未选择101的子节点103，因为103与101是直系关系，已保留父节点101"}}
 """
 )
+
+# =============================================================================
+# 3. 从下往上搜索的提示词模板
+# =============================================================================
+JUDGE_BLOOK_PROMPT = PromptTemplate(
+###初始语义筛选底层Block节点
+    input_variables=["query", "block_info","files_info"],
+    template="""
+你是一个代码分析专家。用户正在查询代码库中的相关信息。代码文件已经按照功能划分为模块，每个功能模块下包含多个文件。
+
+【用户问题】
+{query}
+
+【当前模块和其所包含文件的信息】
+- block_info: {block_info}
+- files_info: {files_info}
+
+【任务】
+判断此模块能否直接回答用户的query或者作为能回答用户query的一部分。
+
+【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+{{"relevant": "true"/"false", "reason": "说明判断理由。如果判断为true，则reason中要说明此模块如何回答用户的query或此模块可以作为回答用户query模块的子模块。如果判断为false，则reason中要说明此模块不能回答用户的query的原因。"}}
+"""
+)
+
+JUDGE_BLOCK_LEVEL_PROMPT = PromptTemplate(
+###判断取到什么层级的Block节点作为回答用户query的入口节点
+    input_variables=["query", "parent_info","select_blocks_info", "all_child_blocks_info"],
+    template="""
+你是一个代码分析专家。用户正在查询代码库中的相关信息。代码文件已经按照功能划分为模块，每个功能模块下包含多个模块。
+【任务】
+select_blocks_info是我已经确定能回答用户query的block的信息，但是我还不确定其能否作为回答用户query的入口节点。
+请你根据all_child_blocks_info里已选中节点及其兄弟的解释, 和"parent_info"其父节点的解释。
+判断作为回答用户的query入口节点，是使用已选的节点，还是使用他们的父节点。
+
+【用户问题】
+{query}
+
+【当前模块和其所包含文件的信息】
+- parent_info: {parent_info}
+- select_blocks_info: {select_blocks_info}
+- all_child_blocks_info: {all_child_blocks_info}
+
+【判断依据】
+1、如果已选中节点占父节点孩子中大多数或者全部，则使用父节点。
+2、如果未选中的兄弟节点也是设计来回答或者部分回答用户query的，则使用父节点。
+3、如果已选中节点占少数且兄弟节点和回答query基本无关，则使用已选中节点。
+
+【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+{{"judgement": "now"/"parent", "reason": "说明判断理由。now表示使用已选的节点，parent表示使用其父节点。"}}
+"""
+)
+
+# # 判断root直连File的相关性
+# JUDGE_ROOT_FILE_PROMPT = PromptTemplate(
+#     input_variables=["query", "file_info"],
+#     template="""
+# 你是一个代码分析专家。用户正在查询代码库中的相关信息。
+
+# 【用户问题】
+# {query}
+
+# 【当前文件信息】
+# - file_info: {file_info}
+
+# 【任务】
+# 判断该文件是否能够帮助回答用户的问题。
+
+# 【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+# {{"relevant": true/false, "reason": "说明判断理由"}}
+
+# 【判断标准】
+# - 文件的功能、职责是否与问题直接相关
+# - 文件中可能包含的信息是否能回答问题
+# - 保持严格标准，不确定时返回false
+# """
+# )
+
+# # 判断Block下File的相关性（Layer 0）
+# JUDGE_FILES_IN_BLOCK_PROMPT = PromptTemplate(
+#     input_variables=["query", "block_info", "files_info"],
+#     template="""
+# 你是一个代码分析专家。代码文件已经按照功能划分为模块，每个功能模块下包含多个文件。
+
+# 【用户问题】
+# {query}
+
+# 【当前模块（Block）信息】
+# - block_info: {block_info}
+
+# 【该Block下的所有文件】
+# {files_info}
+
+# 【任务】
+# 分析该Block下的所有文件，判断哪些文件能够帮助回答用户的问题。
+
+# 【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+# {{"relevant_files":[{{"id":文件id, "reason": 判断理由}},...], "irrelevant_files":[{{"id":文件id, "reason": 判断理由}},...]}}
+
+# 【判断标准】
+# 1. 考虑文件的功能、模块说明与问题的相关性
+# 2. 保持严格标准，不确定时标记为不相关，但也要给出不相关的理由
+# 3. relevant_files数组必须包含所有和query相关文件，不能遗漏
+# 4. irrelevant_files数组必须包含所有和query不相关文件，不能遗漏
+# 5. relevant_files和irrelevant_files可以为空，但是不能有交集
+
+# 【注意】
+# - id必须是整数类型
+# - reason要具体说明相关或不相关的原因
+# """
+# )
+
+# # 判断兄弟Block的相关性（Layer N）
+# JUDGE_SIBLING_BLOCKS_PROMPT = PromptTemplate(
+#     input_variables=["query", "parent_info", "known_children_info", "sibling_blocks_info"],
+#     template="""
+# 你是一个代码分析专家。用户正在查询代码库中的相关信息。代码文件已经按照功能划分为模块，每个功能模块下包含多个文件。
+
+# 【用户问题】
+# {query}
+
+# 【父Block信息】
+# - parent_info: {parent_info}
+
+# 【该父Block下已确认相关的子Block】
+# {known_children_info}
+
+# 【该父Block下所有兄弟Block信息】
+# {sibling_blocks_info}
+
+# 【任务】
+# 基于已确认相关的子Block，判断其余兄弟Block中哪些也能帮助回答用户的问题。
+
+# 【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+# {{"relevant_siblings": [{{"id": block id, "reason": 判断理由}}, ...],"irrelevant_siblings": [{{"id": block id, "reason": 判断理由}}, ...]}}
+
+# 【判断标准】
+# 1. 考虑兄弟Block与已选Block的协作关系
+# 2. 判断是否能补充回答用户问题
+# 3. 关注功能上的相关性
+# 4. relevant_siblings数组必须包含所有和query相关兄弟Block，不能遗漏
+# 5. irrelevant_siblings数组必须包含所有和query不相关兄弟Block，不能遗漏
+# 5. 功能描述可能较为模糊，你要根据提供的信息选择可能相关的所有Block，明确不相关的要排除
+
+# 【注意】
+# - nodeId必须从提供的兄弟Block中选择
+# - 可以返回空数组
+# - reason要说明该Block如何帮助回答问题
+# """
+# )

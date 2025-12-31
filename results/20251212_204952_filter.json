@@ -1,0 +1,157 @@
+{
+  "user_query": "代码库中判断用户使用的优惠券是否生效的接口有哪些?",
+  "analyzed_scopes": [
+    "多实体",
+    "子图"
+  ],
+  "base_data_file": "/home/frisk/CodeNexus/java_wiki/fy/intent_understand/../result/1212/20251212_204952_result.json",
+  "selected_expanded_queries": [
+    "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+  ],
+  "selected_file": "/home/frisk/CodeNexus/java_wiki/fy/intent_understand/../result/1212/20251212_204952_selected.json",
+  "filtered_entities": [
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:394",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/service/SmsCouponService.java",
+      "full_name": null,
+      "explanation": "该文件定义了SmsCouponService接口，作为商城管理系统中优惠券管理的核心业务服务接口，提供了优惠券的创建、删除、更新、分页查询和详情获取等方法，支持对优惠券资源的全生命周期管理。设计该接口的目的是将优惠券相关的业务逻辑进行抽象和统一管理，促进业务代码的模块化和解耦。通过接口定义，便于后续多种实现方式的替换和扩展，同时结合事务管理保证数据操作的原子性和一致性，防止优惠券数据出现异常或不一致的状态。",
+      "agg_global_rank": 5,
+      "agg_q_rank": 5,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:543",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal/src/main/java/com/macro/mall/portal/service/UmsMemberCouponService.java",
+      "full_name": null,
+      "explanation": "该文件定义了用户优惠券管理的服务接口 UmsMemberCouponService，主要负责处理用户优惠券相关的业务逻辑，包括会员添加优惠券、查询优惠券使用历史、基于购物车信息筛选可用优惠券、查询与特定商品相关的优惠券以及获取用户优惠券列表等功能。设计该接口旨在抽象和规范用户优惠券管理的业务操作，使业务逻辑与具体实现解耦，方便在项目其他模块中复用和扩展。通过定义统一的服务接口，能够支持多样化的优惠券使用场景，如购物车促销、单品优惠等，提升系统的灵活性和维护性。",
+      "agg_global_rank": 8,
+      "agg_q_rank": 8,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:422",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/dao/SmsCouponDao.java",
+      "full_name": null,
+      "explanation": "该文件定义了一个名为SmsCouponDao的接口，属于数据访问对象（DAO）层，专注于优惠券管理。接口中包含一个方法getItem，该方法接受一个优惠券ID作为参数，返回一个SmsCouponParam对象，该对象封装了优惠券的详细信息及其与商品和商品分类的绑定关系。设计该接口的目的是将优惠券相关数据访问操作抽象化，分离业务逻辑与数据持久层，便于维护和扩展。通过定义统一的查询方法getItem，可以方便地获取优惠券及其绑定信息，支持后续业务层对优惠券数据的操作和处理，提升系统的模块化和可测试性。",
+      "agg_global_rank": 1,
+      "agg_q_rank": 1,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:435",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/service/impl/SmsCouponServiceImpl.java",
+      "full_name": null,
+      "explanation": "该文件SmsCouponServiceImpl是商城管理后台中的优惠券管理服务实现类，负责实现优惠券的创建、删除、更新、分页查询和详情获取等核心业务逻辑。它通过操作优惠券实体及其与商品和商品分类的关联关系，支持优惠券的全生命周期管理，包括优惠券信息的维护和优惠券适用范围的绑定，确保优惠券能正确关联到指定商品或商品分类。设计该类的目的是将优惠券相关的业务逻辑集中管理，封装对优惠券及其关联数据的操作，保证业务流程的清晰和复用性。通过分层调用Mapper和Dao，实现数据库的增删改查操作，并通过注入不同的关联关系处理接口，实现业务粒度的解耦。该设计便于维护和扩展不同类型优惠券的管理规则，同时保障数据的一致性和完整性。",
+      "agg_global_rank": 3,
+      "agg_q_rank": 3,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:380",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "full_name": null,
+      "explanation": "该文件是商城系统中优惠券管理模块的控制器类，名为SmsCouponController。它定义了一组RESTful风格的HTTP接口，用于处理优惠券的创建、删除、更新、分页查询及单个优惠券详情获取等请求。通过注入SmsCouponService，控制器调用服务层的业务逻辑实现，完成对优惠券资源的增删改查操作，并使用CommonResult统一封装响应数据。设计该控制器的目的是将优惠券管理的业务请求与具体业务逻辑分离，遵循MVC架构模式。控制器负责接收和解析HTTP请求、参数校验（部分由框架完成）、调用业务服务以及统一格式化响应结果，提升代码的模块化和可维护性。同时，使用注解方式进行接口文档生成和请求映射，便于前后端协作和接口测试。",
+      "agg_global_rank": 10,
+      "agg_q_rank": 10,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:537",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal/src/main/java/com/macro/mall/portal/controller/UmsMemberCouponController.java",
+      "full_name": null,
+      "explanation": "该文件是一个基于Spring MVC框架的控制器类，命名为UmsMemberCouponController，位于商城门户模块中，负责处理会员优惠券相关的HTTP请求。它提供了会员领取优惠券、查询会员优惠券列表和历史记录、获取购物车相关优惠券以及根据商品ID查询优惠券的RESTful接口，是会员优惠券管理功能的入口控制层。设计该控制器的目的是将会员优惠券的相关业务请求集中管理和处理，提供清晰的API接口供前端调用，实现会员对优惠券的增删查等核心操作。通过接口划分，保证业务逻辑的分离，便于后续维护和扩展，同时利用Spring和Swagger注解实现自动文档生成和接口规范，提升开发效率和代码易用性。",
+      "agg_global_rank": 14,
+      "agg_q_rank": 14,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:565",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/UmsMemberCouponServiceImpl.java",
+      "full_name": null,
+      "explanation": "该文件UmsMemberCouponServiceImpl.java实现了会员优惠券管理服务，负责处理会员领取优惠券、查询优惠券历史、根据购物车商品筛选可用优惠券、根据商品查询相关优惠券以及会员优惠券列表查询等业务逻辑。它通过依赖多个Mapper和DAO组件操作数据库，完成优惠券的增删改查和业务规则校验。设计该类的目的是将会员优惠券相关的复杂业务逻辑集中管理，解耦控制层和数据访问层，提供面向会员的优惠券功能服务。通过实现UmsMemberCouponService接口，确保业务逻辑的规范性和可扩展性，同时利用Spring的依赖注入管理数据库操作对象，提高代码的维护性和复用性。",
+      "agg_global_rank": 4,
+      "agg_q_rank": 4,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:319",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/dto/SmsCouponParam.java",
+      "full_name": null,
+      "explanation": "该文件定义了一个名为SmsCouponParam的Java类，该类继承自基础实体类SmsCoupon，扩展了优惠券的封装信息，新增了两个字段：productRelationList和productCategoryRelationList，分别用于存储优惠券绑定的商品列表和商品分类列表。类中使用Lombok注解自动生成getter和setter方法，并通过Swagger的@ApiModelProperty注解描述字段，用于支持接口文档生成。该类的主要作用是整合优惠券基本属性与其绑定的商品及分类信息，方便在业务流程中进行优惠券管理和应用判断。设计该类的目的是为了在优惠券管理功能中统一封装优惠券的基础信息及其与商品和商品分类的绑定关系，简化数据传输和处理流程。通过继承SmsCoupon，复用已有基础属性，同时扩展绑定关系，使得优惠券的使用范围和适用对象能够被清晰地描述和管理。这种设计有利于在系统中实现优惠券与商品及分类的灵活关联，支持创建、编辑、查询和核销等多种业务场景，同时通过Swagger注解提升接口文档的可读性和维护性。",
+      "agg_global_rank": 13,
+      "agg_q_rank": 13,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:424",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/dao/SmsCouponProductRelationDao.java",
+      "full_name": null,
+      "explanation": "该文件定义了一个名为SmsCouponProductRelationDao的接口，属于数据访问层（DAO），专门用于操作优惠券与商品之间的关联关系数据。它提供了一个批量插入方法insertList，用于批量添加多个优惠券和商品的关系记录，便于高效管理优惠券覆盖的商品信息。设计该接口的目的是将优惠券与商品的关联关系操作抽象出来，解耦业务逻辑和数据访问层，提升代码的模块化和可维护性。通过批量插入方法，可以减少数据库交互次数，提高性能，适应电商平台中大量优惠券与商品关系的管理需求。",
+      "agg_global_rank": 6,
+      "agg_q_rank": 6,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:465",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/service/impl/SmsCouponHistoryServiceImpl.java",
+      "full_name": null,
+      "explanation": "该文件定义了SmsCouponHistoryServiceImpl类，是优惠券领取记录管理的服务实现类，实现了SmsCouponHistoryService接口。该类负责根据优惠券ID、使用状态和订单编号等查询条件，结合分页参数，调用MyBatis的Mapper接口进行数据库查询，返回符合条件的优惠券领取记录列表。设计该类的目的是将优惠券领取记录的业务逻辑封装在服务层，实现数据的分页查询和条件过滤，降低控制层的复杂度，同时利用MyBatis Example机制动态构造查询条件，提高查询的灵活性和代码的可维护性。通过实现接口还方便后续扩展和单元测试。",
+      "agg_global_rank": 11,
+      "agg_q_rank": 11,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    },
+    {
+      "id": "4:ef44135e-9e0e-4f46-90fd-33f57a9c7bff:431",
+      "labels": [
+        "File"
+      ],
+      "name": "mall-admin/src/main/java/com/macro/mall/dao/SmsFlashPromotionProductRelationDao.java",
+      "full_name": null,
+      "explanation": "该文件定义了一个名为SmsFlashPromotionProductRelationDao的Java接口，作为限时购商品关系管理的自定义DAO接口。接口中声明了一个方法getList，该方法通过传入限时购活动ID和限时购场次ID，查询并返回对应限时购活动场次下的所有关联商品及其详细信息，返回结果是SmsFlashPromotionProduct对象的列表。该接口的设计目的在于将限时购商品关系的数据库访问逻辑抽象成接口方法，便于通过MyBatis等ORM框架实现数据库操作的解耦和维护。通过限定活动ID和场次ID作为查询条件，可以准确地获取对应的限时购商品信息，方便后台管理系统根据活动和时间场次动态展示或管理商品，提高系统的模块化和可扩展性。",
+      "agg_global_rank": 12,
+      "agg_q_rank": 12,
+      "source_q_id": "DEV_Q2",
+      "source_q_query": "在用户提交订单或操作购物车时，系统是如何通过接口调用链完成优惠券可用性校验的？涉及到哪些服务/DAO方法的调用与数据流转？"
+    }
+  ]
+}

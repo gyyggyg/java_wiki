@@ -11,7 +11,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda
 from interfaces.llm_interface import LLMInterface          # 你自己的封装
 from interfaces.neo4j_interface import Neo4jInterface
-from chains.prompts.fin_prompt import INDIVIDUL_PROMPT   # 提示词模板
+from chains.prompts.fin_prompt import INDIVIDUL_PROMPT
+from chains.prompts.mapping_prompt import GENERATE_JSON_PROMPT   # 提示词模板
 from chains.common_chains import ChainFactory            # 简易链工厂
 from interfaces.data_master import get_file_content
 
@@ -23,11 +24,12 @@ class TrueState(TypedDict, total=False):
 
 def in_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface):
     in_chain = ChainFactory.create_generic_chain(llm_interface, INDIVIDUL_PROMPT)
+    test_chain = ChainFactory.create_generic_chain(llm_interface, GENERATE_JSON_PROMPT)
     async def generate_in(state: TrueState) -> TrueState:
-        path = "D:/langgraph/java_wiki/mall/mall"
-        file_path_list = ["mall-mbg/src/main/resources/com/macro/mall/mapper/OmsOrderMapper.xml", "mall-portal/src/main/resources/dao/PortalOrderDao.xml"]
-        file_content = get_file_content(path, file_path_list)
-        node_id = 17629
+        # path = "D:/langgraph/java_wiki/mall/mall"
+        # file_path_list = ["mall-mbg/src/main/resources/com/macro/mall/mapper/OmsOrderMapper.xml", "mall-portal/src/main/resources/dao/PortalOrderDao.xml"]
+        # file_content = get_file_content(path, file_path_list)
+        node_id_list = [345, 344]
 
         # ---- Cypher 查询 ----
         query1 = """
