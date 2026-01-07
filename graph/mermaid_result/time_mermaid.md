@@ -7,27 +7,14 @@ sequenceDiagram
     participant OmsPortalOrderService as OmsPortalOrderService
     participant OmsPortalOrderServiceImpl as OmsPortalOrderServiceImpl
 
-    AlipayController->>AlipayService: pay
-    AlipayController->>AlipayService: webPay
-    AlipayController->>AlipayService: query
-    rect rgb(240,248,255)
-        AlipayController->>AlipayService: notify
-    end
-    AlipayService->>AlipayServiceImpl: implemented_by
-    rect rgb(240,248,255)
-        AlipayService->>AlipayServiceImpl: implemented_by
-    end
-    AlipayServiceImpl->>OmsPortalOrderService: query
-    rect rgb(240,248,255)
-        AlipayServiceImpl->>OmsPortalOrderService: notify
-    end
-    OmsPortalOrderService->>OmsPortalOrderServiceImpl: implemented_by
-    rect rgb(240,248,255)
-        OmsPortalOrderService->>OmsPortalOrderServiceImpl: implemented_by
-    end
-    OmsPortalOrderServiceImpl->>OmsPortalOrderServiceImpl: paySuccessByOrderSn
-    rect rgb(240,248,255)
-        OmsPortalOrderServiceImpl->>OmsPortalOrderServiceImpl: paySuccessByOrderSn calls paySuccess
-    end
+    AlipayController->>AlipayService: pay %% AlipayController.pay
+    AlipayController->>AlipayService: webPay %% AlipayController.webPay
+    AlipayController->>AlipayService: notify %% AlipayController.notify
+    AlipayController->>AlipayService: query %% AlipayController.query
+    AlipayService-->>AlipayServiceImpl: implemented_by %% AlipayServiceImpl implements AlipayService
+    AlipayServiceImpl->>OmsPortalOrderService: query %% AlipayServiceImpl.query
+    AlipayServiceImpl->>OmsPortalOrderService: notify %% AlipayServiceImpl.notify
+    OmsPortalOrderService-->>OmsPortalOrderServiceImpl: implemented_by %% OmsPortalOrderServiceImpl implements OmsPortalOrderService
+    OmsPortalOrderServiceImpl->>OmsPortalOrderServiceImpl: paySuccessByOrderSn %% OmsPortalOrderServiceImpl.paySuccessByOrderSn
 
 ```

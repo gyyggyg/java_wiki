@@ -1,0 +1,110 @@
+{
+    "mermaid": "flowchart TD\n  direction TB\n  subgraph Initialization\n    A1[\"购物车分组与促销信息准备\\n(分组商品，获取促销数据)\"]\n    style A1 fill:#0af,stroke:#005b8a,stroke-width:3px\n  end\n  subgraph MainLoop\n    B1[\"遍历每个商品分组\"]\n    style B1 fill:#0af,stroke:#005b8a,stroke-width:3px\n    B2[\"判断促销类型\"]\n    style B2 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n    B3[\"单品促销\\n(为每个商品设置促销信息,计算优惠)\"]\n    style B3 fill:#0af,stroke:#005b8a,stroke-width:3px\n    B4[\"打折优惠?\\n(有适用阶梯价)\"]\n    style B4 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n    B5[\"应用阶梯折扣\\n(批量设置折扣信息)\"]\n    style B5 fill:#0af,stroke:#005b8a,stroke-width:3px\n    B6[\"无可用阶梯折扣\\n(标记无优惠)\"]\n    style B6 fill:#fbb,stroke:#f96,stroke-dasharray:5 5,stroke-width:3px\n    B7[\"满减优惠?\\n(有适用满减)\"]\n    style B7 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n    B8[\"按比例分摊满减金额\\n(设置满减促销信息)\"]\n    style B8 fill:#0af,stroke:#005b8a,stroke-width:3px\n    B9[\"无可用满减\\n(标记无优惠)\"]\n    style B9 fill:#fbb,stroke:#f96,stroke-dasharray:5 5,stroke-width:3px\n    B10[\"无促销类型\\n(标记无优惠)\"]\n    style B10 fill:#fbb,stroke:#f96,stroke-dasharray:5 5,stroke-width:3px\n  end\n  subgraph cleanup\n    C1[\"返回所有促销结果\"]\n    style C1 fill:#0af,stroke:#005b8a,stroke-width:3px\n  end\n  A1 --> B1\n  B1 --> B2\n  B2 -- \"单品促销\" --> B3\n  B2 -- \"打折优惠\" --> B4\n  B2 -- \"满减优惠\" --> B7\n  B2 -- \"无促销\" --> B10\n  B4 -- \"是\" --> B5\n  B4 -- \"否\" --> B6\n  B7 -- \"是\" --> B8\n  B7 -- \"否\" --> B9\n  B3 -- \"下一个分组\" --> B1\n  B5 -- \"下一个分组\" --> B1\n  B6 -- \"下一个分组\" --> B1\n  B8 -- \"下一个分组\" --> B1\n  B9 -- \"下一个分组\" --> B1\n  B10 -- \"下一个分组\" --> B1\n  B1 -- \"全部分组处理完毕\" --> C1\n",
+    "mapping": {
+        "A1": "8729",
+        "B1": "1367",
+        "B2": "1367",
+        "B3": "3358",
+        "B4": "3066",
+        "B5": "3066",
+        "B6": "3066",
+        "B7": "1507",
+        "B8": "1507",
+        "B9": "1507",
+        "B10": "3233",
+        "C1": "1098"
+    },
+    "id_list": [
+        {
+            "source_id": "8729",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "30-35"
+            ]
+        },
+        {
+            "source_id": "1367",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "36-40"
+            ]
+        },
+        {
+            "source_id": "1367",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "41",
+                "58",
+                "81",
+                "104"
+            ]
+        },
+        {
+            "source_id": "3358",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "41-57"
+            ]
+        },
+        {
+            "source_id": "3066",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "58",
+                "61-62",
+                "78"
+            ]
+        },
+        {
+            "source_id": "3066",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "63-77"
+            ]
+        },
+        {
+            "source_id": "3066",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "79-80"
+            ]
+        },
+        {
+            "source_id": "1507",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "81",
+                "84-85",
+                "101"
+            ]
+        },
+        {
+            "source_id": "1507",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "86-100"
+            ]
+        },
+        {
+            "source_id": "1507",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "102-103"
+            ]
+        },
+        {
+            "source_id": "3233",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "104-107"
+            ]
+        },
+        {
+            "source_id": "1098",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPromotionServiceImpl.java",
+            "lines": [
+                "109"
+            ]
+        }
+    ]
+}
