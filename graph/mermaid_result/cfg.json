@@ -1,0 +1,282 @@
+{
+    "mermaid": "flowchart TD\n    direction TB\n    subgraph Initialization\n        A1[\"生成订单流程启动\"]\n        A2[\"初始化订单商品项列表\"]\n    end\n    subgraph 校验与准备[数据校验与准备]\n        B1[\"收货地址是否填写？\"]\n        style B1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n        B2[\"收货地址缺失，终止下单\"]\n        style B2 fill:#fbb,stroke:#f96,stroke-width:2px,stroke-dasharray:5 5\n        B3[\"获取当前会员和购物车促销信息\"]\n        B4[\"生成订单商品项列表\"]\n        B5[\"校验商品库存是否充足？\"]\n        style B5 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n        B6[\"库存不足，终止下单\"]\n        style B6 fill:#fbb,stroke:#f96,stroke-width:2px,stroke-dasharray:5 5\n    end\n    subgraph 优惠处理[优惠与积分处理]\n        C1[\"选择使用优惠券？\"]\n        style C1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n        C2[\"全部商品无优惠券分摊\"]\n        C3[\"获取优惠券使用详情\"]\n        C4[\"优惠券可用？\"]\n        style C4 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n        C5[\"优惠券不可用，终止下单\"]\n        style C5 fill:#fbb,stroke:#f96,stroke-width:2px,stroke-dasharray:5 5\n        C6[\"分摊优惠券金额到商品项\"]\n        D1[\"选择使用积分？\"]\n        style D1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n        D2[\"全部商品无积分抵扣\"]\n        D3[\"计算积分抵扣金额\"]\n        D4[\"积分抵扣金额可用？\"]\n        style D4 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond\n        D5[\"积分不可用，终止下单\"]\n        style D5 fill:#fbb,stroke:#f96,stroke-width:2px,stroke-dasharray:5 5\n        D6[\"按比例分摊积分优惠至商品项\"]\n    end\n    subgraph 订单金额与锁定[金额处理与资源锁定]\n        E1[\"计算每个商品项实付金额\"]\n        E2[\"锁定商品库存\"]\n    end\n    subgraph 订单生成[订单实体生成与入库]\n        F1[\"构建订单主数据与金额字段\"]\n        F2[\"设置收货人、用户及订单状态\"]\n        F3[\"生成赠送积分、成长值及订单编号\"]\n        F4[\"设置自动确认收货天数\"]\n        F5[\"插入订单主数据\"]\n        F6[\"补全订单商品项信息\"]\n        F7[\"插入订单商品项\"]\n    end\n    subgraph 后续处理[后续操作及结果返回]\n        G1[\"如使用优惠券，更新券状态\"]\n        G2[\"如使用积分，扣减会员积分\"]\n        G3[\"删除购物车中已下单商品\"]\n        G4[\"发送订单超时取消消息\"]\n        G5[\"构建订单返回结果\"]\n    end\n    %% 控制流\n    A1 --> A2\n    A2 --> B1\n    B1 -- 否 --> B2\n    B1 -- 是 --> B3\n    B3 --> B4\n    B4 --> B5\n    B5 -- 否 --> B6\n    B5 -- 是 --> C1\n    C1 -- 否 --> C2\n    C1 -- 是 --> C3\n    C3 --> C4\n    C4 -- 否 --> C5\n    C4 -- 是 --> C6\n    C2 --> D1\n    C6 --> D1\n    D1 -- 否 --> D2\n    D1 -- 是 --> D3\n    D3 --> D4\n    D4 -- 否 --> D5\n    D4 -- 是 --> D6\n    D2 --> E1\n    D6 --> E1\n    E1 --> E2\n    E2 --> F1\n    F1 --> F2\n    F2 --> F3\n    F3 --> F4\n    F4 --> F5\n    F5 --> F6\n    F6 --> F7\n    F7 --> G1\n    G1 --> G2\n    G2 --> G3\n    G3 --> G4\n    G4 --> G5\n    %% 关键节点样式\n    style F5 fill:#0af,stroke:#014,stroke-width:3px\n    style F7 fill:#0af,stroke:#014,stroke-width:3px\n    style G5 fill:#0af,stroke:#014,stroke-width:3px\n    style E2 fill:#0af,stroke:#014,stroke-width:3px\n    style G1 fill:#0af,stroke:#014,stroke-width:3px\n    style G2 fill:#0af,stroke:#014,stroke-width:3px\n    style G3 fill:#0af,stroke:#014,stroke-width:3px\n    style G4 fill:#0af,stroke:#014,stroke-width:3px\n    style E1 fill:#0af,stroke:#014,stroke-width:3px\n    %% 线条样式\n    linkStyle default stroke-width:2px\n    %% 关键路径加粗\n    A1 --> A2:::main\n    A2 --> B1:::main\n    B1 -- 是 --> B3:::main\n    B3 --> B4:::main\n    B4 --> B5:::main\n    B5 -- 是 --> C1:::main\n    C1 -- 是 --> C3:::main\n    C3 --> C4:::main\n    C4 -- 是 --> C6:::main\n    C6 --> D1:::main\n    D1 -- 是 --> D3:::main\n    D3 --> D4:::main\n    D4 -- 是 --> D6:::main\n    D6 --> E1:::main\n    E1 --> E2:::main\n    E2 --> F1:::main\n    F1 --> F2:::main\n    F2 --> F3:::main\n    F3 --> F4:::main\n    F4 --> F5:::main\n    F5 --> F6:::main\n    F6 --> F7:::main\n    F7 --> G1:::main\n    G1 --> G2:::main\n    G2 --> G3:::main\n    G3 --> G4:::main\n    G4 --> G5:::main\n    classDef main stroke-width:3px;\n",
+    "mapping": {
+        "A1": "2309",
+        "A2": "1968",
+        "B1": "8703",
+        "B2": "8703",
+        "B3": "1702",
+        "B4": "1747",
+        "B5": "2362",
+        "B6": "2362",
+        "C1": "3629",
+        "C2": "3629",
+        "C3": "3629",
+        "C4": "3629",
+        "C5": "3629",
+        "C6": "3629",
+        "D1": "1745",
+        "D2": "1745",
+        "D3": "1745",
+        "D4": "1745",
+        "D5": "1745",
+        "D6": "1745",
+        "E1": "9780",
+        "E2": "2064",
+        "F1": "1773",
+        "F2": "2940",
+        "F3": "3018",
+        "F4": "2390",
+        "F5": "1270",
+        "F6": "2492",
+        "F7": "1705",
+        "G1": "2894",
+        "G2": "2374",
+        "G3": "6954",
+        "G4": "1253",
+        "G5": "1831"
+    },
+    "id_list": [
+        {
+            "source_id": "2309",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "96"
+            ]
+        },
+        {
+            "source_id": "1968",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "97-98"
+            ]
+        },
+        {
+            "source_id": "8703",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "99"
+            ]
+        },
+        {
+            "source_id": "8703",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "100-101"
+            ]
+        },
+        {
+            "source_id": "1702",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "103-104"
+            ]
+        },
+        {
+            "source_id": "1747",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "105-124"
+            ]
+        },
+        {
+            "source_id": "2362",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "126"
+            ]
+        },
+        {
+            "source_id": "2362",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "127-128"
+            ]
+        },
+        {
+            "source_id": "3629",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "130"
+            ]
+        },
+        {
+            "source_id": "3629",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "131-134"
+            ]
+        },
+        {
+            "source_id": "3629",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "136-137"
+            ]
+        },
+        {
+            "source_id": "3629",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "138"
+            ]
+        },
+        {
+            "source_id": "3629",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "139-140"
+            ]
+        },
+        {
+            "source_id": "3629",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "141-142"
+            ]
+        },
+        {
+            "source_id": "1745",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "145"
+            ]
+        },
+        {
+            "source_id": "1745",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "146-149"
+            ]
+        },
+        {
+            "source_id": "1745",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "152-153"
+            ]
+        },
+        {
+            "source_id": "1745",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "154"
+            ]
+        },
+        {
+            "source_id": "1745",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "155"
+            ]
+        },
+        {
+            "source_id": "1745",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "157-161"
+            ]
+        },
+        {
+            "source_id": "9780",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "165"
+            ]
+        },
+        {
+            "source_id": "2064",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "167"
+            ]
+        },
+        {
+            "source_id": "1773",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "169-174",
+                "175-180",
+                "181-187",
+                "188"
+            ]
+        },
+        {
+            "source_id": "2940",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "190-212"
+            ]
+        },
+        {
+            "source_id": "3018",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "214-218"
+            ]
+        },
+        {
+            "source_id": "2390",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "220-223"
+            ]
+        },
+        {
+            "source_id": "1270",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "226"
+            ]
+        },
+        {
+            "source_id": "2492",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "227-230"
+            ]
+        },
+        {
+            "source_id": "1705",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "231"
+            ]
+        },
+        {
+            "source_id": "2894",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "233-235"
+            ]
+        },
+        {
+            "source_id": "2374",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "237-243"
+            ]
+        },
+        {
+            "source_id": "6954",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "245"
+            ]
+        },
+        {
+            "source_id": "1253",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "247"
+            ]
+        },
+        {
+            "source_id": "1831",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "248-251"
+            ]
+        }
+    ]
+}

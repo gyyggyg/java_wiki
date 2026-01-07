@@ -37,8 +37,14 @@ def find_code_line_range(full_code: str, target_code: str, name: str) -> List[st
     full_lines = full_code.split('\n')
     target_lines = target_code.strip().split('\n')
 
-    # 获取目标代码的第一行（去除空白）
-    first_line = target_lines[0].strip()
+    # 跳过目标代码开头的注解行，找到实际的声明行
+    first_non_annotation_idx = 0
+    for idx, line in enumerate(target_lines):
+        if not line.strip().startswith('@'):
+            first_non_annotation_idx = idx
+            break
+
+    first_line = target_lines[first_non_annotation_idx].strip()
 
     # 在完整代码中查找起始行
     start_line = None
@@ -46,11 +52,13 @@ def find_code_line_range(full_code: str, target_code: str, name: str) -> List[st
         if first_line in line.strip():
             # 验证后续几行是否匹配
             match = True
-            for j in range(min(3, len(target_lines))):  # 检查前3行
+            for j in range(min(3, len(target_lines) - first_non_annotation_idx)):
                 if i + j - 1 < len(full_lines):
-                    if target_lines[j].strip() and target_lines[j].strip() not in full_lines[i + j - 1]:
-                        match = False
-                        break
+                    target_idx = first_non_annotation_idx + j
+                    if target_idx < len(target_lines) and target_lines[target_idx].strip():
+                        if target_lines[target_idx].strip() not in full_lines[i + j - 1]:
+                            match = False
+                            break
             if match:
                 start_line = i
                 break
@@ -59,7 +67,7 @@ def find_code_line_range(full_code: str, target_code: str, name: str) -> List[st
         return []
 
     # 计算结束行（起始行 + 目标代码行数 - 1）
-    end_line = start_line + len(target_lines) - 1
+    end_line = start_line + len(target_lines) - first_non_annotation_idx - 1
 
     return [f"{start_line}-{end_line}"]
 
@@ -79,8 +87,8 @@ def find_class_or_method_range(full_code: str, code_snippet: str, name: str) -> 
 
     # 尝试匹配类定义
     class_pattern = rf'(public\s+)?class\s+{re.escape(name)}\s*\{{'
-    # 尝试匹配方法定义（包括注解）
-    method_pattern = rf'(@\w+\s*)*(public|private|protected)?\s*\w+\s+{re.escape(name)}\s*\([^)]*\)\s*\{{'
+    # 尝试匹配方法定义（支持泛型、数组等复杂返回类型）
+    method_pattern = rf'(public|private|protected)?\s*[\w\<\>\[\]\,\s\.]+\s+{re.escape(name)}\s*\([^)]*\)\s*\{{'
 
     start_line = None
     is_class = False
