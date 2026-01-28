@@ -338,6 +338,29 @@ BLOCK_PROMPT= PromptTemplate(
 """
 )
 
+MERMIAD_DESC_PROMPT= PromptTemplate(
+    input_variables=["chart_mermaid","chart_type","mermaid_source_info"],
+    template="""
+你是mermaid图解释专家，现在你需要为我输入给你的mermaid图进行简要精准的解释。
+【输入】
+输入的mermaid图内容'chart_mermaid'：{chart_mermaid}
+图的类型'chart_type'：{chart_type}
+生成该图时使用的信息'mermaid_source_info'：{mermaid_source_info}
+
+
+【任务】
+1、根据图的类型'chart_type'，结合'mermaid_source_info'，为我简要精准的解释该图表达的内容
+2、解释内容要符合图的类型'chart_type'，例如代码控制流图、UML图
+3、你的解释的信息来源必须完全基于'mermaid_source_info'，不能凭空添加任何信息
+4、控制流图要结合代码逻辑进行解释，UML图要结合重点类和方法的关系进行解释
+5、以子弹列表形式呈现，要排版逻辑清晰 
+
+
+【输出格式】
+内容直接是Markdown格式, 不要包含任何前言或解释, 直接输出中文Markdown格式。
+"""
+)
+
 #校验提示词
 VALIDATE_PROMPT= PromptTemplate(
     input_variables=["source_information","source_id","chart_mermaid","chart_mapping"],

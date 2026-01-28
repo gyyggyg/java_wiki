@@ -49,25 +49,25 @@ class SimpleMermaidValidator:
         lines = mermaid_code.strip().split('\n')
         valid = True
         
-        # 检查基本结构
-        if not self._check_graph_declaration(lines):
-            valid = False
+        # # 检查基本结构
+        # if not self._check_graph_declaration(lines):
+        #     valid = False
             
-        # 检查节点定义
-        if not self._check_node_definitions(lines):
-            valid = False
+        # # 检查节点定义
+        # if not self._check_node_definitions(lines):
+        #     valid = False
             
-        # 检查连接语法
-        if not self._check_connections(lines):
-            valid = False
+        # # 检查连接语法
+        # if not self._check_connections(lines):
+        #     valid = False
             
-        # 检查子图结构
-        if not self._check_subgraph_structure(lines):
-            valid = False
+        # # 检查子图结构
+        # if not self._check_subgraph_structure(lines):
+        #     valid = False
             
-        # 如果静态检查已经失败，直接返回，不进行编译验证
-        if not valid:
-            return False
+        # # 如果静态检查已经失败，直接返回，不进行编译验证
+        # if not valid:
+        #     return False
             
         # 编译验证（仅在静态检查通过时才进行）
         if self.enable_compile_check:

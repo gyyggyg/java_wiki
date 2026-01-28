@@ -1,0 +1,335 @@
+{
+    "mermaid": "classDiagram\n    class AlipayController {\n        +pay(AliPayParam aliPayParam, HttpServletResponse response)\n        +webPay(AliPayParam aliPayParam, HttpServletResponse response)\n        +notify(HttpServletRequest request)\n        +query(String outTradeNo, String tradeNo)\n        -AlipayConfig alipayConfig\n        -AlipayService alipayService\n    }\n\n    class AlipayService {\n        <<interface>>\n        +String pay(AliPayParam aliPayParam)\n        +String webPay(AliPayParam aliPayParam)\n        +String notify(Map~String,String~ params)\n        +String query(String outTradeNo, String tradeNo)\n    }\n\n    class AlipayServiceImpl {\n        +String pay(AliPayParam aliPayParam)\n        +String webPay(AliPayParam aliPayParam)\n        +String notify(Map~String,String~ params)\n        +String query(String outTradeNo, String tradeNo)\n        -AlipayConfig alipayConfig\n        -AlipayClient alipayClient\n        -OmsOrderMapper orderMapper\n        -OmsPortalOrderService portalOrderService\n    }\n    AlipayService <|.. AlipayServiceImpl\n\n    AlipayController --> AlipayService : uses\n\n    class CommonResult~T~ {\n        -long code\n        -String message\n        -T data\n        +getData()\n        +setData(T)\n        +success(T)\n        +success(T, String)\n        +failed(IErrorCode)\n        +failed(IErrorCode, String)\n        +failed(String)\n        +failed()\n        +validateFailed()\n        +validateFailed(String)\n        +unauthorized(T)\n        +forbidden(T)\n        +getCode()\n        +setCode(long)\n        +getMessage()\n        +setMessage(String)\n        +getData()\n        +setData(T)\n    }\n    AlipayController --> CommonResult~String~ : uses\n\n    class OmsPortalOrderService {\n        <<interface>>\n        +ConfirmOrderResult generateConfirmOrder(List~Long~ cartIds)\n        +Map~String,Object~ generateOrder(OrderParam orderParam)\n        +Integer paySuccess(Long orderId, Integer payType)\n        +Integer cancelTimeOutOrder()\n        +void cancelOrder(Long orderId)\n        +void sendDelayMessageCancelOrder(Long orderId)\n        +void confirmReceiveOrder(Long orderId)\n        +CommonPage~OmsOrderDetail~ list(Integer status, Integer pageNum, Integer pageSize)\n        +OmsOrderDetail detail(Long orderId)\n        +void deleteOrder(Long orderId)\n        +void paySuccessByOrderSn(String orderSn, Integer payType)\n    }\n\n    class OmsPortalOrderServiceImpl {\n        +ConfirmOrderResult generateConfirmOrder(List~Long~)\n        +Map~String,Object~ generateOrder(OrderParam)\n        +Integer paySuccess(Long, Integer)\n        +Integer cancelTimeOutOrder()\n        +void cancelOrder(Long)\n        +void sendDelayMessageCancelOrder(Long)\n        +void confirmReceiveOrder(Long)\n        +CommonPage~OmsOrderDetail~ list(Integer, Integer, Integer)\n        +OmsOrderDetail detail(Long)\n        +void deleteOrder(Long)\n        +void paySuccessByOrderSn(String, Integer)\n    }\n    OmsPortalOrderService <|.. OmsPortalOrderServiceImpl\n\n    AlipayServiceImpl --> OmsPortalOrderService : uses\n    OmsPortalOrderServiceImpl --> Asserts : uses\n    OmsPortalOrderServiceImpl --> CommonPage~OmsOrderDetail~ : uses\n    OmsPortalOrderServiceImpl --> RedisService : uses\n    OmsPortalOrderServiceImpl --> SmsCouponHistoryMapper : uses\n    OmsPortalOrderServiceImpl --> OmsOrderItemMapper : uses\n    OmsPortalOrderServiceImpl --> UmsIntegrationConsumeSettingMapper : uses\n    OmsPortalOrderServiceImpl --> OmsOrderMapper : uses\n    OmsPortalOrderServiceImpl --> OmsOrderSettingMapper : uses\n    OmsPortalOrderServiceImpl --> PmsSkuStockMapper : uses\n    OmsPortalOrderServiceImpl --> OmsOrderExample : uses\n    OmsPortalOrderServiceImpl --> SmsCouponProductCategoryRelation : uses\n    OmsPortalOrderServiceImpl --> SmsCouponHistoryExample : uses\n    OmsPortalOrderServiceImpl --> OmsOrder : uses\n    OmsPortalOrderServiceImpl --> SmsCouponHistory : uses\n    OmsPortalOrderServiceImpl --> OmsCartItem : uses\n    OmsPortalOrderServiceImpl --> SmsCouponProductRelation : uses\n    OmsPortalOrderServiceImpl --> UmsMember : uses\n    OmsPortalOrderServiceImpl --> UmsMemberReceiveAddress : uses\n    OmsPortalOrderServiceImpl --> OmsOrderItem : uses\n    OmsPortalOrderServiceImpl --> OmsOrderSetting : uses\n    OmsPortalOrderServiceImpl --> UmsIntegrationConsumeSetting : uses\n    OmsPortalOrderServiceImpl --> SmsCoupon : uses\n    OmsPortalOrderServiceImpl --> PmsSkuStock : uses\n    OmsPortalOrderServiceImpl --> OmsOrderItemExample : uses\n    OmsPortalOrderServiceImpl --> OmsOrderSettingExample : uses\n    OmsPortalOrderServiceImpl --> CancelOrderSender : uses\n    OmsPortalOrderServiceImpl --> UmsMemberCouponService : uses\n    OmsPortalOrderServiceImpl --> OmsCartItemService : uses\n    OmsPortalOrderServiceImpl --> UmsMemberService : uses\n    OmsPortalOrderServiceImpl --> UmsMemberReceiveAddressService : uses\n    OmsPortalOrderServiceImpl --> PortalOrderDao : uses\n    OmsPortalOrderServiceImpl --> PortalOrderItemDao : uses\n    OmsPortalOrderServiceImpl --> SmsCouponHistoryDetail : uses\n    OmsPortalOrderServiceImpl --> ConfirmOrderResult : uses\n    OmsPortalOrderServiceImpl --> OmsOrderDetail : uses\n    OmsPortalOrderServiceImpl --> CommonPage~OmsOrderDetail~ : uses\n\n    class CommonPage~T~ {\n        -Integer pageNum\n        -Integer pageSize\n        -Integer totalPage\n        -Long total\n        -List~T~ list\n        +restPage(List~T~)\n        +restPage(Page~T~)\n        +getPageNum()\n        +setPageNum(Integer)\n        +getPageSize()\n        +setPageSize(Integer)\n        +getTotalPage()\n        +setTotalPage(Integer)\n        +getList()\n        +setList(List~T~)\n        +getTotal()\n        +setTotal(Long)\n    }\n    OmsPortalOrderService --> CommonPage~OmsOrderDetail~ : returns\n    OmsPortalOrderServiceImpl --> CommonPage~OmsOrderDetail~ : returns\n\n    class ConfirmOrderResult {\n    }\n    OmsPortalOrderService --> ConfirmOrderResult : returns\n    OmsPortalOrderServiceImpl --> ConfirmOrderResult : returns\n\n    class OmsOrderDetail {\n    }\n    OmsPortalOrderService --> OmsOrderDetail : returns\n    OmsPortalOrderServiceImpl --> OmsOrderDetail : returns\n\n    class Asserts {\n        +fail(String message)\n        +fail(IErrorCode errorCode)\n    }\n    class RedisService {\n        <<interface>>\n        +set(String key, Object value, long time)\n        +set(String key, Object value)\n        +Object get(String key)\n        +Boolean del(String key)\n        +Long del(List~String~)\n        +Boolean expire(String key, long time)\n        +Long getExpire(String key)\n        +Boolean hasKey(String key)\n        +Long incr(String key, long delta)\n        +Long decr(String key, long delta)\n        +Object hGet(String key, String hashKey)\n        +Boolean hSet(String key, String hashKey, Object value, long time)\n        +void hSet(String key, String hashKey, Object value)\n        +Map~Object,Object~ hGetAll(String key)\n        +Boolean hSetAll(String key, Map~String,Object~ map, long time)\n        +void hSetAll(String key, Map~String,?~ map)\n        +void hDel(String key, Object... hashKey)\n        +Boolean hHasKey(String key, String hashKey)\n        +Long hIncr(String key, String hashKey, Long delta)\n        +Long hDecr(String key, String hashKey, Long delta)\n        +Set~Object~ sMembers(String key)\n        +Long sAdd(String key, Object... values)\n        +Long sAdd(String key, long time, Object... values)\n        +Boolean sIsMember(String key, Object value)\n        +Long sSize(String key)\n        +Long sRemove(String key, Object... values)\n        +List~Object~ lRange(String key, long start, long end)\n        +Long lSize(String key)\n        +Object lIndex(String key, long index)\n        +Long lPush(String key, Object value)\n        +Long lPush(String key, Object value, long time)\n        +Long lPushAll(String key, Object... values)\n        +Long lPushAll(String key, Long time, Object... values)\n        +Long lRemove(String key, long count, Object value)\n    }\n    class SmsCouponHistoryMapper {\n        <<interface>>\n    }\n    class OmsOrderItemMapper {\n        <<interface>>\n    }\n    class UmsIntegrationConsumeSettingMapper {\n        <<interface>>\n    }\n    class OmsOrderMapper {\n        <<interface>>\n    }\n    class OmsOrderSettingMapper {\n        <<interface>>\n    }\n    class PmsSkuStockMapper {\n        <<interface>>\n    }\n    class OmsOrderExample {\n    }\n    class SmsCouponProductCategoryRelation {\n    }\n    class SmsCouponHistoryExample {\n    }\n    class OmsOrder {\n    }\n    class SmsCouponHistory {\n    }\n    class OmsCartItem {\n    }\n    class SmsCouponProductRelation {\n    }\n    class UmsMember {\n    }\n    class UmsMemberReceiveAddress {\n    }\n    class OmsOrderItem {\n    }\n    class OmsOrderSetting {\n    }\n    class UmsIntegrationConsumeSetting {\n    }\n    class SmsCoupon {\n    }\n    class PmsSkuStock {\n    }\n    class OmsOrderItemExample {\n    }\n    class OmsOrderSettingExample {\n    }\n    class CancelOrderSender {\n    }\n    class UmsMemberCouponService {\n        <<interface>>\n    }\n    class OmsCartItemService {\n        <<interface>>\n    }\n    class UmsMemberService {\n        <<interface>>\n    }\n    class UmsMemberReceiveAddressService {\n        <<interface>>\n    }\n    class PortalOrderDao {\n        <<interface>>\n    }\n    class PortalOrderItemDao {\n        <<interface>>\n    }\n    class SmsCouponHistoryDetail {\n    }\n",
+    "mapping": {
+        "AlipayController": "1657",
+        "CommonResult~T~": "1958",
+        "AlipayService": "2371",
+        "AlipayServiceImpl": "1006",
+        "OmsPortalOrderService": "3483",
+        "CommonPage~T~": "9307",
+        "ConfirmOrderResult": "1832",
+        "OmsOrderDetail": "3192",
+        "OmsPortalOrderServiceImpl": "9619",
+        "Asserts": "2255",
+        "RedisService": "1222",
+        "SmsCouponHistoryMapper": "5204",
+        "OmsOrderItemMapper": "2550",
+        "UmsIntegrationConsumeSettingMapper": "6594",
+        "OmsOrderMapper": "8054",
+        "OmsOrderSettingMapper": "2427",
+        "PmsSkuStockMapper": "9255",
+        "OmsOrderExample": "3360",
+        "SmsCouponProductCategoryRelation": "5886",
+        "SmsCouponHistoryExample": "5214",
+        "OmsOrder": "3030",
+        "SmsCouponHistory": "2681",
+        "OmsCartItem": "2806",
+        "SmsCouponProductRelation": "2730",
+        "UmsMember": "2054",
+        "UmsMemberReceiveAddress": "8545",
+        "OmsOrderItem": "6727",
+        "OmsOrderSetting": "2089",
+        "UmsIntegrationConsumeSetting": "1371",
+        "SmsCoupon": "3968",
+        "PmsSkuStock": "1919",
+        "OmsOrderItemExample": "1662",
+        "OmsOrderSettingExample": "2585",
+        "CancelOrderSender": "2777",
+        "UmsMemberCouponService": "1061",
+        "OmsCartItemService": "3145",
+        "UmsMemberService": "8577",
+        "UmsMemberReceiveAddressService": "1992",
+        "PortalOrderDao": "7130",
+        "PortalOrderItemDao": "2946",
+        "SmsCouponHistoryDetail": "2538"
+    },
+    "id_list": [
+        {
+            "source_id": "1657",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/controller/AlipayController.java",
+            "lines": [
+                "32-74"
+            ]
+        },
+        {
+            "source_id": "1958",
+            "name": "mall-common/src/main/java/com/macro/mall/common/api/CommonResult.java",
+            "lines": [
+                "21-22"
+            ]
+        },
+        {
+            "source_id": "2371",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/AlipayService.java",
+            "lines": [
+                "14-37"
+            ]
+        },
+        {
+            "source_id": "1006",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/AlipayServiceImpl.java",
+            "lines": [
+                "31-162"
+            ]
+        },
+        {
+            "source_id": "3483",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/OmsPortalOrderService.java",
+            "lines": [
+                "16-76"
+            ]
+        },
+        {
+            "source_id": "9307",
+            "name": "mall-common/src/main/java/com/macro/mall/common/api/CommonPage.java",
+            "lines": [
+                "12-100"
+            ]
+        },
+        {
+            "source_id": "1832",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/domain/ConfirmOrderResult.java",
+            "lines": [
+                "18-44"
+            ]
+        },
+        {
+            "source_id": "3192",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/domain/OmsOrderDetail.java",
+            "lines": [
+                "17-20"
+            ]
+        },
+        {
+            "source_id": "9619",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "35-794"
+            ]
+        },
+        {
+            "source_id": "2255",
+            "name": "mall-common/src/main/java/com/macro/mall/common/exception/Asserts.java",
+            "lines": [
+                "9-17"
+            ]
+        },
+        {
+            "source_id": "1222",
+            "name": "mall-common/src/main/java/com/macro/mall/common/service/RedisService.java",
+            "lines": [
+                "11-182"
+            ]
+        },
+        {
+            "source_id": "5204",
+            "name": "mall-mbg/src/main/java/com/macro/mall/mapper/SmsCouponHistoryMapper.java",
+            "lines": [
+                "8-30"
+            ]
+        },
+        {
+            "source_id": "2550",
+            "name": "mall-mbg/src/main/java/com/macro/mall/mapper/OmsOrderItemMapper.java",
+            "lines": [
+                "8-30"
+            ]
+        },
+        {
+            "source_id": "6594",
+            "name": "mall-mbg/src/main/java/com/macro/mall/mapper/UmsIntegrationConsumeSettingMapper.java",
+            "lines": [
+                "8-30"
+            ]
+        },
+        {
+            "source_id": "8054",
+            "name": "mall-mbg/src/main/java/com/macro/mall/mapper/OmsOrderMapper.java",
+            "lines": [
+                "8-30"
+            ]
+        },
+        {
+            "source_id": "2427",
+            "name": "mall-mbg/src/main/java/com/macro/mall/mapper/OmsOrderSettingMapper.java",
+            "lines": [
+                "8-30"
+            ]
+        },
+        {
+            "source_id": "9255",
+            "name": "mall-mbg/src/main/java/com/macro/mall/mapper/PmsSkuStockMapper.java",
+            "lines": [
+                "8-30"
+            ]
+        },
+        {
+            "source_id": "3360",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/OmsOrderExample.java",
+            "lines": [
+                "8-3011"
+            ]
+        },
+        {
+            "source_id": "5886",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/SmsCouponProductCategoryRelation.java",
+            "lines": [
+                "6-76"
+            ]
+        },
+        {
+            "source_id": "5214",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/SmsCouponHistoryExample.java",
+            "lines": [
+                "7-890"
+            ]
+        },
+        {
+            "source_id": "3030",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/OmsOrder.java",
+            "lines": [
+                "8-547"
+            ]
+        },
+        {
+            "source_id": "2681",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/SmsCouponHistory.java",
+            "lines": [
+                "7-147"
+            ]
+        },
+        {
+            "source_id": "2806",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/OmsCartItem.java",
+            "lines": [
+                "8-231"
+            ]
+        },
+        {
+            "source_id": "2730",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/SmsCouponProductRelation.java",
+            "lines": [
+                "6-76"
+            ]
+        },
+        {
+            "source_id": "2054",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/UmsMember.java",
+            "lines": [
+                "7-246"
+            ]
+        },
+        {
+            "source_id": "8545",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/UmsMemberReceiveAddress.java",
+            "lines": [
+                "6-136"
+            ]
+        },
+        {
+            "source_id": "6727",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/OmsOrderItem.java",
+            "lines": [
+                "7-264"
+            ]
+        },
+        {
+            "source_id": "2089",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/OmsOrderSetting.java",
+            "lines": [
+                "6-90"
+            ]
+        },
+        {
+            "source_id": "1371",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/UmsIntegrationConsumeSetting.java",
+            "lines": [
+                "6-78"
+            ]
+        },
+        {
+            "source_id": "3968",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/SmsCoupon.java",
+            "lines": [
+                "8-233"
+            ]
+        },
+        {
+            "source_id": "1919",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/PmsSkuStock.java",
+            "lines": [
+                "7-149"
+            ]
+        },
+        {
+            "source_id": "1662",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/OmsOrderItemExample.java",
+            "lines": [
+                "7-1540"
+            ]
+        },
+        {
+            "source_id": "2585",
+            "name": "mall-mbg/src/main/java/com/macro/mall/model/OmsOrderSettingExample.java",
+            "lines": [
+                "6-559"
+            ]
+        },
+        {
+            "source_id": "2777",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/component/CancelOrderSender.java",
+            "lines": [
+                "18-35"
+            ]
+        },
+        {
+            "source_id": "1061",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/UmsMemberCouponService.java",
+            "lines": [
+                "15-41"
+            ]
+        },
+        {
+            "source_id": "3145",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/OmsCartItemService.java",
+            "lines": [
+                "14-56"
+            ]
+        },
+        {
+            "source_id": "8577",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/UmsMemberService.java",
+            "lines": [
+                "11-64"
+            ]
+        },
+        {
+            "source_id": "1992",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/UmsMemberReceiveAddressService.java",
+            "lines": [
+                "12-42"
+            ]
+        },
+        {
+            "source_id": "7130",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+            "lines": [
+                "13-54"
+            ]
+        },
+        {
+            "source_id": "2946",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderItemDao.java",
+            "lines": [
+                "12-17"
+            ]
+        },
+        {
+            "source_id": "2538",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/domain/SmsCouponHistoryDetail.java",
+            "lines": [
+                "19-26"
+            ]
+        }
+    ]
+}
