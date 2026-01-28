@@ -1,0 +1,151 @@
+{
+    "mermaid": "graph TD\nsubgraph block1[\"Block:PortalOrderAndPromotionServiceImpl\"]\n  subgraph pkg1[\"Package:com.macro.mall.portal.service.impl\"]\n    fileOmsPortalOrderServiceImpl[\"mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java\"]\n    classOmsPortalOrderServiceImpl{\"OmsPortalOrderServiceImpl\"}\n    methodPaySuccessByOrderSnOmsPortalOrderServiceImpl((\"paySuccessByOrderSn\"))\n    methodPaySuccessOmsPortalOrderServiceImpl((\"paySuccess\"))\n    fileOmsPortalOrderServiceImpl --> classOmsPortalOrderServiceImpl\n    classOmsPortalOrderServiceImpl --> methodPaySuccessByOrderSnOmsPortalOrderServiceImpl\n    classOmsPortalOrderServiceImpl --> methodPaySuccessOmsPortalOrderServiceImpl\n  end\nend\n\nsubgraph block2[\"Block:mall-portal/src/main/java/com/macro/mall/portal/service/impl/\"]\n  subgraph pkg2[\"Package:com.macro.mall.portal.service.impl\"]\n    fileAlipayServiceImpl[\"mall-portal/src/main/java/com/macro/mall/portal/service/impl/AlipayServiceImpl.java\"]\n    classAlipayServiceImpl{\"AlipayServiceImpl\"}\n    methodQueryAlipayServiceImpl((\"query\"))\n    methodNotifyAlipayServiceImpl((\"notify\"))\n    fileAlipayServiceImpl --> classAlipayServiceImpl\n    classAlipayServiceImpl --> methodQueryAlipayServiceImpl\n    classAlipayServiceImpl --> methodNotifyAlipayServiceImpl\n  end\nend\n\nsubgraph block3[\"Block:mall-portal/src/main/java/com/macro/mall/portal/controller/\"]\n  subgraph pkg3[\"Package:com.macro.mall.portal.controller\"]\n    fileAlipayController[\"mall-portal/src/main/java/com/macro/mall/portal/controller/AlipayController.java\"]\n    classAlipayController{\"AlipayController\"}\n    methodPayAlipayController((\"pay\"))\n    methodWebPayAlipayController((\"webPay\"))\n    methodNotifyAlipayController((\"notify\"))\n    methodQueryAlipayController((\"query\"))\n    fileAlipayController --> classAlipayController\n    classAlipayController --> methodPayAlipayController\n    classAlipayController --> methodWebPayAlipayController\n    classAlipayController --> methodNotifyAlipayController\n    classAlipayController --> methodQueryAlipayController\n  end\nend\n\nsubgraph block4[\"Block:PortalOrderAndReturnService\"]\n  subgraph pkg4[\"Package:com.macro.mall.portal.service\"]\n    fileOmsPortalOrderService[\"mall-portal/src/main/java/com/macro/mall/portal/service/OmsPortalOrderService.java\"]\n    classOmsPortalOrderService{\"OmsPortalOrderService\"}\n    methodPaySuccessByOrderSnOmsPortalOrderService((\"paySuccessByOrderSn\"))\n    fileOmsPortalOrderService --> classOmsPortalOrderService\n    classOmsPortalOrderService --> methodPaySuccessByOrderSnOmsPortalOrderService\n  end\nend\n\nsubgraph block5[\"Block:mall-portal/src/main/java/com/macro/mall/portal/service/\"]\n  subgraph pkg5[\"Package:com.macro.mall.portal.service\"]\n    fileAlipayService[\"mall-portal/src/main/java/com/macro/mall/portal/service/AlipayService.java\"]\n    classAlipayService{\"AlipayService\"}\n    methodPayAlipayService((\"pay\"))\n    methodWebPayAlipayService((\"webPay\"))\n    methodNotifyAlipayService((\"notify\"))\n    methodQueryAlipayService((\"query\"))\n    fileAlipayService --> classAlipayService\n    classAlipayService --> methodPayAlipayService\n    classAlipayService --> methodWebPayAlipayService\n    classAlipayService --> methodNotifyAlipayService\n    classAlipayService --> methodQueryAlipayService\n  end\nend\n\nmethodQueryAlipayServiceImpl ==> methodPaySuccessByOrderSnOmsPortalOrderService\nmethodNotifyAlipayServiceImpl ==> methodPaySuccessByOrderSnOmsPortalOrderService\nmethodPayAlipayController ==> methodPayAlipayService\nmethodWebPayAlipayController ==> methodWebPayAlipayService\nmethodNotifyAlipayController ==> methodNotifyAlipayService\nmethodQueryAlipayController ==> methodQueryAlipayService\nclassAlipayService ==> classAlipayServiceImpl\nclassOmsPortalOrderService ==> classOmsPortalOrderServiceImpl\nmethodPaySuccessByOrderSnOmsPortalOrderServiceImpl ==> methodPaySuccessOmsPortalOrderServiceImpl\n",
+    "mapping": {
+        "classAlipayServiceImpl": "2629",
+        "methodQueryAlipayServiceImpl": "2225",
+        "methodNotifyAlipayServiceImpl": "1875",
+        "classOmsPortalOrderService": "2271",
+        "methodPaySuccessByOrderSnOmsPortalOrderService": "2934",
+        "classAlipayController": "1131",
+        "methodPayAlipayController": "5715",
+        "methodWebPayAlipayController": "3254",
+        "methodNotifyAlipayController": "2732",
+        "methodQueryAlipayController": "1589",
+        "classAlipayService": "3233",
+        "methodPayAlipayService": "9667",
+        "methodWebPayAlipayService": "3017",
+        "methodNotifyAlipayService": "1072",
+        "methodQueryAlipayService": "1118",
+        "classOmsPortalOrderServiceImpl": "2241",
+        "methodPaySuccessByOrderSnOmsPortalOrderServiceImpl": "3167",
+        "methodPaySuccessOmsPortalOrderServiceImpl": "4371"
+    },
+    "id_list": [
+        {
+            "source_id": "2629",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/AlipayServiceImpl.java",
+            "lines": [
+                "31-162"
+            ]
+        },
+        {
+            "source_id": "2225",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/AlipayServiceImpl.java",
+            "lines": [
+                "99-130"
+            ]
+        },
+        {
+            "source_id": "1875",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/AlipayServiceImpl.java",
+            "lines": [
+                "72-96"
+            ]
+        },
+        {
+            "source_id": "2271",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/OmsPortalOrderService.java",
+            "lines": [
+                "16-76"
+            ]
+        },
+        {
+            "source_id": "2934",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/OmsPortalOrderService.java",
+            "lines": [
+                "75-75"
+            ]
+        },
+        {
+            "source_id": "1131",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/controller/AlipayController.java",
+            "lines": [
+                "32-74"
+            ]
+        },
+        {
+            "source_id": "5715",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/controller/AlipayController.java",
+            "lines": [
+                "41-46"
+            ]
+        },
+        {
+            "source_id": "3254",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/controller/AlipayController.java",
+            "lines": [
+                "50-55"
+            ]
+        },
+        {
+            "source_id": "2732",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/controller/AlipayController.java",
+            "lines": [
+                "59-66"
+            ]
+        },
+        {
+            "source_id": "1589",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/controller/AlipayController.java",
+            "lines": [
+                "71-73"
+            ]
+        },
+        {
+            "source_id": "3233",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/AlipayService.java",
+            "lines": [
+                "14-37"
+            ]
+        },
+        {
+            "source_id": "9667",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/AlipayService.java",
+            "lines": [
+                "18-18"
+            ]
+        },
+        {
+            "source_id": "3017",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/AlipayService.java",
+            "lines": [
+                "36-36"
+            ]
+        },
+        {
+            "source_id": "1072",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/AlipayService.java",
+            "lines": [
+                "23-23"
+            ]
+        },
+        {
+            "source_id": "1118",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/AlipayService.java",
+            "lines": [
+                "31-31"
+            ]
+        },
+        {
+            "source_id": "2241",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "35-794"
+            ]
+        },
+        {
+            "source_id": "3167",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "446-457"
+            ]
+        },
+        {
+            "source_id": "4371",
+            "name": "mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+            "lines": [
+                "255-283"
+            ]
+        }
+    ]
+}

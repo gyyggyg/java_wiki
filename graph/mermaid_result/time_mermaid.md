@@ -7,14 +7,15 @@ sequenceDiagram
     participant OmsPortalOrderService as OmsPortalOrderService
     participant OmsPortalOrderServiceImpl as OmsPortalOrderServiceImpl
 
-    AlipayController->>AlipayService: pay %% AlipayController.pay
-    AlipayController->>AlipayService: webPay %% AlipayController.webPay
-    AlipayController->>AlipayService: notify %% AlipayController.notify
-    AlipayController->>AlipayService: query %% AlipayController.query
-    AlipayService-->>AlipayServiceImpl: implemented_by %% AlipayServiceImpl implements AlipayService
-    AlipayServiceImpl->>OmsPortalOrderService: query %% AlipayServiceImpl.query
-    AlipayServiceImpl->>OmsPortalOrderService: notify %% AlipayServiceImpl.notify
-    OmsPortalOrderService-->>OmsPortalOrderServiceImpl: implemented_by %% OmsPortalOrderServiceImpl implements OmsPortalOrderService
-    OmsPortalOrderServiceImpl->>OmsPortalOrderServiceImpl: paySuccessByOrderSn %% OmsPortalOrderServiceImpl.paySuccessByOrderSn
-
+    AlipayController->>AlipayService: AlipayController.pay %% 调用
+    AlipayController->>AlipayService: AlipayController.webPay %% 调用
+    AlipayController->>AlipayService: AlipayController.notify %% 调用
+    AlipayController->>AlipayService: AlipayController.query %% 调用
+    AlipayService-->>AlipayServiceImpl: implemented_by %% 实现
+    AlipayServiceImpl->>OmsPortalOrderService: AlipayServiceImpl.query %% 调用
+    AlipayServiceImpl->>OmsPortalOrderService: AlipayServiceImpl.notify %% 调用
+    OmsPortalOrderService-->>OmsPortalOrderServiceImpl: implemented_by %% 实现
+    OmsPortalOrderServiceImpl->>OmsPortalOrderServiceImpl: OmsPortalOrderServiceImpl.paySuccessByOrderSn %% 调用
 ```
+
+
