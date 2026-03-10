@@ -166,6 +166,130 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
     # 从下往上搜索的辅助函数
     # =============================================================================
 
+    async def count_total_files(
+        neo4j_interface: Neo4jInterface,
+        block_node_id: str
+    ) -> int:
+        """
+        递归统计 Block 下所有后代 File 的总数量
+        """
+        query = """
+        MATCH (parent:Block)-[:f2c*..]->(child:File)
+        WHERE parent.nodeId = $block_id
+        RETURN count(child) AS total_files
+        """
+        result = await neo4j_interface.execute_query(query, {"block_id": block_node_id})
+        return result[0]["total_files"] if result else 0
+# async def build_module_tree_iterative(neo4j_interface: Neo4jInterface, expand_threshold: float = 2.0):
+#     """
+#     迭代式构建模块架构树
+
+#     算法逻辑：
+#     1. 初始化：获取第一层 Block，计算 min_files（全局固定）
+#     2. 迭代展开：
+#        - 找到需要展开的 Block（fileCount > min_files * expand_threshold）
+#        - 防碎片化检查
+#        - 展开通过检查的 Block（优先展开最大的）
+#     3. 重复直到没有需要展开的 Block
+
+#     Args:
+#         neo4j_interface: Neo4j 接口
+#         expand_threshold: 展开阈值倍数（默认 2.0）
+#         max_iterations: 最大迭代次数
+
+#     Returns:
+#         当前展示的 Block 列表
+#     """
+#     # 1. 初始化：获取第一层 Block
+#     root_block = await get_root_block(neo4j_interface)
+#     if not root_block:
+#         return []
+
+#     first_layer_blocks = await get_child_blocks(neo4j_interface, root_block["nodeId"])
+#     high_blocks = []
+
+#     # 2. 统计每个 Block 的 File 数量
+#     current_display_list = []
+#     for block in first_layer_blocks:
+#         file_count = await count_total_files(neo4j_interface, block["nodeId"])
+#         if file_count > 0:
+#             current_display_list.append({
+#                 "nodeId": block["nodeId"],
+#                 "name": block["name"],
+#                 "fileCount": file_count
+#             })
+#             high_blocks.append(block["nodeId"])
+
+#     if not current_display_list:
+#         return []
+
+#     # 3. 计算 min_files（全局固定，不更新）
+#     min_files = min(b["fileCount"] for b in current_display_list)
+#     print(f"初始化：{len(current_display_list)} 个 Block，min_files = {min_files}")
+#     expanded = []
+
+#     # 4. 迭代展开
+#     blocks_to_expand = [
+#             b for b in current_display_list
+#             if b["fileCount"] > min_files * expand_threshold
+#         ]
+#     q = deque(blocks_to_expand)
+#     while q:
+#         block_to_expand = q.popleft()
+#         print(f"尝试展开：{block_to_expand['name']} ({block_to_expand['fileCount']} 个文件)")
+
+#         # 4.4 获取子 Block
+#         child_blocks = await get_child_blocks(neo4j_interface, block_to_expand["nodeId"])
+
+#         if not child_blocks:
+#             continue
+
+#         # 4.5 统计子 Block 的 File 数量
+#         child_stats = []
+#         for child in child_blocks:
+#             file_count = await count_total_files(neo4j_interface, child["nodeId"])
+#             if file_count > 0:
+#                 child_stats.append({
+#                     "nodeId": child["nodeId"],
+#                     "name": child["name"],
+#                     "fileCount": file_count
+#                 })
+
+#         if not child_stats:
+#             continue
+
+#         # 4.6 防碎片化检查1：子节点数量限制
+#         current_list_size = len(current_display_list)
+#         if len(child_stats) > current_list_size * 2:
+#             print(f"  → 防碎片化检查1失败：子 Block 数量 ({len(child_stats)}) > 当前列表 * 2 ({current_list_size * 2})")
+#             continue
+
+#         # 4.7 防碎片化检查2：子节点质量检查
+#         threshold = min_files  # 改为 min_files，而不是 min_files / 2
+#         small_nodes_count = sum(1 for c in child_stats if c["fileCount"] < threshold)
+#         if small_nodes_count >= len(child_stats) * 2 / 3:
+#             print(f"  → 防碎片化检查2失败：{small_nodes_count}/{len(child_stats)} 个子 Block 文件数 < {threshold:.1f}")
+#             continue
+
+#         # 4.8 通过检查，执行展开
+#         print(f"  ✓ 通过检查，展开为 {len(child_stats)} 个子 Block")
+
+#         # 从当前列表删除该 Block
+#         current_display_list.remove(block_to_expand)
+#         expanded.append(block_to_expand["nodeId"])
+
+#         # 将子 Block 加入当前列表
+#         current_display_list.extend(child_stats)
+#         q.extend(child_stats)
+
+#         print(f"  → 展开后列表大小：{len(current_display_list)}")
+
+#     # 5. 返回最终的展示列表
+#     print(f"\n最终展示列表：{len(current_display_list)} 个 Block")
+#     return current_display_list, expanded, high_blocks
+
+
+# ====================== 2. 应用定义 ======================
     async def get_block_semantic(block_id: int) -> str:
         """
         获取Block的语义解释
