@@ -31,8 +31,11 @@ class ChartState(TypedDict, total=False):
     mermaid_source_info: str
     write_path: str
     additional_info: str
+    output: str
+    mapping : Dict
+    id_list : List
 
-def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node_list: List[int] , type: str, start_time) -> StateGraph:
+def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node_list: List , type: str) -> StateGraph:
     cfg_id_chain = ChainFactory.create_generic_chain(llm_interface, SOURCE_ID_PROMPT)
     cfg_chain = ChainFactory.create_generic_chain(llm_interface, CFG_PROMPT)
     cfg_id_validate_chain = ChainFactory.create_generic_chain(llm_interface, CFG_ID_PROMPT)
@@ -144,7 +147,7 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
 
         all_in = "\n".join(node_information)
         source_id_result = await cfg_id_chain.ainvoke({"source_code": tag_code, "explanation": semantic_explanation})
-        print(f"[CFG] 代码预切片调用完成: {time.time() - start_time:.2f}秒")
+
         print("source_id:",source_id_result)
         reason = json.loads(source_id_result)["reason"]
         id_list = [] #[{'source_id': '2662', 'lines': ['1-2']}]
@@ -162,14 +165,14 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             print(validate_result)
             cfg_result = await cfg_chain.ainvoke({"source_code": tag_code, "explanation": all_in + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": id_list, "code_block": reason})
             validate_result = validator.validate_file(f"```mermaid\n\n{json.loads(cfg_result)['mermaid']}\n\n```")
-        print(f"[CFG] 代码mermaid输出完成: {time.time() - start_time:.2f}秒")
+
         cfg_map = json.loads(cfg_result)["mapping"] # {'A1': '2662'}
         for key,value in cfg_map.items():
             lines = id_list_map[value]
             cfg_lines_map[key] = lines
         print("old_id_result:", cfg_lines_map)
         new_id_result = await cfg_id_validate_chain.ainvoke({"source_code": tag_code, "mermaid": json.loads(cfg_result)["mermaid"], "reason": reason, "mapping": cfg_lines_map})
-        print(f"[CFG] 代码行号范围调整完成: {time.time() - start_time:.2f}秒")
+
         print("new_id_result:",json.loads(new_id_result)["mapping"], json.loads(new_id_result)["reason"])
         new_map = json.loads(new_id_result)["mapping"] # {'A1': ['8-10'], 'B1': ['11-20','80']}
         new_id_list = []
@@ -184,27 +187,30 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
                 else:
                     lines.append(str(int(item) + offset))
             new_id_list.append({"source_id": uu_id, "name": file_name, "lines": lines})
-        resultt = json.dumps({"mermaid": json.loads(cfg_result)["mermaid"], "mapping": json.loads(cfg_result)["mapping"], "id_list": new_id_list}, ensure_ascii=False, indent=4)
-        out_path = os.path.join(os.path.dirname(__file__), "cfg.json")
-        with open(out_path, "w", encoding="utf-8") as f:
-            f.write(resultt)
+        # resultt = json.dumps({"mermaid": json.loads(cfg_result)["mermaid"], "mapping": json.loads(cfg_result)["mapping"], "id_list": new_id_list}, ensure_ascii=False, indent=4)
+        # out_path = os.path.join(os.path.dirname(__file__), "cfg.json")
+        # # with open(out_path, "w", encoding="utf-8") as f:
+        # #     f.write(resultt)
         mermaid_path = os.path.join(os.path.dirname(__file__), "cfg_mermaid.md")
         mermaid_source_info = f"source_code: {source_code},\n code_explanation: {all_in}"
-        return {"chart_type":"代码控制流图", "mermaid_content": json.loads(cfg_result)["mermaid"], "mermaid_source_info":  mermaid_source_info, "write_path": mermaid_path, 'additional_info': add_table}
+        return {"chart_type":"代码控制流图", "mermaid_content": json.loads(cfg_result)["mermaid"], "mermaid_source_info":  mermaid_source_info, "write_path": mermaid_path, 'additional_info': add_table, "mapping": json.loads(cfg_result)["mapping"], "id_list": new_id_list}
 
     async def generate_uml(state: ChartState) -> ChartState:
-        query = """
-        MATCH (n)<-[:DECLARES*]-(n1)<-[:DECLARES]-(n0:File)
-        WHERE n.nodeId = $node_id
-        RETURN n.name AS name, n1.name AS n1_name
-        """
-        key_target = []
-        for i in node_list:
-            result = await neo4j_interface.execute_query(query, {"node_id": i})
-            if result:
-                record = result[0]
-                name = record['n1_name']
-                key_target.append(name)
+        if node_list[0] == "Class&Interface":
+            key_target = node_list[1:]
+        else:
+            query = """
+            MATCH (n)<-[:DECLARES*]-(n1)<-[:DECLARES]-(n0:File)
+            WHERE n.nodeId = $node_id
+            RETURN n.name AS name, n1.name AS n1_name
+            """
+            key_target = []
+            for i in node_list:
+                result = await neo4j_interface.execute_query(query, {"node_id": i})
+                if result:
+                    record = result[0]
+                    name = record['n1_name']
+                    key_target.append(name)
         print("key_target:",key_target)
         query0 = """
         MATCH (n)<-[:DECLARES]-(n0:File)
@@ -223,17 +229,17 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         """
         query3 = """
         MATCH (n)-[:DECLARES*1..]->(m1:Method)-[:CALLS]->(m2:Method)<-[:DECLARES*1..]-(n0)<-[:DECLARES]-(n1:File)
-        WHERE n.name = $name AND n<>n0
+        WHERE n.name = $name AND n<>n0 AND n0.name in $key_target
         RETURN m1.name AS m1_name, m2.name AS m2_name, n0.name AS n0_name, n0.source_code AS n0_code, n1.source_code AS file_code, n1.name AS file_name
         """
         query4 = """
         MATCH (n)-[:DECLARES*1..]->(m1:Method)-[:USES]->(n0:Class)<-[:DECLARES]-(n1:File)
-        WHERE n.name = $name AND n<>n0
+        WHERE n.name = $name AND n<>n0 AND n0.name in $key_target
         RETURN m1.name AS m1_name, n0.name AS n0_name, n0.source_code AS n0_code, n0.file_id AS file_id, n1.source_code AS file_code, n1.name AS file_name
         """
         query5 = """
         MATCH (n)-[:DECLARES*1..]->(m1:Method)-[:RETURNS]->(n0:Class)<-[:DECLARES]-(n1:File)
-        WHERE n.name = $name AND n<>n0
+        WHERE n.name = $name AND n<>n0 and n0.name in $key_target
         RETURN m1.name AS m1_name, n0.name AS n0_name, n0.source_code AS n0_code, n0.file_id AS file_id, n1.source_code AS file_code, n1.name AS file_name
         """
         source_id_ai = []
@@ -245,9 +251,9 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
                 neo4j_interface.execute_query(query0, {"name": name}),
                 neo4j_interface.execute_query(query1, {"name": name}),
                 neo4j_interface.execute_query(query2, {"name": name}),
-                neo4j_interface.execute_query(query3, {"name": name}),
-                neo4j_interface.execute_query(query4, {"name": name}),
-                neo4j_interface.execute_query(query5, {"name": name}),
+                neo4j_interface.execute_query(query3, {"name": name, "key_target": key_target}),
+                neo4j_interface.execute_query(query4, {"name": name, "key_target": key_target}),
+                neo4j_interface.execute_query(query5, {"name": name, "key_target": key_target}),
             )
             code = result[0]
             unique_key = name
@@ -362,13 +368,13 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             print(validate_result)
             uml_result = await uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai})
             validate_result = validator.validate_file(f"```mermaid\n\n{json.loads(uml_result)['mermaid']}\n\n```")       
-        print(f"[UML] 代码mermaid输出完成: {time.time() - start_time:.2f}秒")
-        resultt = json.dumps({"mermaid": json.loads(uml_result)["mermaid"], "mapping": json.loads(uml_result)["mapping"], "id_list": source_id_full}, ensure_ascii=False, indent=4)
-        out_path = os.path.join(os.path.dirname(__file__), "uml.json")
-        with open(out_path, "w", encoding="utf-8") as f:
-            f.write(resultt) 
+
+        # resultt = json.dumps({"mermaid": json.loads(uml_result)["mermaid"], "mapping": json.loads(uml_result)["mapping"], "id_list": source_id_full}, ensure_ascii=False, indent=4)
+        # out_path = os.path.join(os.path.dirname(__file__), "uml.json")
+        # with open(out_path, "w", encoding="utf-8") as f:
+        #     f.write(resultt) 
         mermaid_path = os.path.join(os.path.dirname(__file__), "uml_mermaid.md")
-        return {"chart_type":"代码类\\接口之间关系uml图", "mermaid_content": json.loads(uml_result)["mermaid"], "mermaid_source_info":  f"重点关注对象为{key_target}, 和他们相关的信息是{node_information}", "write_path": mermaid_path}
+        return {"chart_type":"代码类\\接口之间关系uml图", "mermaid_content": json.loads(uml_result)["mermaid"], "mermaid_source_info":  f"重点关注对象为{key_target}, 和他们相关的信息是{node_information}", "write_path": mermaid_path, "mapping": json.loads(uml_result)["mapping"], "id_list": source_id_full}
     
     async def generate_time(state: ChartState) -> ChartState:
         query0 = """
@@ -512,13 +518,13 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
              print(validate_result)
              time_result = await time_chain.ainvoke({"call_information": call_information_str + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai})
              validate_result = validator.validate_file(f"```mermaid\n\n{json.loads(time_result)['mermaid']}\n\n```")
-        print(f"[TIME] 代码mermaid输出完成: {time.time() - start_time:.2f}秒")
-        resultt = json.dumps({"mermaid": json.loads(time_result)["mermaid"], "mapping": json.loads(time_result)["mapping"], "id_list": source_id}, ensure_ascii=False, indent=4)
-        out_path = os.path.join(os.path.dirname(__file__), "time.json")
-        with open(out_path, "w", encoding="utf-8") as f:
-            f.write(resultt)
+
+        # resultt = json.dumps({"mermaid": json.loads(time_result)["mermaid"], "mapping": json.loads(time_result)["mapping"], "id_list": source_id}, ensure_ascii=False, indent=4)
+        # out_path = os.path.join(os.path.dirname(__file__), "time.json")
+        # with open(out_path, "w", encoding="utf-8") as f:
+        #     f.write(resultt)
         mermaid_path = os.path.join(os.path.dirname(__file__), "time_mermaid.md")
-        return {"chart_type":"代码调用链图", "mermaid_content": json.loads(time_result)["mermaid"], "mermaid_source_info": call_information_str, "write_path": mermaid_path, 'additional_info': add_table}
+        return {"chart_type":"代码调用链图", "mermaid_content": json.loads(time_result)["mermaid"], "mermaid_source_info": call_information_str, "write_path": mermaid_path, 'additional_info': add_table, "mapping": json.loads(time_result)["mapping"], "id_list": source_id}
 
 
     async def generate_block(state: ChartState) -> ChartState:
@@ -679,14 +685,14 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             print(validate_result)
             block_result = await block_chain.ainvoke({"key_target": key_target, "call_information": call_information_str + f"之前存在错误的情况，需要规避{validate_result['errors']}", "module_package_info": module_package_info_str, "source_id": source_id_ai})
             validate_result = validator.validate_file(f"```mermaid\n\n{json.loads(block_result)['mermaid']}\n\n```")
-        print(f"[BLOCK] 代码mermaid输出完成: {time.time() - start_time:.2f}秒")
-        resultt = json.dumps({"mermaid": json.loads(block_result)["mermaid"], "mapping": json.loads(block_result)["mapping"], "id_list": source_id}, ensure_ascii=False, indent=4)
-        out_path = os.path.join(os.path.dirname(__file__), "block.json")
-        with open(out_path, "w", encoding="utf-8") as f:
-            f.write(resultt)
+
+        # resultt = json.dumps({"mermaid": json.loads(block_result)["mermaid"], "mapping": json.loads(block_result)["mapping"], "id_list": source_id}, ensure_ascii=False, indent=4)
+        # out_path = os.path.join(os.path.dirname(__file__), "block.json")
+        # with open(out_path, "w", encoding="utf-8") as f:
+        #     f.write(resultt)
         mermaid_path = os.path.join(os.path.dirname(__file__), "block_mermaid.md")
         mermaid_source_info = f"module_package_info:{module_package_info_str}, \n call_information:{call_information_str}"
-        return {"chart_type":"代码所属模块信息关系图", "mermaid_content": json.loads(block_result)["mermaid"], "mermaid_source_info": mermaid_source_info, "write_path": mermaid_path, "additional_info": module_package_table}
+        return {"chart_type":"代码所属模块信息关系图", "mermaid_content": json.loads(block_result)["mermaid"], "mermaid_source_info": mermaid_source_info, "write_path": mermaid_path, "additional_info": module_package_table, "mapping": json.loads(block_result)["mapping"], "id_list": source_id}
     
     async def mermaid_description(state: ChartState) -> ChartState:
         mermaid_content = state["mermaid_content"]
@@ -698,14 +704,11 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             mermaid_description = await description_chain.ainvoke({"chart_type": chart_type, "chart_mermaid": mermaid_content, "mermaid_source_info": mermaid_source_info})
         else:
             mermaid_description = ""
+        output = "```mermaid\n" + mermaid_content + "\n```\n" + mermaid_description + "\n" + additional_info + "\n"
         with open(mermaid_path, "w", encoding="utf-8") as f:
-            f.write("```mermaid\n")
-            f.write(mermaid_content)
-            f.write("\n```\n")
-            f.write(mermaid_description + "\n")
-            f.write(additional_info + "\n")
-        print(f"{chart_type} mermaid保存完成: {time.time() - start_time:.2f}秒")
-        return {} 
+            f.write(output)
+
+        return {"output": output}
 
 
     app = StateGraph(ChartState)
@@ -757,9 +760,9 @@ async def main():
     type = "cfg"
 
     # node_list = [17522, 17618, 17656, 17577, 17702, 17711]
-    # type = "uml"
+    # type = "uml" "block" "time"
 
-    app = chart_app(llm, neo4j, node_list=node_list, type=type, start_time=start_time)
+    app = chart_app(llm, neo4j, node_list=node_list, type=type)
     await app.ainvoke(
         {}, 
         config={"configurable": {"thread_id": "standalone-api"}}

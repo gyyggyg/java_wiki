@@ -361,6 +361,42 @@ MERMIAD_DESC_PROMPT= PromptTemplate(
 """
 )
 
+PROJECT_MODULE_PROMPT = PromptTemplate(
+    input_variables=["project_information", "pom_content"],
+    template="""
+你是模块架构分析专家, 我已经将一个java项目按照文件功能聚类为模块, 现在我需要你根据我给你的项目介绍和pom.xml内容, 为我画出该项目的模块架构示意图。
+【输入】
+代码模块架构'project_information'：{project_information}
+pom.xml内容'pom_content'：{pom_content}
+【任务】
+1、根据'project_information'里节点的描述，为我设计模块节点，要求子模块要在父模块图中。
+2、根据'pom_content'里描述的关系，和'project_information'里的path字段，为我画出模块之间的关系。
+3、图中节点的名称必须和'project_information'里的name字段一致，不能修改节点名称。
+4、图中节点的层级关系必须和'project_information'里一致，不能修改节点层级。
+5、每个节点必须同时显示：
+   第一行：name  
+   第二行：path  
+   两行之间用 `<br/>` 连接。
+6、你只展示不属于一个顶层模块的跨模块关系, 不展示同模块内的关系。
+【mermaid示例】
+flowchart TD
+    subgraph A["Admin System Core Suite<br/>mall-admin/src/"]
+        A1["Admin System Application Layer<br/>../main/java/com/macro/mall/"]
+        A2["Admin Config Management<br/>../config/"]
+    end
+
+    subgraph B["Core Utilities and Configuration<br/>mall-common/src/main/java/com/macro/mall/common/"]
+    end
+
+    A1 --> B
+    A2 --> B
+
+【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+{{"mermaid": "这里是输出模块架构图的Mermaid", "mapping": 图中每个节点名称和其在'project_information'里对应id的映射关系，例如{{"A":"1","A1":"2"...}}}}
+"""
+)
+
+
 #校验提示词
 VALIDATE_PROMPT= PromptTemplate(
     input_variables=["source_information","source_id","chart_mermaid","chart_mapping"],

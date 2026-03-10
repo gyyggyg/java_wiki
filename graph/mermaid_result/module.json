@@ -1,0 +1,26 @@
+{
+    "mermaid": "flowchart TD\n    subgraph A[\"Admin System Core Suite<br/>mall-admin/src/\"]\n        A1[\"Admin System Application Layer<br/>../main/java/com/macro/mall/\"]\n        subgraph A1sub[\"Admin System Application Layer<br/>../main/java/com/macro/mall/\"]\n            A1a[\"Admin System Configuration Management<br/>../config/\"]\n            A1b[\"Admin System Business Controllers<br/>../controller/\"]\n            A1c[\"Admin System Data Access Layer<br/>../dao/\"]\n            A1d[\"Admin System Data Transfer Objects<br/>../dto/\"]\n            A1e[\"Admin System Service Interfaces<br/>../service/\"]\n            A1f[\"Admin System Validation Utilities<br/>../validator/\"]\n        end\n    end\n    \n    subgraph B[\"Core Utilities and Configuration<br/>mall-common/src/main/java/com/macro/mall/common/\"]\n    end\n\n    subgraph C[\"Demo Application Layered Framework<br/>mall-demo/src/\"]\n    end\n\n    subgraph D[\"E-Commerce Data Model and Persistence Suite<br/>mall-mbg/src/main/java/com/macro/mall/\"]\n        D1[\"MyBatis Code Generation and Swagger Integration<br/>MyBatisCodegenWithSwaggerSupport\"]\n        D2[\"Entity Database Mapper Interfaces<br/>../mapper/\"]\n        D3[\"Business Domain Data Models<br/>../model/\"]\n    end\n\n    subgraph E[\"Portal Core Foundation<br/>mall-portal/src/\"]\n        E1[\"Portal Application Structure<br/>../main/java/com/macro/mall/portal/\"]\n        E2[\"Portal Automated Testing Suite<br/>../test/java/com/macro/mall/portal/\"]\n    end\n\n    subgraph F[\"Product Search Service Suite<br/>mall-search/src/\"]\n    end\n\n    subgraph G[\"Security and Caching Infrastructure<br/>mall-security/src/main/java/com/macro/mall/security/\"]\n    end\n\n    %% 跨模块依赖关系\n    A --> B\n    A --> D\n    A --> G\n    A --> F\n    A --> E\n    C --> B\n    C --> D\n    C --> G\n    C --> F\n    C --> E\n    E --> B\n    E --> D\n    E --> G\n    E --> F\n    F --> B\n    F --> D\n    F --> G\n    G --> B\n    D --> B",
+    "mapping": {},
+    "neo4j_id": [
+        18549,
+        18468,
+        18467,
+        18424,
+        18433,
+        18437,
+        18446,
+        18466,
+        18423,
+        18475,
+        18505,
+        18499,
+        18498,
+        18497,
+        18496,
+        18535,
+        18533,
+        18534,
+        18541,
+        18548
+    ]
+}
