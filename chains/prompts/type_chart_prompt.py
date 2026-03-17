@@ -140,7 +140,7 @@ UML_PROMPT= PromptTemplate(
 现在我有一个Java项目，你需要为我做出UML类图，并按照指定格式回复。
 ### 输入信息
 ```
-所有涉及到的类/接口源代码信息'node_information'
+所有涉及到的类/接口结构信息'node_information'（包含类声明、字段列表、方法签名列表、以及类之间的关系描述）
 图中出现的类/接口对应的id'source_id'
 ```
 
@@ -149,6 +149,7 @@ UML_PROMPT= PromptTemplate(
 2、体现"node_information"中所有节点和关系，接口、枚举、抽象类要用 `<<interface>>`、`<<enum>>`、`<<abstract>>` 标注
 3、每个类节点的信息要包含类/接口和外界产生联系的属性和函数
 4、关系例如实现、继承、使用、返回等要在图中体现
+5、枚举类的枚举常量要在类图中体现
 
 uml类图语法规则（必须严格遵守）：
 1. 类节点命名：

@@ -5,7 +5,7 @@ import asyncio
 from typing import Any, Dict, List
 from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gy.interfaces.data_master import get_file
+from interfaces.data_master import get_file
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 from typing_extensions import TypedDict
@@ -26,11 +26,13 @@ class BlockState(TypedDict, total=False):
     section5_module_relation: Dict
     section6_data_uml: Dict
     source_id_list: List
+    uml_token_stats: Dict
 
-new_names = json.loads(get_file(r"E:\\github_clone\\java_wiki\\gy\\graph\\block_new_names.json"))
+# 修改：将硬编码的Windows路径改为基于项目根目录的相对路径
+new_names = json.loads(get_file(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "graph", "block_new_names.json")))
 
 # ====================== 2. 工作流定义 ======================
-def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, id_name_path: Dict):
+def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, id_name_path: Dict, skeleton: bool = False):
     generate_summary_chain = ChainFactory.create_generic_chain(llm_interface, BLOCK_OVERVIEW_PROMPT)
     generate_module_chart_chain = ChainFactory.create_generic_chain(llm_interface, MODULE_CHART_PROMPT)
     generate_relationship_chain = ChainFactory.create_generic_chain(llm_interface, BLOCK_RELATIONSHIP_PROMPT)
@@ -273,7 +275,7 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
         id_list = ["Class&Interface"]
         for record in result:
             id_list.append(record.get("class_name"))
-        app = chart_app(llm_interface, neo4j_interface, node_list=id_list, type="uml")
+        app = chart_app(llm_interface, neo4j_interface, node_list=id_list, type="uml", skeleton=skeleton)
         result = await app.ainvoke(
             {}, 
             config={"configurable": {"thread_id":f"{name}standalone-uml"}}
@@ -283,7 +285,10 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
         source_id_list.extend(result["id_list"])
         section6_data_uml_mermaid= "### 6. 模块数据结构\n" + module_data
         section6_data_uml = {"mermaid": section6_data_uml_mermaid, "mapping": mapping}
-        return {"section6_data_uml": section6_data_uml, "source_id_list": source_id_list}
+        ret = {"section6_data_uml": section6_data_uml, "source_id_list": source_id_list}
+        if result.get("uml_token_stats"):
+            ret["uml_token_stats"] = result["uml_token_stats"]
+        return ret
 
     async def generate_final_output(state: BlockState) -> BlockState:
         print(f"[final_output] state keys: {list(state.keys())}")
