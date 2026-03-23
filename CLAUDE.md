@@ -16,7 +16,7 @@
 其中Block是基于项目目录和文件源码信息划分的模块
 
 实体之间连边表示它们之间的依赖关系，边的类型有：
-- ANNOTATES：表示注解作用于哪个实体, 包括Annotation-[:ANNOTATES]->Method, Annotation-[:ANNOTATES]->Class
+- ANNOTATES：表示注解作用于哪个实体, 包括Annotation-[:ANNOTATES]->Method, Annotation-[:ANNOTATES]->Class, Field<-[:ANNOTATES]-Annotation
 - CALLS：表示方法调用, 包括Method-[:CALLS]->Method
 - CONTAINS：表示Package包含哪些文件实体, 包括Package-[:CONTAINS]->File
 - DECLARES：表示实体定义, 包括File-[:DECLARES]->Class, File-[:DECLARES]->Enum, File-[:DECLARES]->Annotation, File-[:DECLARES]->Interface, File-[:DECLARES]->Record, Class-[:DECLARES]->Class, Enum-[:DECLARES]->Field, Class-[:DECLARES]->Field, Enum-[:DECLARES]->Method, Class-[:DECLARES]->Method, Interface-[:DECLARES]->Method, Enum-[:DECLARES]->Enumconstant
@@ -25,7 +25,7 @@
 - HAS_TYPE：表示某个字段的类型与某个类、接口或枚举等实体相关, Field-[:HAS_TYPE]->Class, Field-[:HAS_TYPE]->Enum
 - IMPLEMENTS：表示接口实现, 包括Class-[:IMPLEMENTS]->Interface
 - RETURNS：表示方法返回, 包括Method-[:RETURNS]->Class, Method-[:RETURNS]->Interface
-- USES：表示方法中使用了某个类、接口或枚举等实体，包括Method-[:USES]->Class
+- USES：表示方法中使用了某个类、接口或枚举等实体，包括Method-[:USES]->Class, Method-[:USES]->Field
 - f2c：表示Block之间的包含关系，包括Block-[:f2c]->Block, Block-[:f2c]->File, Block树根节点是name属性为root的Block节点
 
 ## 节点属性详细说明

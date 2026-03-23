@@ -23,8 +23,9 @@ class InternalBlockState(TypedDict, total=False):
     # 输入
     root_id: str
     # 遍历结果
-    intermediate_blocks: List[Dict]  # 需要生成文档的中间层Block列表
-    leaf_blocks: Dict[str, str]  # {nodeId: folder_path} - 叶子Block到文件夹的映射
+    intermediate_blocks: List[Dict]  # 需要生成文档的中间层Block列表（子节点全是Block）
+    file_leaves: Dict[str, str]  # {nodeId: folder_path} - 纯File叶子Block
+    file_block_leaves: Dict[str, str]  # {nodeId: folder_path} - Block+File混合叶子Block
     # 生成结果
     generated_docs: List[Dict]  # [{block_id, doc_path, wiki}, ...] - 生成的文档
     # 最终输出
@@ -102,55 +103,67 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
     async def traverse_tree(state: InternalBlockState) -> InternalBlockState:
         """
         阶段1：先一次性遍历整棵Block树，预先计算所有路径
-        区分中间层Block（需要生成文档）和叶子Block（直接连接File）
+        三路分类：
+        - 子节点全是Block → 中间层，生成文档
+        - 子节点全是File → file_leaves
+        - 子节点有Block也有File → file_block_leaves
         """
         root = await get_root_block(neo4j_interface)
         if not root:
             print("[ERROR] 未找到root Block节点")
-            return {"intermediate_blocks": [], "leaf_blocks": {}}
+            return {"intermediate_blocks": [], "file_leaves": {}, "file_block_leaves": {}}
 
         root_id = root["nodeId"]
         print(f"[INFO] 找到root Block: {root_id}")
         print(f"[INFO] 开始遍历整棵Block树...")
 
-        intermediate_blocks = []  # 中间层Block列表
-        leaf_blocks = {}  # 叶子Block映射
+        intermediate_blocks = []  # 中间层Block列表（子节点全是Block）
+        file_leaves = {}  # 纯File叶子Block
+        file_block_leaves = {}  # Block+File混合叶子Block
 
         async def traverse_recursive(block_id: str, block_name: str, folder_path: str):
             """
             递归遍历Block树
             """
-            # 检查是否直接连接File
             file_count = await check_direct_files(neo4j_interface, block_id)
+            children = await get_child_blocks(neo4j_interface, block_id)
 
-            if file_count > 0:
-                # 叶子Block：直接连接File，不需要生成文档
-                leaf_blocks[block_id] = folder_path
-                print(f"  [LEAF] {block_name} ({block_id}) -> {folder_path}")
-            else:
-                # 中间层Block：需要生成文档
-                # 获取子Block列表
-                children = await get_child_blocks(neo4j_interface, block_id)
+            has_files = file_count > 0
+            has_blocks = len(children) > 0
 
-                if not children:
-                    print(f"  [WARN] {block_name} 没有子节点，跳过")
-                    return
+            print(f"  [DEBUG] {block_name} ({block_id}): files={file_count}, blocks={len(children)}")
 
-                # 记录中间层Block信息
+            if has_files and not has_blocks:
+                # 纯File叶子Block
+                file_leaves[block_id] = folder_path
+                print(f"    → [FILE_LEAF] 写入file_leaves.json")
+            elif has_files and has_blocks:
+                # Block+File混合叶子Block
+                file_block_leaves[block_id] = folder_path
+                print(f"    → [FILE_BLOCK_LEAF] 写入file_block_leaves.json，继续递归子Block")
+                # 继续递归处理子Block
+                for child in children:
+                    child_id = child["nodeId"]
+                    child_name = block_names.get(str(child_id), child["name"])
+                    child_folder_path = os.path.join(folder_path, child_name)
+                    await traverse_recursive(child_id, child_name, child_folder_path)
+            elif has_blocks:
+                # 纯Block中间层，生成wiki json
                 intermediate_blocks.append({
                     "block_id": block_id,
                     "block_name": block_name,
                     "folder_path": folder_path,
                     "children": children
                 })
-                print(f"  [INTERMEDIATE] {block_name} ({block_id}) -> {len(children)} 个子节点")
+                print(f"    → [INTERMEDIATE] 生成wiki json，继续递归子Block")
 
-                # 递归处理所有子节点
                 for child in children:
                     child_id = child["nodeId"]
                     child_name = block_names.get(str(child_id), child["name"])
                     child_folder_path = os.path.join(folder_path, child_name)
                     await traverse_recursive(child_id, child_name, child_folder_path)
+            else:
+                print(f"    → [WARN] 没有子节点，跳过")
 
         # 从root的子节点开始遍历
         root_children = await get_child_blocks(neo4j_interface, root_id)
@@ -169,13 +182,15 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
             await traverse_recursive(block_id, block_name, folder_path)
 
         print(f"[INFO] 树遍历完成:")
-        print(f"  - 中间层Block（需要生成文档）: {len(intermediate_blocks)} 个")
-        print(f"  - 叶子Block（直接连接File）: {len(leaf_blocks)} 个")
+        print(f"  - 中间层Block（纯Block子节点，生成文档）: {len(intermediate_blocks)} 个")
+        print(f"  - 纯File叶子Block: {len(file_leaves)} 个")
+        print(f"  - Block+File混合叶子Block: {len(file_block_leaves)} 个")
 
         return {
             "root_id": root_id,
             "intermediate_blocks": intermediate_blocks,
-            "leaf_blocks": leaf_blocks,
+            "file_leaves": file_leaves,
+            "file_block_leaves": file_block_leaves,
             "generated_docs": []
         }
 
@@ -310,22 +325,29 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
         """
         保存处理结果到文件
         """
-        leaf_blocks = state["leaf_blocks"]
+        file_leaves = state["file_leaves"]
+        file_block_leaves = state["file_block_leaves"]
         generated_docs = state["generated_docs"]
 
-        # 1. 保存叶子Block映射
-        leaf_output_path = os.path.join(
+        base_output_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "output", "leaf_blocks_mapping.json"
+            "output"
         )
-        os.makedirs(os.path.dirname(leaf_output_path), exist_ok=True)
+        os.makedirs(base_output_path, exist_ok=True)
 
-        with open(leaf_output_path, "w", encoding="utf-8") as f:
-            json.dump(leaf_blocks, f, ensure_ascii=False, indent=2)
+        # 1. 保存纯File叶子Block映射
+        file_leaves_path = os.path.join(base_output_path, "file_leaves.json")
+        with open(file_leaves_path, "w", encoding="utf-8") as f:
+            json.dump(file_leaves, f, ensure_ascii=False, indent=2)
+        print(f"[INFO] 纯File叶子Block映射已保存: {file_leaves_path}")
 
-        print(f"[INFO] 叶子Block映射已保存: {leaf_output_path}")
+        # 2. 保存Block+File混合叶子Block映射
+        file_block_leaves_path = os.path.join(base_output_path, "file_block_leaves.json")
+        with open(file_block_leaves_path, "w", encoding="utf-8") as f:
+            json.dump(file_block_leaves, f, ensure_ascii=False, indent=2)
+        print(f"[INFO] Block+File混合叶子Block映射已保存: {file_block_leaves_path}")
 
-        # 2. 保存每个生成的文档
+        # 3. 保存每个生成的文档
         for doc in generated_docs:
             doc_path = doc["doc_path"]
 
@@ -335,10 +357,17 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
                 "source_id_list": []  # 中间层Block文档不需要源码定位
             }
 
-            json_path = doc_path.replace(".md", ".json")
+            json_path = doc_path.replace(".md", ".meta.json")
+
+            # Windows长路径支持：添加\\?\前缀
+            if os.name == 'nt' and not json_path.startswith('\\\\?\\'):
+                json_path = '\\\\?\\' + os.path.abspath(json_path)
+                dir_path = os.path.dirname(json_path)
+            else:
+                dir_path = os.path.dirname(json_path)
 
             # 确保目录存在
-            os.makedirs(os.path.dirname(json_path), exist_ok=True)
+            os.makedirs(dir_path, exist_ok=True)
 
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(output_data, f, ensure_ascii=False, indent=2)
@@ -346,10 +375,12 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
             print(f"[INFO] 文档已保存: {json_path}")
 
         final_output = {
-            "leaf_blocks": leaf_blocks,
+            "file_leaves": file_leaves,
+            "file_block_leaves": file_block_leaves,
             "generated_docs_count": len(generated_docs),
             "summary": {
-                "total_leaf_blocks": len(leaf_blocks),
+                "total_file_leaves": len(file_leaves),
+                "total_file_block_leaves": len(file_block_leaves),
                 "total_intermediate_docs": len(generated_docs)
             }
         }

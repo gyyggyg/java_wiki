@@ -5,7 +5,7 @@ import asyncio
 from typing import Any, Dict, List
 from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gy.interfaces.data_master import get_file
+from interfaces.data_master import get_file
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 from typing_extensions import TypedDict
@@ -183,7 +183,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
         # 保存输出文件
         output_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "output", "root_doc.json"
+            "output", "root_doc.meta.json"
         )
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

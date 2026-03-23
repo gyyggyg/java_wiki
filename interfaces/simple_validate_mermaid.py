@@ -1,3 +1,4 @@
+from ast import pattern
 import re
 import os
 import sys
@@ -35,8 +36,16 @@ class SimpleMermaidValidator:
         for i, block in enumerate(mermaid_blocks, 1):
             if not self._validate_mermaid_block(block, i):
                 valid = False
-                
-        return {"result": valid, "errors": self.errors}
+        result = []
+        if self.errors:
+            pattern = r'^(.*?)(?=\s*\([A-Za-z]:\\|\s*\(file:///[A-Za-z]:/)'
+            match = re.search(pattern, self.errors[0], re.MULTILINE | re.DOTALL)
+            if match:
+                result = match.group(1).strip()
+            else:
+                result = self.errors
+
+        return {"result": valid, "errors": result}
     
     def _extract_mermaid_blocks(self, content):
         """提取文档中的所有Mermaid代码块"""
