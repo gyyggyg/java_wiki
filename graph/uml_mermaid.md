@@ -1,217 +1,179 @@
 ```mermaid
 classDiagram
-    class DemoController {
-        +CommonResult~List~PmsBrand~~ getBrandList()
-        +CommonResult createBrand(PmsBrandDto pmsBrand)
-        +CommonResult updateBrand(Long id, PmsBrandDto pmsBrandDto)
-        +CommonResult deleteBrand(Long id)
-        +CommonResult~CommonPage~PmsBrand~~~ listBrand(Integer pageNum, Integer pageSize)
-        +CommonResult~PmsBrand~ brand(Long id)
-        -DemoService demoService
+    class DynamicSecurityFilter {
+        +init(filterConfig)
+        +doFilter(servletRequest, servletResponse, filterChain)
+        +destroy()
+        +getSecureObjectClass()
+        +obtainSecurityMetadataSource()
+        +setMyAccessDecisionManager(dynamicAccessDecisionManager)
+        -dynamicSecurityMetadataSource
+        -ignoreUrlsConfig
     }
-    
-    class DemoService {
-        <<interface>>
-        +List~PmsBrand~ listAllBrand()
-        +int createBrand(PmsBrandDto pmsBrandDto)
-        +int updateBrand(Long id, PmsBrandDto pmsBrandDto)
-        +int deleteBrand(Long id)
-        +List~PmsBrand~ listBrand(int pageNum, int pageSize)
-        +PmsBrand getBrand(Long id)
-    }
-    
-    class DemoServiceImpl {
-        +List~PmsBrand~ listAllBrand()
-        +int createBrand(PmsBrandDto pmsBrandDto)
-        +int updateBrand(Long id, PmsBrandDto pmsBrandDto)
-        +int deleteBrand(Long id)
-        +List~PmsBrand~ listBrand(int pageNum, int pageSize)
-        +PmsBrand getBrand(Long id)
-        -PmsBrandMapper brandMapper
-    }
-
-    DemoService <|.. DemoServiceImpl
-    DemoController --> DemoService
-    DemoServiceImpl --> PmsBrandMapper
-    DemoServiceImpl --> PmsBrandDto
-    DemoServiceImpl --> PmsBrand
-    
-    class RestTemplateDemoController {
-        +Object getForEntity(Long id)
-        +Object getForEntity2(Long id)
-        +Object getForEntity3(Long id)
-        +Object getForObject(Long id)
-        +Object postForEntity(PmsBrand brand)
-        +Object postForObject(PmsBrand brand)
-        +Object postForEntity3(String name)
-        -RestTemplate restTemplate
-        -String HOST_MALL_ADMIN
-    }
-    
-    class RestTemplateConfig {
-        +RestTemplate restTemplate()
-    }
-    
-    class FlagValidatorClass {
-        +void initialize(FlagValidator flagValidator)
-        +boolean isValid(Integer value, ConstraintValidatorContext constraintValidatorContext)
-        -String[] values
-    }
-    FlagValidatorClass ..|> ConstraintValidator~FlagValidator,Integer~
-
-    class SwaggerConfig {
-        +SwaggerProperties swaggerProperties()
-        +BeanPostProcessor springfoxHandlerProviderBeanPostProcessor()
-    }
-    
-    class BaseSwaggerConfig {
+    class AbstractSecurityInterceptor {
         <<abstract>>
-        +Docket createRestApi()
-        +SwaggerProperties swaggerProperties()
-        +BeanPostProcessor generateBeanPostProcessor()
+        +beforeInvocation(object)
+        +afterInvocation(token, returnedObject)
+        +setAccessDecisionManager(accessDecisionManager)
     }
-    SwaggerConfig <|-- BaseSwaggerConfig
-    
-    class MyBatisConfig {
+    class Filter {
+        <<interface>>
+        +init(filterConfig)
+        +doFilter(servletRequest, servletResponse, filterChain)
+        +destroy()
     }
-    
-    class SecurityConfig {
-        +SecurityFilterChain filterChain(HttpSecurity httpSecurity)
-        -IgnoreUrlsConfig ignoreUrlsConfig
-        -RestfulAccessDeniedHandler restfulAccessDeniedHandler
-        -RestAuthenticationEntryPoint restAuthenticationEntryPoint
-        -JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter
-        -DynamicSecurityService dynamicSecurityService
-        -DynamicSecurityFilter dynamicSecurityFilter
+    class DynamicSecurityMetadataSource {
+        +loadDataSource()
+        +clearDataSource()
+        +getAttributes(o)
+        +getAllConfigAttributes()
+        +supports(aClass)
+        -dynamicSecurityService
+        -configAttributeMap
     }
-    SecurityConfig --> AdminUserDetails
-    SecurityConfig --> IgnoreUrlsConfig
-    SecurityConfig --> RestfulAccessDeniedHandler
-    SecurityConfig --> RestAuthenticationEntryPoint
-    SecurityConfig --> JwtAuthenticationTokenFilter
-    SecurityConfig --> DynamicSecurityService
-    SecurityConfig --> DynamicSecurityFilter
-    
-    class AdminUserDetails {
-        +Collection~GrantedAuthority~ getAuthorities()
-        +String getPassword()
-        +String getUsername()
-        +boolean isAccountNonExpired()
-        +boolean isAccountNonLocked()
-        +boolean isCredentialsNonExpired()
-        +boolean isEnabled()
-        -UmsAdmin umsAdmin
-        -List~UmsResource~ resourceList
+    class FilterInvocationSecurityMetadataSource {
+        <<interface>>
+        +getAttributes(o)
+        +getAllConfigAttributes()
+        +supports(aClass)
     }
-    AdminUserDetails ..|> UserDetails
-    AdminUserDetails --> UmsAdmin
-    AdminUserDetails --> UmsResource
-    
-    class MallDemoApplication {
-        +main(String[] args)
+    class DynamicSecurityService {
+        <<interface>>
+        +loadDataSource()
     }
-    
-    class PmsBrandDto {
-        +String getName()
-        +void setName(String name)
-        +String getFirstLetter()
-        +void setFirstLetter(String firstLetter)
-        +Integer getSort()
-        +void setSort(Integer sort)
-        +Integer getFactoryStatus()
-        +void setFactoryStatus(Integer factoryStatus)
-        +Integer getShowStatus()
-        +void setShowStatus(Integer showStatus)
-        +String getLogo()
-        +void setLogo(String logo)
-        +String getBigPic()
-        +void setBigPic(String bigPic)
-        +String getBrandStory()
-        +void setBrandStory(String brandStory)
-        -String name
-        -String firstLetter
-        -Integer sort
-        -Integer factoryStatus
-        -Integer showStatus
-        -String logo
-        -String bigPic
-        -String brandStory
+    class DynamicAccessDecisionManager {
+        +decide(authentication, object, configAttributes)
+        +supports(configAttribute)
+        +supports(aClass)
     }
-    
-    class MallDemoApplicationTests {
-        +void contextLoads()
-        +void testLogStash()
-        -Logger logger
+    class AccessDecisionManager {
+        <<interface>>
+        +decide(authentication, object, configAttributes)
+        +supports(configAttribute)
+        +supports(aClass)
     }
+    class IgnoreUrlsConfig {
+        +getUrls()
+    }
+    class FilterInvocation {
+        +getChain()
+        +getRequest()
+        +getResponse()
+        +getRequestUrl()
+    }
+    class ConfigAttribute {
+        +getAttribute()
+    }
+    class Authentication {
+        +getAuthorities()
+    }
+    class GrantedAuthority {
+        +getAuthority()
+    }
+    class PathMatcher {
+        +match(pattern, path)
+    }
+    class AntPathMatcher {
+    }
+    class InterceptorStatusToken {
+    }
+    class URLUtil {
+        +getPath(url)
+    }
+    class HttpMethod {
+    }
+    class ServletRequest {
+    }
+    class ServletResponse {
+    }
+    class FilterChain {
+        +doFilter(servletRequest, servletResponse)
+    }
+    class FilterConfig {
+    }
+    class ServletException {
+    }
+    class IOException {
+    }
+    class AccessDeniedException {
+    }
+    class InsufficientAuthenticationException {
+    }
+    class Collection~ConfigAttribute~ {
+    }
+    class Map~String,ConfigAttribute~ {
+    }
+    class List~ConfigAttribute~ {
+    }
+    class Iterator~String~ {
+    }
+    DynamicSecurityFilter --|> AbstractSecurityInterceptor
+    DynamicSecurityFilter ..|> Filter
+    DynamicSecurityFilter o-- DynamicSecurityMetadataSource
+    DynamicSecurityFilter o-- IgnoreUrlsConfig
+    DynamicSecurityFilter ..> DynamicAccessDecisionManager
+    DynamicSecurityFilter ..> FilterInvocation
+    DynamicSecurityFilter ..> PathMatcher
+    DynamicSecurityFilter ..> AntPathMatcher
+    DynamicSecurityFilter ..> InterceptorStatusToken
+    DynamicSecurityFilter ..> HttpMethod
+    DynamicSecurityFilter ..> ServletRequest
+    DynamicSecurityFilter ..> ServletResponse
+    DynamicSecurityFilter ..> FilterChain
+    DynamicSecurityFilter ..> ServletException
+    DynamicSecurityFilter ..> IOException
+    DynamicSecurityMetadataSource ..|> FilterInvocationSecurityMetadataSource
+    DynamicSecurityMetadataSource o-- DynamicSecurityService
+    DynamicSecurityMetadataSource ..> Map~String,ConfigAttribute~
+    DynamicSecurityMetadataSource ..> Collection~ConfigAttribute~
+    DynamicSecurityMetadataSource ..> List~ConfigAttribute~
+    DynamicSecurityMetadataSource ..> FilterInvocation
+    DynamicSecurityMetadataSource ..> URLUtil
+    DynamicSecurityMetadataSource ..> PathMatcher
+    DynamicSecurityMetadataSource ..> AntPathMatcher
+    DynamicSecurityMetadataSource ..> Iterator~String~
+    DynamicAccessDecisionManager ..|> AccessDecisionManager
+    DynamicAccessDecisionManager ..> Authentication
+    DynamicAccessDecisionManager ..> Collection~ConfigAttribute~
+    DynamicAccessDecisionManager ..> ConfigAttribute
+    DynamicAccessDecisionManager ..> GrantedAuthority
+    DynamicAccessDecisionManager ..> AccessDeniedException
+    DynamicAccessDecisionManager ..> InsufficientAuthenticationException
+    DynamicAccessDecisionManager ..> Iterator~String~
+    DynamicSecurityService ..> Map~String,ConfigAttribute~
 
 ```
-- 本图为**代码类/接口之间的UML关系图**，展示了 Mall Demo 应用中核心类、接口及其主要成员方法和类之间的继承、实现与依赖关系。
-- 重点内容如下：
+- 本图为代码类与接口之间关系的UML类图，重点展示了动态安全权限相关的核心类及其关系，主要关注 DynamicSecurityFilter、DynamicSecurityMetadataSource、DynamicSecurityService、DynamicAccessDecisionManager 四个类/接口。
 
----
+- DynamicSecurityFilter 类（核心过滤器）：
+  - 继承自 AbstractSecurityInterceptor（抽象安全拦截器），实现了 Filter（过滤器接口）。
+  - 主要负责对 HTTP 请求进行安全拦截、校验与放行逻辑。
+  - 持有 DynamicSecurityMetadataSource（动态元数据源）和 IgnoreUrlsConfig（忽略URL配置）的组合关系。
+  - 可通过 setMyAccessDecisionManager 方法设置 DynamicAccessDecisionManager（动态权限决策管理器）。
+  - 方法 doFilter 实现了安全请求的核心流程，包括OPTIONS请求、白名单直接放行，以及通过 AccessDecisionManager 决定是否放行。
+  - 依赖 FilterInvocation（过滤器调用对象）、PathMatcher/AntPathMatcher（路径匹配）、InterceptorStatusToken（拦截状态）、和 HTTP 相关类。
 
-- `DemoController`（品牌管理示例接口，控制层）  
-    - 公开方法：品牌的增删改查、分页获取、单条获取等（如 `getBrandList`, `createBrand`, `updateBrand`, `deleteBrand`, `listBrand`, `brand`）。
-    - 内部依赖成员：`DemoService`（业务层接口）。
-    - 与 `DemoService` 通过调用关系 (`-->`) 关联。
+- DynamicSecurityMetadataSource 类（动态安全元数据源）：
+  - 实现了 FilterInvocationSecurityMetadataSource 接口。
+  - 持有 DynamicSecurityService（动态安全服务）的组合关系。
+  - 负责加载、维护和获取路径对应的权限数据（ConfigAttribute），并通过 PathMatcher 进行路径匹配。
+  - 方法 loadDataSource 通过 dynamicSecurityService 加载权限数据，getAttributes 根据请求路径返回需要的资源权限。
 
-- `DemoService`（品牌管理业务接口）  
-    - 声明了品牌相关的业务操作方法（如 `listAllBrand`, `createBrand`, `updateBrand`, `deleteBrand`, `listBrand`, `getBrand`）。
-    - 为接口 (`<<interface>>`)，由 `DemoServiceImpl` 实现。
-    - 与 `DemoController` 之间为接口调用关系。
+- DynamicSecurityService 接口（动态安全服务）：
+  - 提供 loadDataSource 方法，用于加载所有资源与权限的映射关系（Map<String, ConfigAttribute>）。
+  - 被 DynamicSecurityMetadataSource 调用，实现资源权限的动态获取。
 
-- `DemoServiceImpl`（品牌管理业务实现类）  
-    - 实现 `DemoService`（`<|..` 继承关系）。
-    - 依赖 `PmsBrandMapper`（数据访问层）、`PmsBrandDto`、`PmsBrand`。
-    - 包含与品牌业务相关的具体实现方法。
-
-- `RestTemplateDemoController`（RestTemplate 调用示例控制器）  
-    - 提供多种 HTTP 调用品牌相关接口的演示方法（如 `getForEntity`, `getForObject`, `postForEntity`, `postForObject` 等）。
-    - 依赖成员：`RestTemplate`（由 `RestTemplateConfig` 提供），`HOST_MALL_ADMIN`（远程主机地址字符串）。
-
-- `RestTemplateConfig`（RestTemplate 配置类）  
-    - 提供 `RestTemplate` Bean 的方法（`restTemplate()`），供控制器依赖注入使用。
-
-- `FlagValidatorClass`  
-    - 实现接口 `ConstraintValidator<FlagValidator, Integer>`（`..|>` 继承关系）。
-    - 实现方法：`initialize`（初始化校验器）、`isValid`（校验逻辑）。
-
-- `SwaggerConfig`（Swagger API 文档配置类）  
-    - 继承自抽象类 `BaseSwaggerConfig`（`<|--` 继承关系）。
-    - 重写 `swaggerProperties()`，提供接口文档属性配置。
-    - 提供 `springfoxHandlerProviderBeanPostProcessor()` Bean，用于兼容 Springfox。
-
-- `BaseSwaggerConfig`（Swagger 基础配置抽象类）  
-    - 定义了 `createRestApi`、`swaggerProperties`、`generateBeanPostProcessor` 等方法。
-    - 为抽象基类，供 `SwaggerConfig` 继承和扩展。
-
-- `MyBatisConfig`  
-    - MyBatis 框架相关的配置类，无方法或成员。
-
-- `SecurityConfig`（安全配置类）  
-    - 配置 Spring Security 相关安全过滤链（`filterChain`）。
-    - 依赖于多个安全相关 Bean（如 `IgnoreUrlsConfig`, `RestfulAccessDeniedHandler`, `RestAuthenticationEntryPoint`, `JwtAuthenticationTokenFilter`, `DynamicSecurityService`, `DynamicSecurityFilter`）。
-    - 与 `AdminUserDetails`、`IgnoreUrlsConfig` 等类有依赖关系。
-
-- `AdminUserDetails`  
-    - 实现接口 `UserDetails`（`..|>` 继承关系）。
-    - 持有 `UmsAdmin`（后台用户信息）、`List<UmsResource>`（资源列表）。
-    - 实现用户权限及状态相关方法（如 `getAuthorities`, `getPassword`, `getUsername` 等）。
-    - 与 `UmsAdmin`、`UmsResource` 有关联。
-
-- `PmsBrandDto`  
-    - 品牌数据传输对象，包含品牌的各种属性（如 `name`, `firstLetter`, `sort`, `factoryStatus`, `showStatus`, `logo`, `bigPic`, `brandStory`）及其 getter/setter。
-
-- `MallDemoApplication`  
-    - Spring Boot 应用主类，包含 `main` 方法（程序入口）。
-
-- `MallDemoApplicationTests`  
-    - 应用测试类，包含测试方法（如 `contextLoads`, `testLogStash`），用于日志和环境加载测试。
-
----
+- DynamicAccessDecisionManager 类（动态权限决策管理器）：
+  - 实现 AccessDecisionManager 接口。
+  - 方法 decide 负责根据当前用户（Authentication）拥有的权限与请求所需的权限（ConfigAttribute 集合）进行比对，决定是否授权访问，未满足时抛出 AccessDeniedException。
+  - 被 DynamicSecurityFilter 作为权限决策组件使用。
 
 - 关系说明：
-    - 实线箭头（`-->`）表示依赖或关联，如控制器依赖服务、服务实现依赖数据访问对象。
-    - 空心三角箭头（`<|--`、`<|..`、`..|>`）表示继承或实现关系，如实现接口或继承抽象类。
-    - 类之间的依赖和实现关系，清晰反映了各层之间的职责划分与调用路径，符合标准的 Spring Boot 分层架构设计思想。
+  - DynamicSecurityFilter 依赖并组合了 DynamicSecurityMetadataSource 和 IgnoreUrlsConfig，设置 DynamicAccessDecisionManager 作为决策器。
+  - DynamicSecurityMetadataSource 依赖 DynamicSecurityService 提供权限数据。
+  - DynamicAccessDecisionManager 作为 AccessDecisionManager 的实现，负责最终的权限判断。
+  - 相关辅助类如 FilterInvocation、ConfigAttribute、Authentication、GrantedAuthority、PathMatcher 等被各核心类调用或依赖。
+
+- 总结：
+  - 此UML图清晰展现了动态安全过滤的关键类之间的继承、实现、组合与调用关系，体现了基于动态权限元数据与决策管理器的安全认证机制整体架构。
 

@@ -1,6 +1,30 @@
 from langchain.prompts import PromptTemplate
 
+MODULE_NAME_PROMPT = PromptTemplate(
+    input_variables=["module_information","pom_content"], 
+    template="""
+你是模块命名专家。针对一个已按文件功能完成聚类的 Java 项目，请为出现的每个模块重新设计一个**自然语言风格的英文名称**。
+【输入】
+- 模块树信息：包含父子层级、唯一 nodeId、初始名称及语义说明，见 `module_information`：{module_information}
+- `pom.xml` ：{pom_content}，含模块间依赖关系
 
+【任务】
+1. 根据 `module_information` 还原模块层级结构  
+2. 依据 `pom_content` 中的依赖关系，推断各模块职责边界  
+3. 综合层级位置、职责范围及与其他模块的关联，为 `module_information` 中出现的每个 nodeId 生成一个英文名称，要求：
+   - 不要使用驼峰命名法
+   - 使用自然语言、可读性强、空格分隔、一眼看懂，控制在5个词内
+   - 高度展示概括模块的具体功能，体现差异和联系 
+   - 体现上下级关系  
+   - 同级名称保持相关性  
+   - 与依赖模块名称呼应  
+   - 避免模棱两可功能不清晰的名称，如 "Module1"、"FoundationA"
+4. 仅返回 nodeId 到新名称的映射
+
+【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+{{"module1_id":"Admin Core System","module2_id":"Demo Framework Config"}} 
+"""
+)
 #生成source_id提示词;
 SOURCE_ID_PROMPT= PromptTemplate(
     input_variables=["source_code","explanation"],
@@ -140,7 +164,7 @@ UML_PROMPT= PromptTemplate(
 现在我有一个Java项目，你需要为我做出UML类图，并按照指定格式回复。
 ### 输入信息
 ```
-所有涉及到的类/接口源代码信息'node_information'
+所有涉及到的类/接口结构信息'node_information'（包含类声明、字段列表、方法签名列表、以及类之间的关系描述）
 图中出现的类/接口对应的id'source_id'
 ```
 
@@ -149,32 +173,32 @@ UML_PROMPT= PromptTemplate(
 2、体现"node_information"中所有节点和关系，接口、枚举、抽象类要用 `<<interface>>`、`<<enum>>`、`<<abstract>>` 标注
 3、每个类节点的信息要包含类/接口和外界产生联系的属性和函数
 4、关系例如实现、继承、使用、返回等要在图中体现
+5、枚举类的枚举常量要在类图中体现
 
 uml类图语法规则（必须严格遵守）：
 1. 类节点命名：
    - 必须使用给你提供的实际类名作为节点ID，不能使用数字ID，类名、关系标签都不能用单引号或双引号包裹,关系上不要加标签
-   - 类名里不要出现 $、.、- 等符号；
+   - 类名里禁止出现 $、.、- 等符号；
    - 正确：class Order, class AlipayService, class CommonResult~T~
    - 错误：class 2841, class 5554, class 2907
 2. 泛型类型必须使用波浪号~而不是尖括号<>
-   - 正确：class Result~T~, List~String~, Map~K,V~
-   - 错误：class Result<T>, List<String>, Map<K,V>
+   - 一对波浪号~只能出现一次，禁止嵌套波浪号
+   - 嵌套泛型必须展平：用下划线或逗号代替内层泛型括号
+   - 正确：class Result~T~, List~String~, Map~K,V~, CommonResult~List_CmsPrefrenceArea~
+   - 错误：class Result<T>, List<String>, CommonResult~List~CmsPrefrenceArea~~, CommonResult~List~String~~
 3. 类定义中禁止出现第二对 {{ }}、方法体、分号、注释、修饰符（如 public/private）
    - 可见性符号只能保留 + - # ~
    - 抽象类用 <<abstract>>，接口用 <<interface>>，枚举用 <<enumeration>>，放在第二行开头
 4. 内部类/嵌套类处理：
    - 必须将内部类拆分为独立的类节点，不要在类定义内部再定义类
    - 使用组合关系（*--）或聚合关系（o--）表示外部类与内部类的包含关系
-   - 内部类命名：OuterClass.InnerClass 或 OuterClass$InnerClass
+   - 内部类命名：使用下划线连接，如 OuterClass_InnerClass
+   - 禁止使用 $ 或 . 作为内部类分隔符（$ 和 . 是mermaid非法字符）
    - 正确示例：
      class Order {{
         <<interface>> %%类型放在这里
          +validate()
      }}
-     class Order$Item {{
-         +getPrice()
-     }}
-     Order *-- Order$Item : contains
    - 错误示例（禁止）：
      class Order {{
          class Item {{
