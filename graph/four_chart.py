@@ -18,7 +18,10 @@ from interfaces.neo4j_interface import Neo4jInterface
 from chains.common_chains import ChainFactory   
 from graph.id_generate import find_class_or_method_range
 from interfaces.simple_validate_mermaid import SimpleMermaidValidator
-from chains.prompts.type_chart_prompt import SOURCE_ID_PROMPT, CFG_PROMPT, UML_PROMPT, TIME_PROMPT, BLOCK_PROMPT, CFG_ID_PROMPT, MERMIAD_DESC_PROMPT
+
+# 便捷引用：清理classDiagram中类定义内部的空行
+_sanitize_class_diagram = SimpleMermaidValidator.sanitize_class_diagram
+from chains.prompts.type_chart_prompt import SOURCE_ID_PROMPT, CFG_PROMPT, UML_PROMPT, HYBRID_UML_PROMPT, HYBRID_UML_DESC_PROMPT, TIME_PROMPT, BLOCK_PROMPT, CFG_ID_PROMPT, MERMIAD_DESC_PROMPT
 
 
 def generate_uuid_4digits() -> str:
@@ -26,15 +29,57 @@ def generate_uuid_4digits() -> str:
     return str(uuid.uuid4().int)[:4]
 
 
+def _strip_json_comments(text: str) -> str:
+    """去除JSON文本中的行内 // 注释（不影响字符串内的 //）。"""
+    lines = text.split('\n')
+    cleaned = []
+    for line in lines:
+        in_string = False
+        escape = False
+        i = 0
+        while i < len(line):
+            ch = line[i]
+            if escape:
+                escape = False
+                i += 1
+                continue
+            if ch == '\\' and in_string:
+                escape = True
+                i += 1
+                continue
+            if ch == '"':
+                in_string = not in_string
+                i += 1
+                continue
+            if not in_string and ch == '/' and i + 1 < len(line) and line[i + 1] == '/':
+                line = line[:i].rstrip()
+                break
+            i += 1
+        cleaned.append(line)
+    return '\n'.join(cleaned)
+
+
 def extract_json(text: str) -> dict:
-    """从LLM输出中提取JSON对象，处理markdown代码块和多余文字。"""
-    # 先尝试直接解析
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-    # 尝试提取 ```json ... ``` 或 ``` ... ``` 中的内容
+    """从LLM输出中提取JSON对象，处理markdown代码块、多余文字和行内//注释。"""
     import re
+
+    def _try_parse(s: str) -> dict | None:
+        """尝试解析JSON，失败则去除//注释后重试。"""
+        try:
+            return json.loads(s)
+        except json.JSONDecodeError:
+            pass
+        try:
+            return json.loads(_strip_json_comments(s))
+        except json.JSONDecodeError:
+            return None
+
+    # 1. 直接解析
+    result = _try_parse(text)
+    if result is not None:
+        return result
+
+    # 2. 提取 ```json ... ``` 或 ``` ... ``` 中的内容
     patterns = [
         r'```json\s*\n?(.*?)\n?\s*```',
         r'```\s*\n?(.*?)\n?\s*```',
@@ -42,18 +87,18 @@ def extract_json(text: str) -> dict:
     for pattern in patterns:
         match = re.search(pattern, text, re.DOTALL)
         if match:
-            try:
-                return json.loads(match.group(1))
-            except json.JSONDecodeError:
-                continue
-    # 尝试找第一个 { 到最后一个 } 之间的内容
+            result = _try_parse(match.group(1))
+            if result is not None:
+                return result
+
+    # 3. 提取第一个 { 到最后一个 } 之间的内容
     first_brace = text.find('{')
     last_brace = text.rfind('}')
     if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-        try:
-            return json.loads(text[first_brace:last_brace + 1])
-        except json.JSONDecodeError:
-            pass
+        result = _try_parse(text[first_brace:last_brace + 1])
+        if result is not None:
+            return result
+
     raise json.JSONDecodeError(f"无法从LLM输出中提取有效JSON", text, 0)
 
 
@@ -225,11 +270,13 @@ class ChartState(TypedDict, total=False):
     id_list : List
     uml_token_stats: Dict
 
-def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node_list: List , type: str, skeleton: bool = False) -> StateGraph:
+def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node_list: List , type: str, skeleton: bool = False, class_source_map: Dict = None) -> StateGraph:
     cfg_id_chain = ChainFactory.create_generic_chain(llm_interface, SOURCE_ID_PROMPT)
     cfg_chain = ChainFactory.create_generic_chain(llm_interface, CFG_PROMPT)
     cfg_id_validate_chain = ChainFactory.create_generic_chain(llm_interface, CFG_ID_PROMPT)
     uml_chain = ChainFactory.create_generic_chain(llm_interface, UML_PROMPT)
+    hybrid_uml_chain = ChainFactory.create_generic_chain(llm_interface, HYBRID_UML_PROMPT)
+    hybrid_uml_desc_chain = ChainFactory.create_generic_chain(llm_interface, HYBRID_UML_DESC_PROMPT)
     time_chain = ChainFactory.create_generic_chain(llm_interface, TIME_PROMPT)
     block_chain = ChainFactory.create_generic_chain(llm_interface, BLOCK_PROMPT)
     description_chain = ChainFactory.create_generic_chain(llm_interface, MERMIAD_DESC_PROMPT)
@@ -566,16 +613,280 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         cb_config = {"callbacks": [uml_token_counter]}
         uml_result = await uml_chain.ainvoke({"node_information": node_information, "source_id": source_id_ai}, config=cb_config)
         uml_parsed = extract_json(uml_result)
+        uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
         validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
         while not validate_result["result"]:
             print(validate_result)
             uml_result = await uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai}, config=cb_config)
             uml_parsed = extract_json(uml_result)
+            uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
             validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
 
         mermaid_path = os.path.join(os.path.dirname(__file__), "uml_mermaid.md")
         return {"chart_type":"代码类\\接口之间关系uml图", "mermaid_content": uml_parsed["mermaid"], "mermaid_source_info":  f"重点关注对象为{key_target}, 和他们相关的信息是{node_information}", "write_path": mermaid_path, "mapping": uml_parsed["mapping"], "id_list": source_id_full, "uml_token_stats": uml_token_counter.summary()}
-    
+
+    async def generate_hybrid_uml(state: ChartState) -> ChartState:
+        """混合型Block的UML图：用namespace分组标注直连类和子模块类的归属。
+        始终使用extract_class_summary，因为JSON格式要求结构化字段（declaration/fields/methods）。
+        """
+        simplify = extract_class_summary
+
+        # class_source_map: {"OrderController": "本模块", "OrderService": "订单服务", ...}
+        source_map = class_source_map or {}
+
+        if node_list[0] == "Class&Interface":
+            key_target = node_list[1:]
+        else:
+            key_target = []
+            for nid in node_list:
+                query_class = """
+                MATCH (n)<-[:DECLARES*1..]-(n1:Class|Interface)
+                WHERE n.nodeId = $node_id
+                RETURN n1.name AS n1_name
+                """
+                result = await neo4j_interface.execute_query(query_class, {"node_id": nid})
+                if result:
+                    record = result[0]
+                    name = record['n1_name']
+                    key_target.append(name)
+        print("key_target (hybrid_uml):", key_target)
+
+        query0 = """
+        MATCH (n)<-[:DECLARES]-(n0:File)
+        WHERE n.name = $name
+        RETURN n.source_code AS n_code, n0.source_code AS file_code, n0.name AS file_name
+        """
+        query1 = """
+        MATCH (n)-[:IMPLEMENTS]->(n0)<-[:DECLARES]-(n1:File)
+        WHERE n.name = $name
+        RETURN n0.name AS n0_name, n0.source_code AS n0_code, n1.source_code AS file_code, n1.name AS file_name
+        """
+        query2 = """
+        MATCH (n)-[:EXTENDS]->(n0)<-[:DECLARES]-(n1:File)
+        WHERE n.name = $name
+        RETURN n0.name AS n0_name, n0.source_code AS n0_code, n1.source_code AS file_code, n1.name AS file_name
+        """
+        query3 = """
+        MATCH (n)-[:DECLARES*1..]->(m1:Method)-[:CALLS]->(m2:Method)<-[:DECLARES*1..]-(n0)<-[:DECLARES]-(n1:File)
+        WHERE n.name = $name AND n<>n0 AND n0.name in $key_target
+        RETURN m1.name AS m1_name, m2.name AS m2_name, n0.name AS n0_name, n0.source_code AS n0_code, n1.source_code AS file_code, n1.name AS file_name
+        """
+        query4 = """
+        MATCH (n)-[:DECLARES*1..]->(m1:Method)-[:USES]->(n0:Class)<-[:DECLARES]-(n1:File)
+        WHERE n.name = $name AND n<>n0 AND n0.name in $key_target
+        RETURN m1.name AS m1_name, n0.name AS n0_name, n0.source_code AS n0_code, n0.file_id AS file_id, n1.source_code AS file_code, n1.name AS file_name
+        """
+        query5 = """
+        MATCH (n)-[:DECLARES*1..]->(m1:Method)-[:RETURNS]->(n0:Class)<-[:DECLARES]-(n1:File)
+        WHERE n.name = $name AND n<>n0 and n0.name in $key_target
+        RETURN m1.name AS m1_name, n0.name AS n0_name, n0.source_code AS n0_code, n0.file_id AS file_id, n1.source_code AS file_code, n1.name AS file_name
+        """
+        source_id_ai = []
+        source_id_full = []
+        source_id_range = {}
+        # 收集每个类的结构化信息：{类名: {declaration, fields, methods, relations, namespace}}
+        class_info = {}
+
+        def ensure_class(cname, code_text=None, ns=None):
+            """确保类信息存在，如果code_text提供则解析并填充"""
+            if cname not in class_info:
+                class_info[cname] = {"declaration": "", "fields": "", "methods": "", "relations": [], "namespace": ns or source_map.get(cname, "未知模块")}
+            if code_text and not class_info[cname]["declaration"]:
+                summary = simplify(code_text)
+                lines_s = summary.split('\n')
+                for l in lines_s:
+                    if l.startswith("fields:"):
+                        class_info[cname]["fields"] = l
+                    elif l.startswith("methods:"):
+                        class_info[cname]["methods"] = l
+                    elif l.startswith("enum_constants:"):
+                        class_info[cname]["fields"] = l + ("\n" + class_info[cname]["fields"] if class_info[cname]["fields"] else "")
+                    else:
+                        if not class_info[cname]["declaration"]:
+                            class_info[cname]["declaration"] = l
+
+        for name in key_target:
+            result, result1, result2, result3, result4, result5 = await asyncio.gather(
+                neo4j_interface.execute_query(query0, {"name": name}),
+                neo4j_interface.execute_query(query1, {"name": name}),
+                neo4j_interface.execute_query(query2, {"name": name}),
+                neo4j_interface.execute_query(query3, {"name": name, "key_target": key_target}),
+                neo4j_interface.execute_query(query4, {"name": name, "key_target": key_target}),
+                neo4j_interface.execute_query(query5, {"name": name, "key_target": key_target}),
+            )
+            code = result[0]
+            if name not in source_id_range:
+                lines = find_class_or_method_range(result[0]['file_code'], result[0]['n_code'], name)
+                source_id_range[name] = {
+                    "file_name": result[0]['file_name'],
+                    "name": name,
+                    "lines": lines
+                }
+            ensure_class(name, code['n_code'])
+
+            if result1:
+                for record in result1:
+                    ensure_class(record['n0_name'], record['n0_code'])
+                    class_info[name]["relations"].append(f"实现 -> {record['n0_name']}")
+                    if record['n0_name'] not in source_id_range:
+                        lines = find_class_or_method_range(record['file_code'], record['n0_code'], record['n0_name'])
+                        source_id_range[record['n0_name']] = {"file_name": record['file_name'], "name": record['n0_name'], "lines": lines}
+            if result2:
+                for record in result2:
+                    ensure_class(record['n0_name'], record['n0_code'])
+                    class_info[name]["relations"].append(f"继承 -> {record['n0_name']}")
+                    if record['n0_name'] not in source_id_range:
+                        lines = find_class_or_method_range(record['file_code'], record['n0_code'], record['n0_name'])
+                        source_id_range[record['n0_name']] = {"file_name": record['file_name'], "name": record['n0_name'], "lines": lines}
+            if result3:
+                rel_dict = {}
+                for record in result3:
+                    ensure_class(record['n0_name'], record['n0_code'])
+                    if record['n0_name'] not in source_id_range:
+                        lines = find_class_or_method_range(record['file_code'], record['n0_code'], record['n0_name'])
+                        source_id_range[record['n0_name']] = {"file_name": record['file_name'], "name": record['n0_name'], "lines": lines}
+                    if record['n0_name'] not in rel_dict:
+                        rel_dict[record['n0_name']] = []
+                    rel_dict[record['n0_name']].append(record['m2_name'])
+                for key, value in rel_dict.items():
+                    class_info[name]["relations"].append(f"调用 -> {key}.{value}")
+            if result4:
+                rel_dict = {}
+                for record in result4:
+                    ensure_class(record['n0_name'], record['n0_code'])
+                    if record['n0_name'] not in source_id_range:
+                        lines = find_class_or_method_range(record['file_code'], record['n0_code'], record['n0_name'])
+                        source_id_range[record['n0_name']] = {"file_name": record['file_name'], "name": record['n0_name'], "lines": lines}
+                    if record['n0_name'] not in rel_dict:
+                        rel_dict[record['n0_name']] = []
+                    rel_dict[record['n0_name']].append(record['m1_name'])
+                for key, value in rel_dict.items():
+                    class_info[name]["relations"].append(f"使用 -> {key}")
+            if result5:
+                rel_dict = {}
+                for record in result5:
+                    ensure_class(record['n0_name'], record['n0_code'])
+                    if record['n0_name'] not in source_id_range:
+                        lines = find_class_or_method_range(record['file_code'], record['n0_code'], record['n0_name'])
+                        source_id_range[record['n0_name']] = {"file_name": record['file_name'], "name": record['n0_name'], "lines": lines}
+                    if record['n0_name'] not in rel_dict:
+                        rel_dict[record['n0_name']] = []
+                    rel_dict[record['n0_name']].append(record['m1_name'])
+                for key, value in rel_dict.items():
+                    class_info[name]["relations"].append(f"返回 -> {key}")
+
+        # ---- 过滤：只保留与直连类有关系的子模块 ----
+        direct_classes = {cname for cname, info in class_info.items() if info["namespace"] == "__direct__"}
+
+        # 找出与直连类有关系的子模块类（双向检查）
+        related_child_classes = set()
+        for cname, info in class_info.items():
+            for rel in info.get("relations", []):
+                target = rel.split(" -> ")[-1].split(".")[0].strip()
+                if cname in direct_classes and target in class_info and target not in direct_classes:
+                    # 直连类指向子模块类
+                    related_child_classes.add(target)
+                elif cname not in direct_classes and target in direct_classes:
+                    # 子模块类指向直连类
+                    related_child_classes.add(cname)
+
+        # 找出相关子模块类所属的namespace，保留整个namespace
+        related_namespaces = {class_info[c]["namespace"] for c in related_child_classes if c in class_info}
+
+        # 过滤class_info
+        removed_namespaces = set()
+        filtered_class_info = {}
+        for cname, info in class_info.items():
+            if info["namespace"] == "__direct__" or info["namespace"] in related_namespaces:
+                filtered_class_info[cname] = info
+            else:
+                removed_namespaces.add(info["namespace"])
+
+        if removed_namespaces:
+            print(f"[hybrid_uml] 过滤掉与直连类无关的子模块: {removed_namespaces}")
+        print(f"[hybrid_uml] 保留的子模块: {related_namespaces}")
+
+        # 更新source_id_range，移除被过滤的类
+        source_id_range = {k: v for k, v in source_id_range.items() if k in filtered_class_info}
+
+        # ---- 按namespace分组，生成JSON格式 ----
+        ns_groups = {}
+        for cname, info in filtered_class_info.items():
+            ns = info["namespace"]
+            if ns not in ns_groups:
+                ns_groups[ns] = []
+            class_entry = {"name": cname, "declaration": info["declaration"]}
+            if info["fields"]:
+                class_entry["fields"] = info["fields"]
+            if info["methods"]:
+                class_entry["methods"] = info["methods"]
+            if info["relations"]:
+                # 清理指向已移除类的relation
+                filtered_rels = [r for r in info["relations"]
+                                 if r.split(" -> ")[-1].split(".")[0].strip() in filtered_class_info]
+                if filtered_rels:
+                    class_entry["relations"] = filtered_rels
+            ns_groups[ns].append(class_entry)
+
+        # __direct__ 的类不放在 namespace 中，其余按 namespace 分组
+        node_information_json = []
+        if "__direct__" in ns_groups:
+            node_information_json.append({"direct_classes": ns_groups.pop("__direct__")})
+        for ns, classes in ns_groups.items():
+            node_information_json.append({"namespace": ns, "classes": classes})
+        node_information = json.dumps(node_information_json, ensure_ascii=False, indent=2)
+        for item in source_id_range.values():
+            uu_id = generate_uuid_4digits()
+            key = {"source_id": uu_id, "name": item['file_name'], "lines": item['lines']}
+            source_id_full.append(key)
+            source_id_ai.append({"source_id": uu_id, "name": item['name']})
+
+        # 调试：将hybrid UML输入写入文件
+        uml_debug_path = os.path.join(os.path.dirname(__file__), "hybrid_uml_input_debug.txt")
+        with open(uml_debug_path, "w", encoding="utf-8") as f:
+            f.write("=== node_information ===\n")
+            f.write(node_information)
+            f.write("\n\n=== source_id ===\n")
+            f.write(json.dumps(source_id_ai, ensure_ascii=False, indent=2))
+            f.write("\n\n=== class_source_map ===\n")
+            f.write(json.dumps(source_map, ensure_ascii=False, indent=2))
+        print(f"[DEBUG] Hybrid UML输入已写入 {uml_debug_path}")
+
+        uml_token_counter = TokenCounter()
+        cb_config = {"callbacks": [uml_token_counter]}
+        print("node_information for hybrid UML:", node_information)
+        def strip_namespace_prefix(mermaid_code: str) -> str:
+            """去除关系线中的namespace前缀，避免Mermaid创建多余节点。
+            例如: 'API Response and Error Management.CommonResult~T~ --> IErrorCode'
+            变为: 'CommonResult~T~ --> IErrorCode'
+            """
+            # 收集所有已知的namespace名称
+            ns_names = set(source_map.values()) - {"__direct__"}
+            lines = mermaid_code.split('\n')
+            cleaned = []
+            for line in lines:
+                for ns in ns_names:
+                    # 替换 "namespace名." 前缀
+                    line = line.replace(f"{ns}.", "")
+                cleaned.append(line)
+            return '\n'.join(cleaned)
+
+        uml_result = await hybrid_uml_chain.ainvoke({"node_information": node_information, "source_id": source_id_ai}, config=cb_config)
+        uml_parsed = extract_json(uml_result)
+        uml_parsed["mermaid"] = strip_namespace_prefix(uml_parsed["mermaid"])
+        uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
+        validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
+        while not validate_result["result"]:
+            print(validate_result)
+            uml_result = await hybrid_uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai}, config=cb_config)
+            uml_parsed = extract_json(uml_result)
+            uml_parsed["mermaid"] = strip_namespace_prefix(uml_parsed["mermaid"])
+            uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
+            validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
+
+        mermaid_path = os.path.join(os.path.dirname(__file__), "hybrid_uml_mermaid.md")
+        return {"chart_type": "混合模块类关系uml图（含namespace分组）", "mermaid_content": uml_parsed["mermaid"], "mermaid_source_info": node_information, "write_path": mermaid_path, "mapping": uml_parsed["mapping"], "id_list": source_id_full, "uml_token_stats": uml_token_counter.summary()}
+
     async def generate_time(state: ChartState) -> ChartState:
         query0 = """
         MATCH (n)<-[:DECLARES*1..]-(n0:Class|Interface)<-[:DECLARES]-(f:File)
@@ -897,8 +1208,21 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         chart_type = state["chart_type"]
         additional_info = state["additional_info"] if "additional_info" in state else ""
         uml_token_stats = state.get("uml_token_stats")
-        if type == "cfg" or type == "uml":
-            # 如果有UML token统计，继续用同一个counter统计描述生成的token
+        if type == "hybrid_uml":
+            # hybrid_uml 使用专用描述提示词，输入为 mermaid 图 + node_information(JSON)
+            if uml_token_stats is not None:
+                desc_counter = TokenCounter()
+                mermaid_description = await hybrid_uml_desc_chain.ainvoke({"chart_mermaid": mermaid_content, "node_information": mermaid_source_info}, config={"callbacks": [desc_counter]})
+                desc_stats = desc_counter.summary()
+                uml_token_stats = {
+                    "call_count": uml_token_stats["call_count"] + desc_stats["call_count"],
+                    "total_input_tokens": uml_token_stats["total_input_tokens"] + desc_stats["total_input_tokens"],
+                    "total_output_tokens": uml_token_stats["total_output_tokens"] + desc_stats["total_output_tokens"],
+                    "total_tokens": uml_token_stats["total_tokens"] + desc_stats["total_tokens"],
+                }
+            else:
+                mermaid_description = await hybrid_uml_desc_chain.ainvoke({"chart_mermaid": mermaid_content, "node_information": mermaid_source_info})
+        elif type in ("cfg", "uml"):
             if uml_token_stats is not None:
                 desc_counter = TokenCounter()
                 mermaid_description = await description_chain.ainvoke({"chart_type": chart_type, "chart_mermaid": mermaid_content, "mermaid_source_info": mermaid_source_info}, config={"callbacks": [desc_counter]})
@@ -926,25 +1250,23 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
     app = StateGraph(ChartState)
     app.add_node("generate_cfg", generate_cfg)
     app.add_node("generate_uml", generate_uml)
+    app.add_node("generate_hybrid_uml", generate_hybrid_uml)
     app.add_node("generate_time", generate_time)
     app.add_node("generate_block", generate_block)
     app.add_node("mermaid_description", mermaid_description)
-    # app.add_node("route", route_decision)
-    # app.add_edge("route", "generate_cfg")
-    # app.add_edge("route", "generate_uml")
-    # app.add_edge("route", "generate_time")
-    # app.add_edge("route", "generate_block")
-    # app.set_entry_point("route")
     if type == "cfg":
         app.set_entry_point("generate_cfg")
     elif type == "uml":
         app.set_entry_point("generate_uml")
+    elif type == "hybrid_uml":
+        app.set_entry_point("generate_hybrid_uml")
     elif type == "time":
         app.set_entry_point("generate_time")
     elif type == "block":
         app.set_entry_point("generate_block")
     app.add_edge("generate_cfg", "mermaid_description")
     app.add_edge("generate_uml", "mermaid_description")
+    app.add_edge("generate_hybrid_uml", "mermaid_description")
     app.add_edge("generate_time", "mermaid_description")
     app.add_edge("generate_block", "mermaid_description")
     app.add_edge("mermaid_description", END)
