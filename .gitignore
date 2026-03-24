@@ -28,3 +28,16 @@ output/
 # Debug files
 graph/*_debug*.txt
 graph/test_*.json
+/feiqi
+/output
+/results
+/wiki-final
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Archives
+*.rar
+*.zip

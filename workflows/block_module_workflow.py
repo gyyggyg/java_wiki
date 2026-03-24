@@ -7,15 +7,26 @@ from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from interfaces.data_master import get_file
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.memory import MemorySaver
 from typing_extensions import TypedDict
 from interfaces.llm_interface import LLMInterface
 from interfaces.neo4j_interface import Neo4jInterface
 from chains.common_chains import ChainFactory
 from chains.prompts.block_doc_prompt import BLOCK_OVERVIEW_PROMPT, MODULE_CHART_PROMPT, BLOCK_RELATIONSHIP_PROMPT
 from graph.module_target import module_app
-from graph.four_chart import chart_app
+from graph.four_chart import chart_app, invoke_and_parse
 from time import sleep
+import logging
+
+# 配置日志，只记录block生成结果
+from datetime import datetime
+_log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output", f"block_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+logging.basicConfig(level=logging.INFO)
+block_logger = logging.getLogger("block_generation")
+_file_handler = logging.FileHandler(_log_path, encoding="utf-8")
+_file_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+_file_handler.flush = _file_handler.stream.flush  # 每条日志立即写入磁盘
+block_logger.addHandler(_file_handler)
+block_logger.propagate = False
 
 # ====================== 1. 状态定义 ======================
 class BlockState(TypedDict, total=False):
@@ -38,7 +49,10 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
     generate_relationship_chain = ChainFactory.create_generic_chain(llm_interface, BLOCK_RELATIONSHIP_PROMPT)
 
     name = id_name_path["block_name"]
-    write_path = id_name_path["block_path"] + ".json"
+    write_path = id_name_path["block_path"] + ".meta.json"
+    # Windows长路径支持（超过260字符限制）
+    if sys.platform == "win32" and not write_path.startswith("\\\\?\\"):
+        write_path = "\\\\?\\" + os.path.abspath(write_path)
     nodeId = int(id_name_path["block_id"])
     async def generate_summary(state: BlockState) -> BlockState:
         query = """
@@ -108,7 +122,7 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
         table_lines = []
         table_lines.append("| 文件 | 所属包 | 文件功能 |")
         table_lines.append("| --- | --- | --- |")
-        node_id = []
+        node_id = set()
         result = await neo4j_interface.execute_query(query, {"nodeId": nodeId})
         for record in result:
             file_name = record.get("file_name", "未知文件")
@@ -117,11 +131,11 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
             file_nodeId = record.get("file_nodeId")
             package_nodeId = record.get("package_nodeId")
             table_lines.append(f"| {file_name} | {package_name} | {file_explanation} |")
-            node_id.append(str(file_nodeId))
-            node_id.append(str(package_nodeId))
+            node_id.add(str(file_nodeId))
+            node_id.add(str(package_nodeId))
 
         markedown_content = "## 3. 模块内架构\n" + "\n".join(table_lines)
-        return {"section3_architecture_diagram": {"markdown": markedown_content, "neo4j_id": {"3": node_id}}}
+        return {"section3_architecture_diagram": {"markdown": markedown_content, "neo4j_id": {"3": list(node_id)}}}
         # query_relationship = """
         # MATCH (b:Block {nodeId: $nodeId})-[:f2c*]->(f1:File)-[:DECLARES]->()-[r*1..5]->(c)<-[:DECLARES]-(f2:File)
         # WHERE NONE(rel IN r WHERE type(rel) IN ['CONTAINS', 'DIR_INCLUDES', 'f2c']) AND (f2:File)<-[:f2c*]-(b) AND f1 <> f2
@@ -207,13 +221,13 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
     
     async def main_control_flow(state: BlockState) -> BlockState:
         query = """
-        MATCH (b:Block {nodeId: $nodeId})-[:f2c*]->(f:File)-[:DECLARES]->(c)-[:DECLARES*]->(m:Method)
+        MATCH (b:Block {nodeId: $nodeId})-[:f2c*]->(f:File)-[:DECLARES]->(c:Class)-[:DECLARES*]->(m:Method)
         RETURN c.name AS class_name, m.name AS method_name, m.nodeId AS method_nodeId, m.layer_num AS layer_num
         ORDER BY layer_num DESC
         LIMIT 3
         """
         result = await neo4j_interface.execute_query(query, {"nodeId": nodeId})
-        section4_main_control_flow = [{"markdown":"## 4. 关键控制流分析\n", "neo4j_id":{}}]
+        section4_main_control_flow = [{"markdown":"## 4. 关键控制流分析\n", "neo4j_id":{"4" :[str(nodeId)]}}]
         source_id_list = state.get("source_id_list", [])
 
         async def generate_single_cfg(idx, method):
@@ -565,9 +579,8 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
             for entity_name, what in se_what_map.items():
                 relationship.append(f"  {entity_name}: {what}")
 
-        print("\n".join(relationship))
-        markdown_result = await generate_relationship_chain.ainvoke({"cross_module_calls": "\n".join(relationship)})
-        parsed = json.loads(markdown_result)
+
+        parsed = await invoke_and_parse(generate_relationship_chain, {"cross_module_calls": "\n".join(relationship)})
         section5_module_relation = {"markdown": parsed["markdown"], "neo4j_id": parsed["mapping"]}
         return {"section5_module_relation": section5_module_relation}
     
@@ -600,28 +613,28 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
 
     async def generate_final_output(state: BlockState) -> BlockState:
         print(f"[final_output] state keys: {list(state.keys())}")
-        # content = {"wiki":[
-        #     state.get("section1_summary", {"markdown": ""}),
-        #     state.get("section2_core_components", {"markdown": ""}),
-        #     state.get("section3_architecture_diagram", {"markdown": ""})
-        # ]}
-        # content["wiki"].extend(state.get("section4_main_control_flow", []))
-        # content["wiki"].append(state.get("section5_module_relation", {"markdown": ""}))
-        # content["wiki"].append(state.get("section6_data_uml", {"mermaid": ""}))
-        # content["source_id_list"] = state.get("source_id_list", [])
-        output = ""
-        output += state.get("section1_summary", {"markdown": ""}).get("markdown", "") + "\n"
-        output += state.get("section2_core_components", {"markdown": ""}).get("markdown", "") + "\n"
-        output += state.get("section3_architecture_diagram", {"markdown": ""}).get("markdown", "") + "\n"
-        main_control_flow = state.get("section4_main_control_flow", [])
-        for item in main_control_flow:
-            output += item.get("mermaid", "") + "\n"
-        output += state.get("section5_module_relation", {"markdown": ""}).get("markdown", "") + "\n"
-        output += state.get("section6_data_uml", {"mermaid": ""}).get("mermaid", "") + "\n"
+        content = {"wiki":[
+            state.get("section1_summary", {"markdown": ""}),
+            state.get("section2_core_components", {"markdown": ""}),
+            state.get("section3_architecture_diagram", {"markdown": ""})
+        ]}
+        content["wiki"].extend(state.get("section4_main_control_flow", []))
+        content["wiki"].append(state.get("section5_module_relation", {"markdown": ""}))
+        content["wiki"].append(state.get("section6_data_uml", {"mermaid": ""}))
+        content["source_id_list"] = state.get("source_id_list", [])
+        # output = ""
+        # output += state.get("section1_summary", {"markdown": ""}).get("markdown", "") + "\n"
+        # output += state.get("section2_core_components", {"markdown": ""}).get("markdown", "") + "\n"
+        # output += state.get("section3_architecture_diagram", {"markdown": ""}).get("markdown", "") + "\n"
+        # main_control_flow = state.get("section4_main_control_flow", [])
+        # for item in main_control_flow:
+        #     output += item.get("mermaid", "") + "\n"
+        # output += state.get("section5_module_relation", {"markdown": ""}).get("markdown", "") + "\n"
+        # output += state.get("section6_data_uml", {"mermaid": ""}).get("mermaid", "") + "\n"
         os.makedirs(os.path.dirname(write_path), exist_ok=True)
         with open(write_path, "w", encoding="utf-8") as f:
-            f.write(output)
-            # json.dump(content, f, ensure_ascii=False, indent=4)
+            # f.write(output)
+            json.dump(content, f, ensure_ascii=False, indent=4)
         print("final output done")
         return {}
     def should_generate_output(state: BlockState) -> str:
@@ -679,7 +692,7 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
     graph.add_edge("generate_final_output", END)
 
 
-    app = graph.compile(checkpointer=MemorySaver())
+    app = graph.compile()
     return app
 
 # ====================== 3. 独立运行入口 ======================
@@ -703,119 +716,126 @@ async def main():
     # 读取叶子Block映射
     block_target = json.loads(get_file(r"D:\\langgraph\\java_wiki\\output\\file_leaves.json"))
 
-    # ============ 单个Block测试模式 ============
-    # 取第一个block进行测试
-    first_block_id, first_block_path = list(block_target.items())[51]
+    # # ============ 单个Block测试模式（已注释） ============
+    # # 取第一个block进行测试
+    # first_block_id, first_block_path = list(block_target.items())[40]
 
-    first_block_name = new_names.get(str(first_block_id), f"Block_{first_block_id}")
+    # first_block_name = new_names.get(str(first_block_id), f"Block_{first_block_id}")
 
-    print(f"[INFO] 测试模式: 只处理第一个Block")
-    print(f"[INFO] Block ID: {first_block_id}, Name: {first_block_name}")
+    # print(f"[INFO] 测试模式: 只处理第一个Block")
+    # print(f"[INFO] Block ID: {first_block_id}, Name: {first_block_name}")
 
-    try:
-        id_name_path = {
-            "block_id": first_block_id,
-            "block_name": first_block_name,
-            "block_path": first_block_path
-        }
+    # try:
+    #     id_name_path = {
+    #         "block_id": first_block_id,
+    #         "block_name": first_block_name,
+    #         "block_path": first_block_path
+    #     }
 
-        app = block_module_workflow(llm, neo4j, id_name_path)
-        result = await app.ainvoke(
-            {},
-            config={"configurable": {"thread_id": f"block-{first_block_id}"}}
-        )
-        print(f"[INFO] 测试完成: {first_block_name}")
-    except Exception as e:
-        print(f"[ERR] 测试失败: {first_block_name} - {str(e)}")
-        import traceback
-        traceback.print_exc()
+    #     app = block_module_workflow(llm, neo4j, id_name_path)
+    #     result = await app.ainvoke(
+    #         {},
+    #         config={"configurable": {"thread_id": f"block-{first_block_id}"}}
+    #     )
+    #     print(f"[INFO] 测试完成: {first_block_name}")
+    # except Exception as e:
+    #     print(f"[ERR] 测试失败: {first_block_name} - {str(e)}")
+    #     import traceback
+    #     traceback.print_exc()
 
-    # ============ 以下是原并发逻辑（已注释） ============
-    # # 准备所有需要处理的Block
-    # blocks_to_process = []
-    # for block_id, block_path in block_target.items():
-    #     block_name = new_names.get(str(block_id), f"Block_{block_id}")
-    #     blocks_to_process.append({
-    #         "block_id": block_id,
-    #         "block_name": block_name,
-    #         "block_path": block_path
-    #     })
+    # ============ 并发逻辑 ============
+    # 准备所有需要处理的Block
+    blocks_to_process = []
+    for block_id, block_path in block_target.items():
+        block_name = new_names.get(str(block_id), f"Block_{block_id}")
+        blocks_to_process.append({
+            "block_id": block_id,
+            "block_name": block_name,
+            "block_path": block_path
+        })
 
-    # print(f"[INFO] 共有 {len(blocks_to_process)} 个叶子Block需要生成文档")
+    print(f"[INFO] 共有 {len(blocks_to_process)} 个叶子Block需要生成文档")
 
-    # # 从环境变量读取最大并发数
-    # max_concurrent = int(os.environ.get("MAX_CONCURRENT_BLOCKS", "10"))
-    # print(f"[INFO] 最大并发数: {max_concurrent}")
+    # 从环境变量读取最大并发数
+    max_concurrent = int(os.environ.get("MAX_CONCURRENT_BLOCKS", "15"))
+    print(f"[INFO] 最大并发数: {max_concurrent}")
 
-    # # 创建信号量控制并发
-    # semaphore = asyncio.Semaphore(max_concurrent)
+    # 创建信号量控制并发
+    semaphore = asyncio.Semaphore(max_concurrent)
 
-    # async def process_single_block(block_info: Dict, index: int):
-    #     """
-    #     处理单个Block的文档生成
-    #     """
-    #     async with semaphore:
-    #         block_id = block_info["block_id"]
-    #         block_name = block_info["block_name"]
-    #         block_path = block_info["block_path"]
+    max_retries_per_block = 2
 
-    #         print(f"  [{index}/{len(blocks_to_process)}] 开始生成: {block_name} ({block_id})")
+    async def process_single_block(block_info: Dict, index: int):
+        """
+        处理单个Block的文档生成，失败时自动重试最多max_retries_per_block次
+        """
+        async with semaphore:
+            block_id = block_info["block_id"]
+            block_name = block_info["block_name"]
+            block_path = block_info["block_path"]
 
-    #         try:
-    #             # 创建workflow实例
-    #             id_name_path = {
-    #                 "block_id": block_id,
-    #                 "block_name": block_name,
-    #                 "block_path": block_path
-    #             }
+            print(f"  [{index}/{len(blocks_to_process)}] 开始生成: {block_name} ({block_id})")
 
-    #             app = block_module_workflow(llm, neo4j, id_name_path)
+            last_error = None
+            for attempt in range(1, max_retries_per_block + 1):
+                try:
+                    id_name_path = {
+                        "block_id": block_id,
+                        "block_name": block_name,
+                        "block_path": block_path
+                    }
 
-    #             # 执行workflow
-    #             result = await app.ainvoke(
-    #                 {},
-    #                 config={"configurable": {"thread_id": f"block-{block_id}"}}
-    #             )
+                    app = block_module_workflow(llm, neo4j, id_name_path)
 
-    #             print(f"  [{index}/{len(blocks_to_process)}] 完成: {block_name}")
-    #             return {
-    #                 "block_id": block_id,
-    #                 "block_name": block_name,
-    #                 "success": True,
-    #                 "result": result
-    #             }
+                    result = await app.ainvoke(
+                        {},
+                        config={"configurable": {"thread_id": f"block-{block_id}-attempt{attempt}"}}
+                    )
 
-    #         except Exception as e:
-    #             print(f"  [{index}/{len(blocks_to_process)}] 失败: {block_name} - {str(e)}")
-    #             return {
-    #                 "block_id": block_id,
-    #                 "block_name": block_name,
-    #                 "success": False,
-    #                 "error": str(e)
-    #             }
+                    print(f"  [{index}/{len(blocks_to_process)}] 完成: {block_name}" + (f" (第{attempt}次尝试)" if attempt > 1 else ""))
+                    block_logger.info(f"SUCCESS | {block_name} ({block_id}) | 第{attempt}次尝试")
+                    return {
+                        "block_id": block_id,
+                        "block_name": block_name,
+                        "success": True,
+                        "result": result
+                    }
 
-    # # 并发执行所有Block的文档生成
-    # print(f"[INFO] 开始并发生成文档...")
-    # tasks = [
-    #     process_single_block(block, i + 1)
-    #     for i, block in enumerate(blocks_to_process)
-    # ]
+                except Exception as e:
+                    last_error = e
+                    print(f"  [{index}/{len(blocks_to_process)}] 第{attempt}/{max_retries_per_block}次失败: {block_name} - {str(e)}")
 
-    # results = await asyncio.gather(*tasks)
+            print(f"  [{index}/{len(blocks_to_process)}] 最终失败（{max_retries_per_block}次尝试后）: {block_name}")
+            block_logger.info(f"FAILED  | {block_name} ({block_id}) | {str(last_error)}")
+            return {
+                "block_id": block_id,
+                "block_name": block_name,
+                "success": False,
+                "error": str(last_error)
+            }
 
-    # # 统计结果
-    # success_count = sum(1 for r in results if r["success"])
-    # fail_count = len(results) - success_count
+    # 并发执行所有Block的文档生成
+    print(f"[INFO] 开始并发生成文档...")
+    tasks = [
+        process_single_block(block, i + 1)
+        for i, block in enumerate(blocks_to_process)
+    ]
 
-    # print(f"\n[INFO] 文档生成完成:")
-    # print(f"  - 成功: {success_count}/{len(blocks_to_process)}")
-    # print(f"  - 失败: {fail_count}/{len(blocks_to_process)}")
+    results = await asyncio.gather(*tasks)
 
-    # if fail_count > 0:
-    #     print(f"\n[WARN] 失败的Block:")
-    #     for r in results:
-    #         if not r["success"]:
-    #             print(f"  - {r['block_name']} ({r['block_id']}): {r['error']}")
+    # 统计结果
+    success_count = sum(1 for r in results if r["success"])
+    fail_count = len(results) - success_count
+
+    print(f"\n[INFO] 文档生成完成:")
+    print(f"  - 成功: {success_count}/{len(blocks_to_process)}")
+    print(f"  - 失败: {fail_count}/{len(blocks_to_process)}")
+
+    if fail_count > 0:
+        print(f"\n[WARN] 失败的Block:")
+        for r in results:
+            if not r["success"]:
+                print(f"  - {r['block_name']} ({r['block_id']}): {r['error']}")
 
     neo4j.close()
     print("[INFO] 工作流执行完成")

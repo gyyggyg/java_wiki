@@ -13,7 +13,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda
-from interfaces.llm_interface import LLMInterface, TokenCounter        
+from interfaces.llm_interface import LLMInterface
 from interfaces.neo4j_interface import Neo4jInterface
 from chains.common_chains import ChainFactory   
 from graph.id_generate import find_class_or_method_range
@@ -95,11 +95,32 @@ def extract_json(text: str) -> dict:
     first_brace = text.find('{')
     last_brace = text.rfind('}')
     if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-        result = _try_parse(text[first_brace:last_brace + 1])
-        if result is not None:
-            return result
+        try:
+            return json.loads(text[first_brace:last_brace + 1])
+        except json.JSONDecodeError:
+            pass
+    print(f"[WARN] 无法解析JSON，原始文本为:\n{text[:200]}...")
+    return False
 
-    raise json.JSONDecodeError(f"无法从LLM输出中提取有效JSON", text, 0)
+
+MAX_JSON_RETRIES = 10
+MAX_MERMAID_RETRIES = 5
+
+def sanitize_mermaid(mermaid_text: str) -> str:
+    """清理mermaid文本中不支持的字符（如Java的$内部类分隔符）"""
+    # 只替换类名中的$，不动箭头等语法符号
+    mermaid_text = mermaid_text.replace("$", "_")
+    return mermaid_text
+
+async def invoke_and_parse(chain, invoke_args, max_retries=MAX_JSON_RETRIES):
+    """调用LLM chain并解析JSON，解析失败时自动重试。"""
+    for attempt in range(max_retries):
+        result = await chain.ainvoke(invoke_args)
+        parsed = extract_json(result)
+        if parsed is not False:
+            return parsed
+        print(f"[WARN] JSON解析失败，正在重试 ({attempt + 1}/{max_retries})...")
+    raise ValueError(f"经过{max_retries}次重试后仍无法从LLM输出中解析JSON")
 
 
 def extract_class_summary(source_code: str) -> str:
@@ -268,7 +289,6 @@ class ChartState(TypedDict, total=False):
     output: str
     mapping : Dict
     id_list : List
-    uml_token_stats: Dict
 
 def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node_list: List , type: str, skeleton: bool = False, class_source_map: Dict = None) -> StateGraph:
     cfg_id_chain = ChainFactory.create_generic_chain(llm_interface, SOURCE_ID_PROMPT)
@@ -346,8 +366,6 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         add_table = "\n".join(table_lines)
         if result1:
             code = result1[0]
-            # if not key_target:
-            #     key_target = name
             file_name = code['file_name']
             source_code = code['source_code']
             semantic_explanation = code['SE_How']
@@ -355,8 +373,14 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
                 f"函数 {code['name']} 语义解释为 {code['SE_How']}\n下面是与其相关的类的介绍"
             )
             base_lines = find_class_or_method_range(code['file_code'], code['source_code'], code['name'])
+        else:
+            raise ValueError(f"未找到nodeId={node_id}对应的方法源码，无法生成CFG")
         print("base_lines:", base_lines)
-        base_start = int(base_lines[0].split('-')[0])
+        if base_lines:
+            base_start = int(base_lines[0].split('-')[0])
+        else:
+            base_start = 1
+            print(f"[WARN] 无法定位方法 {code['name']} 在文件中的行号，默认从第1行开始")
         offset = base_start - 1
         code_lines = [line for line in source_code.split('\n') if not line.strip().startswith('@')]
         tag_code = {str(i+1): line for i, line in enumerate(code_lines)}
@@ -383,10 +407,8 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
                 )
 
         all_in = "\n".join(node_information)
-        source_id_result = await cfg_id_chain.ainvoke({"source_code": tag_code, "explanation": semantic_explanation})
-
-        print("source_id:",source_id_result)
-        source_id_parsed = extract_json(source_id_result)
+        source_id_parsed = await invoke_and_parse(cfg_id_chain, {"source_code": tag_code, "explanation": semantic_explanation})
+        print("source_id:", source_id_parsed)
         reason = source_id_parsed["reason"]
         id_list = [] #[{'source_id': '2662', 'lines': ['1-2']}]
         id_list_map = {} #{'2662': ['1-2']}
@@ -397,13 +419,15 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             id_list.append({"source_id": uu_id, "lines": item})
             id_list_map[uu_id] = item
 
-        cfg_result = await cfg_chain.ainvoke({"source_code": tag_code, "explanation": all_in, "source_id": id_list, "code_block": reason})
-        cfg_parsed = extract_json(cfg_result)
+        cfg_parsed = await invoke_and_parse(cfg_chain, {"source_code": tag_code, "explanation": all_in, "source_id": id_list, "code_block": reason})
+        cfg_parsed['mermaid'] = sanitize_mermaid(cfg_parsed['mermaid'])
         validate_result = validator.validate_file(f"```mermaid\n\n{cfg_parsed['mermaid']}\n\n```")
-        while not validate_result["result"]:
+        for _retry in range(MAX_MERMAID_RETRIES):
+            if validate_result["result"]:
+                break
             print(validate_result)
-            cfg_result = await cfg_chain.ainvoke({"source_code": tag_code, "explanation": all_in + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": id_list, "code_block": reason})
-            cfg_parsed = extract_json(cfg_result)
+            cfg_parsed = await invoke_and_parse(cfg_chain, {"source_code": tag_code, "explanation": all_in + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": id_list, "code_block": reason})
+            cfg_parsed['mermaid'] = sanitize_mermaid(cfg_parsed['mermaid'])
             validate_result = validator.validate_file(f"```mermaid\n\n{cfg_parsed['mermaid']}\n\n```")
 
         cfg_map = cfg_parsed["mapping"] # {'A1': '2662'}
@@ -411,9 +435,7 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             lines = id_list_map[value]
             cfg_lines_map[key] = lines
         print("old_id_result:", cfg_lines_map)
-        new_id_result = await cfg_id_validate_chain.ainvoke({"source_code": tag_code, "mermaid": cfg_parsed["mermaid"], "reason": reason, "mapping": cfg_lines_map})
-
-        new_id_parsed = extract_json(new_id_result)
+        new_id_parsed = await invoke_and_parse(cfg_id_validate_chain, {"source_code": tag_code, "mermaid": cfg_parsed["mermaid"], "reason": reason, "mapping": cfg_lines_map})
         print("new_id_result:", new_id_parsed["mapping"], new_id_parsed["reason"])
         new_map = new_id_parsed["mapping"] # {'A1': ['8-10'], 'B1': ['11-20','80']}
         new_id_list = []
@@ -601,21 +623,20 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             key = {"source_id": uu_id, "name": item['file_name'], "lines": item['lines']}
             source_id_full.append(key)
             source_id_ai.append({"source_id": uu_id, "name": item['name']})
-        # 调试：将UML输入写入文件
-        uml_debug_path = os.path.join(os.path.dirname(__file__), "uml_input_debug.txt")
-        with open(uml_debug_path, "w", encoding="utf-8") as f:
-            f.write("=== node_information ===\n")
-            f.write(node_information)
-            f.write("\n\n=== source_id ===\n")
-            f.write(json.dumps(source_id_ai, ensure_ascii=False, indent=2))
-        print(f"[DEBUG] UML输入已写入 {uml_debug_path}")
-        uml_token_counter = TokenCounter()
-        cb_config = {"callbacks": [uml_token_counter]}
-        uml_result = await uml_chain.ainvoke({"node_information": node_information, "source_id": source_id_ai}, config=cb_config)
-        uml_parsed = extract_json(uml_result)
-        uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
+        # # 调试：将UML输入写入文件
+        # uml_debug_path = os.path.join(os.path.dirname(__file__), "uml_input_debug.txt")
+        # with open(uml_debug_path, "w", encoding="utf-8") as f:
+        #     f.write("=== node_information ===\n")
+        #     f.write(node_information)
+        #     f.write("\n\n=== source_id ===\n")
+        #     f.write(json.dumps(source_id_ai, ensure_ascii=False, indent=2))
+        # print(f"[DEBUG] UML输入已写入 {uml_debug_path}")
+        uml_parsed = await invoke_and_parse(uml_chain, {"node_information": node_information, "source_id": source_id_ai})
+        uml_parsed['mermaid'] = sanitize_mermaid(uml_parsed['mermaid'])
         validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
-        while not validate_result["result"]:
+        for _retry in range(MAX_MERMAID_RETRIES):
+            if validate_result["result"]:
+                break
             print(validate_result)
             uml_result = await uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai}, config=cb_config)
             uml_parsed = extract_json(uml_result)
@@ -1023,14 +1044,16 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
                 source_id.append({"source_id": uu_id, "name": info['file_name'], "lines": method['lines']})
                 source_id_ai.append({"source_id": uu_id, "name": method['name']})
         call_information_str = "\n".join(call_information)
-        time_result = await time_chain.ainvoke({"call_information": call_information_str, "source_id": source_id_ai})
-        time_parsed = extract_json(time_result)
+        time_parsed = await invoke_and_parse(time_chain, {"call_information": call_information_str, "source_id": source_id_ai})
+        time_parsed['mermaid'] = sanitize_mermaid(time_parsed['mermaid'])
         validate_result = validator.validate_file(f"```mermaid\n\n{time_parsed['mermaid']}\n\n```")
-        while not validate_result["result"]:
-             print(validate_result)
-             time_result = await time_chain.ainvoke({"call_information": call_information_str + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai})
-             time_parsed = extract_json(time_result)
-             validate_result = validator.validate_file(f"```mermaid\n\n{time_parsed['mermaid']}\n\n```")
+        for _retry in range(MAX_MERMAID_RETRIES):
+            if validate_result["result"]:
+                break
+            print(validate_result)
+            time_parsed = await invoke_and_parse(time_chain, {"call_information": call_information_str + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai})
+            time_parsed['mermaid'] = sanitize_mermaid(time_parsed['mermaid'])
+            validate_result = validator.validate_file(f"```mermaid\n\n{time_parsed['mermaid']}\n\n```")
 
         mermaid_path = os.path.join(os.path.dirname(__file__), "time_mermaid.md")
         return {"chart_type":"代码调用链图", "mermaid_content": time_parsed["mermaid"], "mermaid_source_info": call_information_str, "write_path": mermaid_path, 'additional_info': add_table, "mapping": time_parsed["mapping"], "id_list": source_id}
@@ -1188,13 +1211,15 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         call_information_str = "\n".join(call_information)
         module_package_info_str = "\n".join(module_package_info)
         print("key_target:",key_target)
-        block_result = await block_chain.ainvoke({"call_information": call_information_str, "module_package_info": module_package_info_str, "source_id": source_id_ai})
-        block_parsed = extract_json(block_result)
+        block_parsed = await invoke_and_parse(block_chain, {"call_information": call_information_str, "module_package_info": module_package_info_str, "source_id": source_id_ai})
+        block_parsed['mermaid'] = sanitize_mermaid(block_parsed['mermaid'])
         validate_result = validator.validate_file(f"```mermaid\n\n{block_parsed['mermaid']}\n\n```")
-        while not validate_result["result"]:
+        for _retry in range(MAX_MERMAID_RETRIES):
+            if validate_result["result"]:
+                break
             print(validate_result)
-            block_result = await block_chain.ainvoke({"key_target": key_target, "call_information": call_information_str + f"之前存在错误的情况，需要规避{validate_result['errors']}", "module_package_info": module_package_info_str, "source_id": source_id_ai})
-            block_parsed = extract_json(block_result)
+            block_parsed = await invoke_and_parse(block_chain, {"key_target": key_target, "call_information": call_information_str + f"之前存在错误的情况，需要规避{validate_result['errors']}", "module_package_info": module_package_info_str, "source_id": source_id_ai})
+            block_parsed['mermaid'] = sanitize_mermaid(block_parsed['mermaid'])
             validate_result = validator.validate_file(f"```mermaid\n\n{block_parsed['mermaid']}\n\n```")
 
         mermaid_path = os.path.join(os.path.dirname(__file__), "block_mermaid.md")
@@ -1241,10 +1266,7 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         with open(mermaid_path, "w", encoding="utf-8") as f:
             f.write(output)
 
-        result = {"output": output}
-        if uml_token_stats is not None:
-            result["uml_token_stats"] = uml_token_stats
-        return result
+        return {"output": output}
 
 
     app = StateGraph(ChartState)
