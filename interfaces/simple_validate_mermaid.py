@@ -215,15 +215,53 @@ class SimpleMermaidValidator:
             
         return valid
         # --------------- 编译校验 ---------------
+    @staticmethod
+    def sanitize_class_diagram(code: str) -> str:
+        """清理classDiagram中类定义内部的空行，防止mermaid解析器崩溃。
+
+        mermaid的ClassMember.parseMember在遇到undefined成员行时会抛出
+        TypeError: Cannot read properties of undefined (reading 'startsWith')
+        """
+        lines = code.split('\n')
+        result = []
+        inside_class_body = False
+        brace_depth = 0
+        for line in lines:
+            stripped = line.strip()
+            if inside_class_body:
+                if '{' in stripped:
+                    brace_depth += stripped.count('{') - stripped.count('}')
+                elif '}' in stripped:
+                    brace_depth += stripped.count('{') - stripped.count('}')
+                    if brace_depth <= 0:
+                        inside_class_body = False
+                        brace_depth = 0
+                # 跳过类定义内部的空行
+                if stripped == '':
+                    continue
+            else:
+                # 检测类定义开始：class Foo {
+                if re.match(r'^\s*class\s+', stripped) and '{' in stripped:
+                    inside_class_body = True
+                    brace_depth = stripped.count('{') - stripped.count('}')
+                    if brace_depth <= 0:
+                        inside_class_body = False
+                        brace_depth = 0
+            result.append(line)
+        return '\n'.join(result)
+
     def validate_block_compile(self, code, block_num):
         """尝试调用 mmdc 进行真实编译"""
         if not self.enable_compile_check:
             return True  # 未启用编译校验时默认通过
-            
+
         mmdc_cmds = self._resolve_mmdc_commands()
         if not mmdc_cmds:
             self.errors.append(f"未找到 mmdc 或 npx 环境")
             return False
+
+        # 清理类图中类定义内部的空行
+        code = self.sanitize_class_diagram(code)
 
         try:
             with tempfile.TemporaryDirectory() as tmpdir:

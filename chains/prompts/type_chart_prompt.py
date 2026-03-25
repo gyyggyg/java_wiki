@@ -239,6 +239,124 @@ classDiagram
 """
 )
 
+HYBRID_UML_PROMPT = PromptTemplate(
+    input_variables=["node_information", "source_id"],
+    template="""
+你的任务是将输入的JSON数据转换为Mermaid classDiagram。
+
+## 输入格式
+'node_information'是一个JSON数组，包含两种元素：
+
+**1. 直连类（不放在任何namespace中）**：
+```json
+{{
+  "direct_classes": [
+    {{"name": "类名", "declaration": "Java类声明", "fields": "...", "methods": "...", "relations": [...]}}
+  ]
+}}
+```
+这些类直接定义在classDiagram顶层，不包裹在namespace中。
+
+**2. 子模块类（按namespace分组）**：
+```json
+{{
+  "namespace": "子模块名称",
+  "classes": [
+    {{"name": "类名", "declaration": "Java类声明", "fields": "...", "methods": "...", "relations": [...]}}
+  ]
+}}
+```
+这些类放在对应的namespace中。
+
+'source_id'是每个类对应的唯一标识id。
+
+## 转换步骤（请严格按此顺序执行）
+
+**步骤1：遍历JSON，处理两种类型的元素**
+- 含"direct_classes"的元素 → 类直接定义在classDiagram顶层，不包裹在namespace中
+- 含"namespace"的元素 → 类放在对应的namespace中，namespace名称直接使用JSON中的值，禁止修改或编造
+
+**步骤2：为每个class生成类定义**
+- "name" → 类节点ID（泛型用波浪号~替换尖括号<>）
+- "declaration"中含interface → 添加<<interface>>，含abstract → 添加<<abstract>>，含enum → 添加<<enumeration>>
+- "fields" → 转换为UML字段（public→+, private→-, protected→#, 无修饰符→~）
+- "methods" → 转换为UML方法（同上）
+- 禁止添加JSON中不存在的类
+
+**步骤3：在所有namespace外部，根据relations生成关系连线**
+- "实现 ->" → `<|..`（虚线继承）
+- "继承 ->" → `<|--`（实线继承）
+- "调用 ->" → `-->`（依赖）
+- "使用 ->" → `-->`（依赖）
+- "返回 ->" → `-->`（依赖）
+- 关系线上不要加标签
+- **关键：关系线中只使用类名，禁止加namespace前缀**
+  - 正确：`CommonResult~T~ --> IErrorCode`
+  - 错误：`API Response and Error Management.CommonResult~T~ --> API Response and Error Management.IErrorCode`
+  - 原因：Mermaid会将带前缀的名称视为新节点，导致图中出现多余节点
+
+## Mermaid语法约束
+1. 第一行必须是classDiagram
+2. 泛型必须用波浪号~，不能用<>。正确：CommonResult~T~，错误：CommonResult<T>
+3. 类定义中禁止出现：第二对花括号、方法体、分号、注释、Java修饰符（用+-#~替代）
+4. 内部类拆分为独立节点，用组合关系（*--）连接
+5. 每行只能定义一个类
+
+## 语法骨架（仅展示格式，不要复制内容）
+```
+classDiagram
+    %% direct_classes中的类：直接定义在顶层
+    class [direct_classes中的name值] {{
+        [字段和方法]
+    }}
+
+    %% namespace中的类：包裹在namespace内
+    namespace [JSON中的namespace值] {{
+        class [classes中的name值] {{
+            [字段和方法]
+        }}
+    }}
+
+    [类A] --> [类B]  %% 根据relations生成
+```
+
+## 转换规则速查
+| JSON字段 | 转换方式 |
+|----------|---------|
+| declaration含"interface" | 类定义内第一行加<<interface>> |
+| declaration含"abstract" | 类定义内第一行加<<abstract>> |
+| declaration含"enum" | 类定义内第一行加<<enumeration>> |
+| fields中"private X y" | -X y |
+| fields中"public X y" | +X y |
+| fields中"protected X y" | #X y |
+| methods中"public foo():Bar" | +foo() Bar |
+| methods中"private foo():Bar" | -foo() Bar |
+| 泛型 CommonResult<T> | CommonResult~T~ |
+| relations中"实现 ->" | <\|.. |
+| relations中"继承 ->" | <\|-- |
+| relations中"调用/使用/返回 ->" | --> |
+
+---
+
+### 以下是你需要转换的实际输入数据（请严格基于此数据生成，禁止使用上面骨架中的占位内容）
+
+'node_information'：
+```json
+{node_information}
+```
+
+'source_id'：
+```json
+{source_id}
+```
+
+【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
+mapping中的值必须是source_id中对应的id字符串，不是行号或名称
+{{"mermaid": "classDiagram\\n    namespace ...", "mapping": {{"类名1": "source_id值1", "类名2": "source_id值2"}}}}
+
+"""
+)
+
 TIME_PROMPT= PromptTemplate(
     input_variables=["call_information","source_id"],
     template="""
@@ -382,6 +500,62 @@ MERMIAD_DESC_PROMPT= PromptTemplate(
 
 【输出格式】
 内容直接是Markdown格式, 不要包含任何前言或解释, 直接输出中文Markdown格式。
+"""
+)
+
+HYBRID_UML_DESC_PROMPT = PromptTemplate(
+    input_variables=["chart_mermaid", "node_information"],
+    template="""
+你是Java项目架构分析专家。现在你需要为一个混合型模块的UML类图撰写说明。
+
+该UML类图展示的是该模块**自身直接实现的类与其直接关联的子模块类**之间的关系。
+图中已过滤掉与模块自身代码无直接关系的子模块，只保留有依赖交互的部分。
+
+图的结构：
+- 顶层的类（不在任何分组中）是该模块自身直接实现的代码
+- 分组中的类属于与模块自身代码有直接依赖的子模块
+
+### 输入
+UML类图（Mermaid格式）：
+```mermaid
+{chart_mermaid}
+```
+
+模块结构信息（JSON格式）：
+```json
+{node_information}
+```
+
+### 任务
+为该UML图撰写说明，分为三部分：
+
+**第一部分：整体概述（2-3句）**
+- 说明该模块自身直接实现了哪些核心类
+- 这些核心类与哪些子模块存在依赖关系
+- 整体呈现什么样的协作模式
+
+**第二部分：关联子模块中的类说明**
+按子模块分组，为每个子模块中的类撰写简要说明：
+- 每个类1-2句，说明该类的职责和核心方法的作用
+- 顶层类（模块自身直接实现的类）不需要描述（前文已有详细介绍）
+- 重点说明类的关键方法做了什么，而不是罗列所有方法
+- 说明该子模块中的类为什么会被模块自身的代码所依赖
+
+**第三部分：关系线逐条解读**
+逐条解释UML图中的**每条关系线**（即 `-->`, `<|..`, `<|--` 等连线），说明每条连线在业务上的含义。格式：
+- `类A --> 类B`：一句话解释这条依赖在业务上意味着什么
+- 如果是接口实现关系（`<|..`），说明这样设计的好处
+- 如果是继承关系（`<|--`），说明继承的目的
+
+### 要求
+- 第二部分只描述子模块内的类，不要重复描述顶层类
+- 输出文本中不要出现"namespace"一词，统一使用"模块"或"子模块"
+- 第三部分只解释图中实际存在的关系线，不要编造图中没有的连线
+- 每条连线的解释控制在1-2句
+- 信息来源必须完全基于输入的UML图和JSON数据
+
+【输出格式】
+直接输出中文Markdown格式，不要包含任何前言或解释。
 """
 )
 
