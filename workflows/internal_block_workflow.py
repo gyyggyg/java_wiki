@@ -18,6 +18,9 @@ from chains.prompts.internal_block_prompt import (
 )
 from interfaces.data_master import get_file
 
+# 项目根目录（java_wiki）
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # ====================== 1. 状态定义 ======================
 class InternalBlockState(TypedDict, total=False):
     # 输入
@@ -98,7 +101,7 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
     children_chain = ChainFactory.create_generic_chain(llm_interface, INTERNAL_BLOCK_CHILDREN_PROMPT)
 
     # 加载Block名称映射
-    block_names = json.loads(get_file(r"E:\\github_clone\\java_wiki\\gy\\graph\\block_new_names.json"))
+    block_names = json.loads(get_file(os.path.join(PROJECT_ROOT, "graph", "block_new_names.json")))
 
     async def traverse_tree(state: InternalBlockState) -> InternalBlockState:
         """
@@ -169,11 +172,8 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
         root_children = await get_child_blocks(neo4j_interface, root_id)
         print(f"[INFO] root有 {len(root_children)} 个子Block")
 
-        # 构建输出基础路径（与root_doc_workflow保持一致）
-        base_output_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "output"
-        )
+        # 构建输出基础路径（相对于项目根目录）
+        base_output_path = "output"
 
         for child in root_children:
             block_id = child["nodeId"]
@@ -288,9 +288,9 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
                         }
                     ]
 
-                    # 保存文档路径
+                    # 保存文档路径（folder_path是相对路径，需转为绝对路径写文件）
                     doc_filename = f"{block_name}.md"
-                    doc_path = os.path.join(folder_path, doc_filename)
+                    doc_path = os.path.join(PROJECT_ROOT, folder_path, doc_filename)
 
                     doc_result = {
                         "block_id": block_id,
@@ -329,20 +329,17 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
         file_block_leaves = state["file_block_leaves"]
         generated_docs = state["generated_docs"]
 
-        base_output_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "output"
-        )
-        os.makedirs(base_output_path, exist_ok=True)
+        internal_result_path = os.path.join(PROJECT_ROOT, "internal_result")
+        os.makedirs(internal_result_path, exist_ok=True)
 
         # 1. 保存纯File叶子Block映射
-        file_leaves_path = os.path.join(base_output_path, "file_leaves.json")
+        file_leaves_path = os.path.join(internal_result_path, "file_leaves.json")
         with open(file_leaves_path, "w", encoding="utf-8") as f:
             json.dump(file_leaves, f, ensure_ascii=False, indent=2)
         print(f"[INFO] 纯File叶子Block映射已保存: {file_leaves_path}")
 
         # 2. 保存Block+File混合叶子Block映射
-        file_block_leaves_path = os.path.join(base_output_path, "file_block_leaves.json")
+        file_block_leaves_path = os.path.join(internal_result_path, "file_block_leaves.json")
         with open(file_block_leaves_path, "w", encoding="utf-8") as f:
             json.dump(file_block_leaves, f, ensure_ascii=False, indent=2)
         print(f"[INFO] Block+File混合叶子Block映射已保存: {file_block_leaves_path}")

@@ -15,6 +15,9 @@ from chains.common_chains import ChainFactory
 from chains.prompts.root_doc_prompt import PROJECT_INTRO_PROMPT, MODULE_ARCHITECTURE_PROMPT
 from graph.module_target import module_app
 
+# 项目根目录（java_wiki）
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # ====================== 1. 状态定义 ======================
 class RootDocState(TypedDict, total=False):
     # 模块信息
@@ -48,7 +51,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
         result = await neo4j_interface.execute_query(query)
 
         modules_info = []
-        new_names = json.loads(get_file(r"E:\\github_clone\\java_wiki\\gy\\graph\\block_new_names.json"))
+        new_names = json.loads(get_file(os.path.join(PROJECT_ROOT, "graph", "block_new_names.json")))
 
         for record in result:
             modules_info.append({
