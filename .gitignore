@@ -1,8 +1,11 @@
 /feiqi
 /output
+/internal_result
 /results
 /wiki-final
 .env
+/mall
+/results
 
 # Python
 __pycache__/

@@ -17,9 +17,14 @@ from graph.four_chart import chart_app, invoke_and_parse
 from time import sleep
 import logging
 
+# 项目根目录（java_wiki）
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # 配置日志，只记录block生成结果
 from datetime import datetime
-_log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output", f"block_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+_internal_result_dir = os.path.join(PROJECT_ROOT, "internal_result")
+os.makedirs(_internal_result_dir, exist_ok=True)
+_log_path = os.path.join(_internal_result_dir, f"block_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 logging.basicConfig(level=logging.INFO)
 block_logger = logging.getLogger("block_generation")
 _file_handler = logging.FileHandler(_log_path, encoding="utf-8")
@@ -714,7 +719,7 @@ async def main():
     print("[INFO] Neo4j 连接成功")
 
     # 读取叶子Block映射
-    block_target = json.loads(get_file(r"D:\\langgraph\\java_wiki\\output\\file_leaves.json"))
+    block_target = json.loads(get_file(os.path.join(PROJECT_ROOT, "internal_result", "file_leaves.json")))
 
     # # ============ 单个Block测试模式（已注释） ============
     # # 取第一个block进行测试
