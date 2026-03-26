@@ -44,7 +44,6 @@ class HybridBlockState(TypedDict, total=False):
     section5_module_relation: Dict
     section6_data_uml: Dict
     source_id_list: List
-    uml_token_stats: Dict
 
 
 # ====================== 2. 工作流定义 ======================
@@ -642,11 +641,8 @@ def hybrid_block_workflow(
         source_id_list.extend(uml_result["id_list"])
         section6_mermaid = "## 6. 核心类与子模块类关系图\n" + module_data
         section6 = {"mermaid": section6_mermaid, "mapping": mapping}
-        ret = {"section6_data_uml": section6, "source_id_list": source_id_list}
-        if uml_result.get("uml_token_stats"):
-            ret["uml_token_stats"] = uml_result["uml_token_stats"]
         print("[hybrid] section6 done")
-        return ret
+        return {"section6_data_uml": section6, "source_id_list": source_id_list}
 
     # ---- 最终输出 ----
     async def generate_final_output(state: HybridBlockState) -> HybridBlockState:

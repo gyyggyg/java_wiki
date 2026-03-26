@@ -42,7 +42,6 @@ class BlockState(TypedDict, total=False):
     section5_module_relation: Dict
     section6_data_uml: Dict
     source_id_list: List
-    uml_token_stats: Dict
 
 # 修改：将硬编码的Windows路径改为基于项目根目录的相对路径
 new_names = json.loads(get_file(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "graph", "block_new_names.json")))
@@ -611,10 +610,7 @@ def block_module_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInt
         source_id_list.extend(result["id_list"])
         section6_data_uml_mermaid= "### 6. 模块数据结构\n" + module_data
         section6_data_uml = {"mermaid": section6_data_uml_mermaid, "mapping": mapping}
-        ret = {"section6_data_uml": section6_data_uml, "source_id_list": source_id_list}
-        if result.get("uml_token_stats"):
-            ret["uml_token_stats"] = result["uml_token_stats"]
-        return ret
+        return {"section6_data_uml": section6_data_uml, "source_id_list": source_id_list}
 
     async def generate_final_output(state: BlockState) -> BlockState:
         print(f"[final_output] state keys: {list(state.keys())}")

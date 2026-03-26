@@ -160,7 +160,7 @@ def module_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface):
         """
         path = os.environ.get("POM_PATHS", "pom.xml")
         pom_content = get_file(path)
-        new_names = json.loads(get_file(r"E:\\github_clone\\java_wiki\\gy\\graph\\block_new_names.json"))
+        new_names = json.loads(get_file(os.path.join(os.path.dirname(__file__), "block_new_names.json")))
         target_list = state['graphman']
 
         # 获取从root到target_list中所有节点的路径

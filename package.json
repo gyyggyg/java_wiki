@@ -1,0 +1,26 @@
+{
+  "name": "java_wiki",
+  "version": "1.0.0",
+  "description": "```mermaid   flowchart TD       Start([开始: node_list, type=cfg]) --> Query",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gyyggyg/java_wiki.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gyyggyg/java_wiki/issues"
+  },
+  "homepage": "https://github.com/gyyggyg/java_wiki#readme",
+  "dependencies": {
+    "jsdom": "^29.0.1",
+    "mermaid": "^11.13.0",
+    "roughjs": "^4.6.6"
+  }
+}

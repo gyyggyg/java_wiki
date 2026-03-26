@@ -3,7 +3,7 @@ from langchain.prompts import PromptTemplate
 MODULE_NAME_PROMPT = PromptTemplate(
     input_variables=["module_information","pom_content"], 
     template="""
-你是模块命名专家。针对一个已按文件功能完成聚类的 Java 项目，请为出现的每个模块重新设计一个**自然语言风格的英文名称**。
+你是模块命名专家。针对一个已按文件功能完成聚类的 Java 项目，请为出现的每个模块重新设计一个**自然语言风格的中文名称**。
 【输入】
 - 模块树信息：包含父子层级、唯一 nodeId、初始名称及语义说明，见 `module_information`：{module_information}
 - `pom.xml` ：{pom_content}，含模块间依赖关系
@@ -22,7 +22,7 @@ MODULE_NAME_PROMPT = PromptTemplate(
 4. 仅返回 nodeId 到新名称的映射
 
 【输出格式】（严格JSON，不要包含任何其他解释、前言或Markdown标记）
-{{"module1_id":"Admin Core System","module2_id":"Demo Framework Config"}} 
+{{"module1_id":"商品搜索核心服务模块","module2_id":"商品搜索系统实现与保障模块",...}} 
 """
 )
 #生成source_id提示词;

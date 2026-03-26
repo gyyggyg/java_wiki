@@ -431,25 +431,36 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             validate_result = validator.validate_file(f"```mermaid\n\n{cfg_parsed['mermaid']}\n\n```")
 
         cfg_map = cfg_parsed["mapping"] # {'A1': '2662'}
-        for key,value in cfg_map.items():
-            lines = id_list_map[value]
-            cfg_lines_map[key] = lines
+        for key, value in cfg_map.items():
+            if value in id_list_map:
+                cfg_lines_map[key] = id_list_map[value]
+            else:
+                print(f"[WARN] CFG mapping 中 {key} 对应的 value '{value}' 不在 id_list_map 中，跳过")
         print("old_id_result:", cfg_lines_map)
         new_id_parsed = await invoke_and_parse(cfg_id_validate_chain, {"source_code": tag_code, "mermaid": cfg_parsed["mermaid"], "reason": reason, "mapping": cfg_lines_map})
         print("new_id_result:", new_id_parsed["mapping"], new_id_parsed["reason"])
         new_map = new_id_parsed["mapping"] # {'A1': ['8-10'], 'B1': ['11-20','80']}
         new_id_list = []
-        
-        for key,value in new_map.items():
+
+        for key, value in new_map.items():
+            if key not in cfg_map:
+                print(f"[WARN] new_map 中的 key '{key}' 不在 cfg_map 中，跳过")
+                continue
             uu_id = cfg_map[key]
             lines = []
             for item in value:
-                if '-' in item:
-                    start, end = item.split('-')
-                    lines.append(f"{int(start) + offset}-{int(end) + offset}")
-                else:
-                    lines.append(str(int(item) + offset))
-            new_id_list.append({"source_id": uu_id, "name": file_name, "lines": lines})
+                try:
+                    if '-' in str(item):
+                        parts = str(item).split('-')
+                        start, end = int(parts[0]), int(parts[1])
+                        lines.append(f"{start + offset}-{end + offset}")
+                    else:
+                        lines.append(str(int(item) + offset))
+                except (ValueError, IndexError):
+                    print(f"[WARN] CFG 行号解析失败: key={key}, item='{item}'，跳过")
+                    continue
+            if lines:
+                new_id_list.append({"source_id": uu_id, "name": file_name, "lines": lines})
         # resultt = json.dumps({"mermaid": json.loads(cfg_result)["mermaid"], "mapping": json.loads(cfg_result)["mapping"], "id_list": new_id_list}, ensure_ascii=False, indent=4)
         # out_path = os.path.join(os.path.dirname(__file__), "cfg.json")
         # # with open(out_path, "w", encoding="utf-8") as f:
@@ -638,13 +649,13 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             if validate_result["result"]:
                 break
             print(validate_result)
-            uml_result = await uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai}, config=cb_config)
+            uml_result = await uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai})
             uml_parsed = extract_json(uml_result)
             uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
             validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
 
         mermaid_path = os.path.join(os.path.dirname(__file__), "uml_mermaid.md")
-        return {"chart_type":"代码类\\接口之间关系uml图", "mermaid_content": uml_parsed["mermaid"], "mermaid_source_info":  f"重点关注对象为{key_target}, 和他们相关的信息是{node_information}", "write_path": mermaid_path, "mapping": uml_parsed["mapping"], "id_list": source_id_full, "uml_token_stats": uml_token_counter.summary()}
+        return {"chart_type":"代码类\\接口之间关系uml图", "mermaid_content": uml_parsed["mermaid"], "mermaid_source_info":  f"重点关注对象为{key_target}, 和他们相关的信息是{node_information}", "write_path": mermaid_path, "mapping": uml_parsed["mapping"], "id_list": source_id_full}
 
     async def generate_hybrid_uml(state: ChartState) -> ChartState:
         """混合型Block的UML图：用namespace分组标注直连类和子模块类的归属。
@@ -873,8 +884,6 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
             f.write(json.dumps(source_map, ensure_ascii=False, indent=2))
         print(f"[DEBUG] Hybrid UML输入已写入 {uml_debug_path}")
 
-        uml_token_counter = TokenCounter()
-        cb_config = {"callbacks": [uml_token_counter]}
         print("node_information for hybrid UML:", node_information)
         def strip_namespace_prefix(mermaid_code: str) -> str:
             """去除关系线中的namespace前缀，避免Mermaid创建多余节点。
@@ -892,21 +901,26 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
                 cleaned.append(line)
             return '\n'.join(cleaned)
 
-        uml_result = await hybrid_uml_chain.ainvoke({"node_information": node_information, "source_id": source_id_ai}, config=cb_config)
+        uml_result = await hybrid_uml_chain.ainvoke({"node_information": node_information, "source_id": source_id_ai})
         uml_parsed = extract_json(uml_result)
         uml_parsed["mermaid"] = strip_namespace_prefix(uml_parsed["mermaid"])
         uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
         validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
-        while not validate_result["result"]:
-            print(validate_result)
-            uml_result = await hybrid_uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai}, config=cb_config)
+        for _retry in range(MAX_MERMAID_RETRIES):
+            if validate_result["result"]:
+                break
+            print(f"[hybrid_uml] 验证失败 (重试 {_retry + 1}/{MAX_MERMAID_RETRIES}): {validate_result['errors'][:200]}")
+            uml_result = await hybrid_uml_chain.ainvoke({"node_information": node_information + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": source_id_ai})
             uml_parsed = extract_json(uml_result)
             uml_parsed["mermaid"] = strip_namespace_prefix(uml_parsed["mermaid"])
             uml_parsed["mermaid"] = _sanitize_class_diagram(uml_parsed["mermaid"])
             validate_result = validator.validate_file(f"```mermaid\n\n{uml_parsed['mermaid']}\n\n```")
+        else:
+            if not validate_result["result"]:
+                print(f"[hybrid_uml] 达到最大重试次数 {MAX_MERMAID_RETRIES}，使用最后一次结果")
 
         mermaid_path = os.path.join(os.path.dirname(__file__), "hybrid_uml_mermaid.md")
-        return {"chart_type": "混合模块类关系uml图（含namespace分组）", "mermaid_content": uml_parsed["mermaid"], "mermaid_source_info": node_information, "write_path": mermaid_path, "mapping": uml_parsed["mapping"], "id_list": source_id_full, "uml_token_stats": uml_token_counter.summary()}
+        return {"chart_type": "混合模块类关系uml图（含namespace分组）", "mermaid_content": uml_parsed["mermaid"], "mermaid_source_info": node_information, "write_path": mermaid_path, "mapping": uml_parsed["mapping"], "id_list": source_id_full}
 
     async def generate_time(state: ChartState) -> ChartState:
         query0 = """
@@ -1232,34 +1246,10 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         mermaid_source_info = state["mermaid_source_info"]
         chart_type = state["chart_type"]
         additional_info = state["additional_info"] if "additional_info" in state else ""
-        uml_token_stats = state.get("uml_token_stats")
         if type == "hybrid_uml":
-            # hybrid_uml 使用专用描述提示词，输入为 mermaid 图 + node_information(JSON)
-            if uml_token_stats is not None:
-                desc_counter = TokenCounter()
-                mermaid_description = await hybrid_uml_desc_chain.ainvoke({"chart_mermaid": mermaid_content, "node_information": mermaid_source_info}, config={"callbacks": [desc_counter]})
-                desc_stats = desc_counter.summary()
-                uml_token_stats = {
-                    "call_count": uml_token_stats["call_count"] + desc_stats["call_count"],
-                    "total_input_tokens": uml_token_stats["total_input_tokens"] + desc_stats["total_input_tokens"],
-                    "total_output_tokens": uml_token_stats["total_output_tokens"] + desc_stats["total_output_tokens"],
-                    "total_tokens": uml_token_stats["total_tokens"] + desc_stats["total_tokens"],
-                }
-            else:
-                mermaid_description = await hybrid_uml_desc_chain.ainvoke({"chart_mermaid": mermaid_content, "node_information": mermaid_source_info})
+            mermaid_description = await hybrid_uml_desc_chain.ainvoke({"chart_mermaid": mermaid_content, "node_information": mermaid_source_info})
         elif type in ("cfg", "uml"):
-            if uml_token_stats is not None:
-                desc_counter = TokenCounter()
-                mermaid_description = await description_chain.ainvoke({"chart_type": chart_type, "chart_mermaid": mermaid_content, "mermaid_source_info": mermaid_source_info}, config={"callbacks": [desc_counter]})
-                desc_stats = desc_counter.summary()
-                uml_token_stats = {
-                    "call_count": uml_token_stats["call_count"] + desc_stats["call_count"],
-                    "total_input_tokens": uml_token_stats["total_input_tokens"] + desc_stats["total_input_tokens"],
-                    "total_output_tokens": uml_token_stats["total_output_tokens"] + desc_stats["total_output_tokens"],
-                    "total_tokens": uml_token_stats["total_tokens"] + desc_stats["total_tokens"],
-                }
-            else:
-                mermaid_description = await description_chain.ainvoke({"chart_type": chart_type, "chart_mermaid": mermaid_content, "mermaid_source_info": mermaid_source_info})
+            mermaid_description = await description_chain.ainvoke({"chart_type": chart_type, "chart_mermaid": mermaid_content, "mermaid_source_info": mermaid_source_info})
         else:
             mermaid_description = ""
         output = "```mermaid\n" + mermaid_content + "\n```\n" + mermaid_description + "\n" + additional_info + "\n"
