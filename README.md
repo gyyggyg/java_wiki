@@ -25,7 +25,7 @@ pip install -r requirement.txt
 
 ### 2. Node.js 依赖
 
-用于 Mermaid 图表语法校验（无需 Chrome）：
+用于 Mermaid 图表语法校验：
 
 ```bash
 npm install
@@ -47,12 +47,6 @@ BASE_URL=https://api.openai.com/v1
 
 # 并发控制（可选）
 MAX_CONCURRENT_BLOCKS=10
-
-# Mermaid 校验用 Chrome 路径（可选，已改用 Node.js 校验）
-# macOS:
-PUPPETEER_EXECUTABLE_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
-# Windows:
-# PUPPETEER_EXECUTABLE_PATH=C:\Users\xxx\AppData\Local\Google\Chrome\Application\chrome.exe
 ```
 
 ## 快速开始
