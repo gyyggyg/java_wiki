@@ -2,61 +2,64 @@
 flowchart TD
     direction TB
     subgraph Initialization
-        N1["获取目标方法信息\n(准备拦截信息)"]
-        style N1 fill:#0af,stroke:#026,stroke-width:3px
+        A1["提取请求头中的JWT令牌"]
+        style A1 fill:#e6f7ff,stroke:#0af,stroke-width:3px
     end
-    subgraph MainLogic
-        N2["执行目标方法\n(尝试执行业务逻辑)"]
-        style N2 fill:#0af,stroke:#026,stroke-width:3px
-        D1["是否发生异常? "]
-        style D1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
-        N3["正常完成\n(返回执行业务结果)"]
-        style N3 fill:#0af,stroke:#026,stroke-width:3px
-        subgraph ExceptionHandling
-            D2["方法带有@CacheException注解?"]
-            style D2 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
-            E1["异常抛出\n(让调用方感知异常)"]
-            style E1 fill:#fbb,stroke:#f96,stroke-width:2px,stroke-dasharray:5 5
-            E2["记录异常日志\n(异常被捕获并记录)"]
-            style E2 fill:#fbb,stroke:#f96,stroke-width:2px,stroke-dasharray:5 5
-        end
+    subgraph Token检查与解析
+        B1["请求头存在且格式符合要求?"]
+        style B1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
+        B2["解析用户名并记录日志"]
+        style B2 fill:#e6f7ff,stroke:#0af,stroke-width:3px
     end
-    subgraph Return
-        N4["返回业务结果或null"]
-        style N4 fill:#0af,stroke:#026,stroke-width:3px
+    subgraph 用户验证流程
+        C1["用户名存在且未认证?"]
+        style C1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
+        C2["加载用户详情"]
+        style C2 fill:#e6f7ff,stroke:#0af,stroke-width:3px
+        C3["JWT令牌有效? "]
+        style C3 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
+        C4["构建认证信息并写入上下文\n(用户身份认证)"]
+        style C4 fill:#1854b4,stroke:#0af,stroke-width:3px,color:#fff
     end
-    N1 --> N2
-    N2 -- "无异常" --> D1
-    D1 -- "否" --> N3
-    N3 --> N4
-    D1 -- "是" --> D2
-    D2 -- "是" --> E1
-    E1 --> N4
-    D2 -- "否" --> E2
-    E2 --> N4
-```
-- 本图为“代码控制流图”，描述了doAround方法的核心执行流程，具体如下：
-    - **初始化阶段**  
-        - 获取目标方法相关信息，为后续拦截和处理做准备。
-    - **主逻辑阶段**  
-        - 执行目标方法（即调用joinPoint.proceed()），尝试完成业务逻辑。
-        - 判断目标方法执行过程中是否发生异常：
-            - 若**未发生异常**，则直接返回业务方法的正常执行结果。
-            - 若**发生异常**，进入异常处理分支。
-                - 判断该方法是否带有@CacheException注解：
-                    - 若**有@CacheException注解**，则异常被直接抛出，让调用方能够感知此异常。
-                    - 若**没有@CacheException注解**，则捕获异常并通过LOGGER记录异常日志，异常不会继续抛出。
-    - **返回阶段**  
-        - 最终返回业务结果：正常情况下返回目标方法的执行结果；发生异常且未抛出时返回null。
+    subgraph 请求继续
+        D1["继续执行后续过滤器"]
+        style D1 fill:#fbb,stroke:#f96,stroke-width:3px
+    end
 
-- 该流程图准确反映了doAround方法的控制流逻辑，重点体现了：
-    - 业务方法执行与异常捕获的分支流程；
-    - @CacheException注解对异常处理策略的影响；
-    - 日志记录器LOGGER的作用为记录未抛出的异常信息。
+    A1 --> B1
+    B1 -- 是 --> B2
+    B1 -- 否 --> D1
+    B2 --> C1
+    C1 -- 是 --> C2
+    C1 -- 否 --> D1
+    C2 --> C3
+    C3 -- 是 --> C4
+    C3 -- 否 --> D1
+    C4 --> D1
+
+```
+- 本图为 doFilterInternal 方法的代码控制流图，描述了处理HTTP请求时JWT令牌认证的主要逻辑流程。
+
+- 主要流程如下：
+  - **初始化阶段**
+    - 从HTTP请求头中提取JWT令牌（Authorization头，提取并去除"Bearer "前缀）。
+  - **Token检查与解析阶段**
+    - 判断请求头是否存在且格式正确（非空且以tokenHead开头），否则直接跳转到后续处理。
+    - 若格式正确，解析JWT令牌获取用户名，并记录日志。
+  - **用户验证流程**
+    - 判断解析出的用户名是否存在，且当前安全上下文未认证（即未登录）。
+      - 如果条件成立，加载该用户名对应的用户详情（UserDetailsService）。
+      - 验证JWT令牌是否合法且与用户详情匹配（validateToken方法）。
+        - 若验证通过，构建认证信息（UsernamePasswordAuthenticationToken），并写入安全上下文，完成用户身份认证。
+    - 任一步骤失败（用户名不存在、已认证、token无效），则跳转到后续处理。
+  - **请求继续阶段**
+    - 无论认证是否通过，最终都继续执行过滤器链（chain.doFilter），进行后续的过滤或请求处理。
+  
+- 图中各判断与操作节点、流转关系严格对应doFilterInternal方法的实际控制流程，体现了JWT认证在请求处理过程中的关键分支。
 
 下面介绍该函数所属的文件、类、函数的基本信息
 
 | 文件 | 类 | 函数 |
 | --- | --- | --- |
-| mall-security/src/main/java/com/macro/mall/security/aspect/RedisCacheAspect.java | RedisCacheAspect | RedisCacheAspect.doAround |
-| 该文件定义了一个基于Spring AOP的切面类RedisCacheAspect，用于拦截com.macro.mall.portal.service和com.macro.mall.service包中所有以CacheService结尾的类的公共方法，主要负责对这些方法的调用进行环绕通知，统一捕获并处理方法执行过程中发生的异常，尤其是与Redis缓存操作相关的异常。 | RedisCacheAspect是一个基于Spring AOP的切面类，用于拦截com.macro.mall.portal.service和com.macro.mall.service包下所有以CacheService结尾的类的公共方法，实现对这些方法的调用进行环绕通知，统一捕获和处理执行过程中发生的异常，尤其是与Redis缓存操作相关的异常，防止Redis宕机影响正常业务逻辑，保证业务流程的稳定性。 | 该方法是一个基于Spring AOP的环绕通知方法，用于拦截符合切点cacheAspect()定义的目标方法调用。该方法执行目标方法并捕获其执行过程中抛出的异常，针对带有@CacheException注解的方法会将异常继续抛出，否则仅记录异常日志，保证业务流程在缓存操作异常时仍能继续执行，返回目标方法的执行结果或null。 |
+| mall-security/src/main/java/com/macro/mall/security/component/JwtAuthenticationTokenFilter.java | JwtAuthenticationTokenFilter | JwtAuthenticationTokenFilter.doFilterInternal |
+| 该文件定义了一个名为JwtAuthenticationTokenFilter的Spring Security过滤器类，继承自OncePerRequestFilter，用于在每次HTTP请求时从请求头中提取JWT令牌，解析用户名，基于用户名通过UserDetailsService加载用户详情，验证JWT令牌的有效性，并将认证信息设置到SecurityContext中，从而实现基于JWT的用户身份认证和授权。 | JwtAuthenticationTokenFilter是一个继承自Spring Security的OncePerRequestFilter的过滤器类，用于在每次HTTP请求时从请求头中提取JWT令牌，解析出用户名，加载用户详情，验证令牌的有效性，并将认证信息设置到SecurityContext中，从而实现基于JWT的用户身份认证和授权。 | 该方法是继承自Spring Security的OncePerRequestFilter的JWT登录授权过滤器的核心方法，用于在每次HTTP请求时从请求头中提取JWT令牌，解析出用户名，验证令牌的有效性，并将认证信息存入Spring Security的SecurityContext，从而实现基于JWT的用户身份验证和授权。 |

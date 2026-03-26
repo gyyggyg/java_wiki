@@ -216,111 +216,129 @@ class SimpleMermaidValidator:
         return valid
         # --------------- 编译校验 ---------------
     @staticmethod
+    @staticmethod
     def sanitize_class_diagram(code: str) -> str:
-        """清理classDiagram中类定义内部的空行，防止mermaid解析器崩溃。
+        """清理classDiagram中导致mermaid解析器崩溃的各种语法问题。
 
-        mermaid的ClassMember.parseMember在遇到undefined成员行时会抛出
-        TypeError: Cannot read properties of undefined (reading 'startsWith')
+        mermaid的ClassMember.parseMember在遇到以下情况时会抛出
+        TypeError: Cannot read properties of undefined (reading 'startsWith'):
+        1. 类定义内部的空行
+        2. 成员行包含分号
+        3. 成员行包含 // 注释
+        4. 成员行包含修饰符关键字（如 public, private）
+        5. 成员行中有多余的花括号
+        6. 可变参数 Object... 语法
+        7. 构造函数波浪号语法错误 ~ClassName()~
         """
         lines = code.split('\n')
         result = []
         inside_class_body = False
         brace_depth = 0
+
         for line in lines:
             stripped = line.strip()
+
             if inside_class_body:
-                if '{' in stripped:
-                    brace_depth += stripped.count('{') - stripped.count('}')
-                elif '}' in stripped:
-                    brace_depth += stripped.count('{') - stripped.count('}')
-                    if brace_depth <= 0:
-                        inside_class_body = False
-                        brace_depth = 0
+                open_count = stripped.count('{')
+                close_count = stripped.count('}')
+                brace_depth += open_count - close_count
+
+                if brace_depth <= 0:
+                    inside_class_body = False
+                    brace_depth = 0
+                    result.append(line)
+                    continue
+
                 # 跳过类定义内部的空行
                 if stripped == '':
                     continue
+
+                # 跳过纯注释行
+                if stripped.startswith('//') or stripped.startswith('%%'):
+                    continue
+
+                # 清理成员行
+                member = stripped
+                # 去掉行尾分号
+                member = member.rstrip(';')
+                # 去掉行内注释
+                if '//' in member:
+                    member = member[:member.index('//')].rstrip()
+                # 去掉行内 %% 注释（但保留 <<interface>> 等标注行）
+                if '%%' in member and '<<' not in member:
+                    member = member[:member.index('%%')].rstrip()
+                # 替换可变参数 Object... → Object[]
+                member = re.sub(r'(\w+)\.\.\.', r'\1[]', member)
+                # 去掉成员行中多余的花括号（不是开头/结尾的 { }）
+                if member and not member.startswith('{') and not member.endswith('}'):
+                    member = member.replace('{', '').replace('}', '')
+                # 修复构造函数波浪号: ~ClassName()~ → ClassName()
+                member = re.sub(r'^~(\w+)\((.*?)\)~$', r'\1(\2)', member)
+
+                if member.strip():
+                    # 保持原始缩进
+                    indent = line[:len(line) - len(line.lstrip())]
+                    result.append(indent + member)
             else:
-                # 检测类定义开始：class Foo {
+                # 检测类定义开始（含 namespace 内的 class 定义）
                 if re.match(r'^\s*class\s+', stripped) and '{' in stripped:
                     inside_class_body = True
                     brace_depth = stripped.count('{') - stripped.count('}')
                     if brace_depth <= 0:
                         inside_class_body = False
                         brace_depth = 0
-            result.append(line)
+                result.append(line)
+
         return '\n'.join(result)
 
+    # Node.js 校验脚本路径（相对于项目根目录）
+    _VALIDATE_SCRIPT = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "scripts", "validate_mermaid.mjs"
+    )
+
     def validate_block_compile(self, code, block_num):
-        """尝试调用 mmdc 进行真实编译"""
+        """使用 Node.js + mermaid.parse() 校验语法（无需 Chrome/Puppeteer）"""
         if not self.enable_compile_check:
-            return True  # 未启用编译校验时默认通过
+            return True
 
-        mmdc_cmds = self._resolve_mmdc_commands()
-        if not mmdc_cmds:
-            self.errors.append(f"未找到 mmdc 或 npx 环境")
-            return False
-
-        # 清理类图中类定义内部的空行
+        # 清理类图中导致解析崩溃的语法问题
         code = self.sanitize_class_diagram(code)
 
+        node_cmd = shutil.which("node")
+        if not node_cmd:
+            self.errors.append("未找到 node 环境")
+            return False
+
+        if not os.path.exists(self._VALIDATE_SCRIPT):
+            self.errors.append(f"未找到校验脚本: {self._VALIDATE_SCRIPT}")
+            return False
+
         try:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                src = Path(tmpdir) / "diagram.mmd"
-                out = Path(tmpdir) / "diagram.svg"
-                src.write_text(code, encoding="utf-8")
-                
-                for mmdc_cmd in mmdc_cmds:
-                    cmd = [*mmdc_cmd, "-i", str(src), "-o", str(out), "--quiet"]
-                    try:
-                        proc = subprocess.run(
-                            cmd,
-                            capture_output=True,
-                            text=True,
-                            timeout=self.mmdc_timeout_sec,
-                            encoding="utf-8",
-                            errors="replace",
-                        )
-                        if proc.returncode == 0 and out.exists():
-                            return True
-                        self.errors.append(
-                            f"编译失败\n"
-                            f"STDOUT: {proc.stdout}\nSTDERR: {proc.stderr}"
-                        )
-                        return False
-                    except FileNotFoundError:
-                        # 尝试下一个候选命令
-                        continue
+            proc = subprocess.run(
+                [node_cmd, self._VALIDATE_SCRIPT, "-"],
+                input=code,
+                capture_output=True,
+                text=True,
+                timeout=self.mmdc_timeout_sec,
+                encoding="utf-8",
+                errors="replace",
+            )
+            if proc.returncode == 0 and proc.stdout.strip() == "OK":
+                return True
+            error_msg = proc.stderr.strip() or proc.stdout.strip() or "未知错误"
+            self.errors.append(f"语法校验失败: {error_msg}")
+            return False
 
         except subprocess.TimeoutExpired:
-            self.errors.append(f"mmdc 编译超时")
+            self.errors.append("mermaid 语法校验超时")
             return False
         except Exception as e:
             error_msg = str(e)
-            if len(error_msg) > 100:
-                error_msg = error_msg[:100] + "..."
-            self.errors.append(f"编译异常 - {error_msg}")
+            if len(error_msg) > 200:
+                error_msg = error_msg[:200] + "..."
+            self.errors.append(f"校验异常: {error_msg}")
             return False
-        return True
-
-    def _resolve_mmdc_commands(self):
-        """查找可用的 mermaid-cli 执行命令"""
-        candidates = []
-        
-        # 直接 mmdc 可执行
-        for exe in ["mmdc", "mmdc.cmd", "mmdc.exe", "mmdc.ps1"]:
-            path = shutil.which(exe)
-            if path:
-                candidates.append([path])
-                
-        # 通过 npx 运行 mermaid-cli
-        for exe in ["npx", "npx.cmd", "npx.exe"]:
-            path = shutil.which(exe)
-            if path:
-                # 不同 npx 版本对 --yes/-y 支持不同，逐个尝试
-                candidates.append([path, "--yes", "@mermaid-js/mermaid-cli"])  # 现代 npx
-                candidates.append([path, "-y", "@mermaid-js/mermaid-cli"])     # 一些环境
-                candidates.append([path, "@mermaid-js/mermaid-cli"])            # 最后兜底（可能交互）
-        return candidates
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ class LLMInterface:
     """LLM接口封装，专门用于层级化模块生成"""
 
     def __init__(self,
-                 model_name: str = "gpt-4o-mini",
+                 model_name: str = "gpt-4.1",
                  provider: str = "openai",
                  temperature: float = 0.7,
                  max_tokens: int = 16000,

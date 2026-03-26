@@ -44,3 +44,5 @@ __pycache__/
 # Archives
 *.rar
 *.zip
+/node_modules
+/logs

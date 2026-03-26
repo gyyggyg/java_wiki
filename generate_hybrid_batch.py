@@ -44,15 +44,17 @@ async def generate_one(
 ) -> Dict:
     """生成单个混合型Block的wiki"""
     block_name = os.path.basename(block_path)
+    # 混合型Block存入 目录/目录名.meta.json
+    actual_path = os.path.join(block_path, block_name + ".meta")
 
     id_name_path = {
         "block_id": node_id,
         "block_name": block_name,
-        "block_path": block_path
+        "block_path": actual_path
     }
 
     print(f"[INFO] 开始生成混合型Block: {block_name} (ID: {node_id})")
-    print(f"       输出路径: {block_path}")
+    print(f"       输出路径: {actual_path}.json")
 
     app = hybrid_block_workflow(llm, neo4j, id_name_path, skeleton=skeleton)
     result = await app.ainvoke(
@@ -68,7 +70,7 @@ async def generate_one(
               f"输出{uml_stats['total_output_tokens']:,}tokens, "
               f"合计{uml_stats['total_tokens']:,}tokens")
 
-    output_path = block_path + ".json"
+    output_path = actual_path + ".json"
     if os.path.exists(output_path):
         print(f"[INFO] 文档已保存: {output_path}")
     else:

@@ -186,7 +186,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
         # 保存输出文件
         output_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "output", "root_doc.meta.json"
+            "output", "总揽.meta.json"
         )
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
