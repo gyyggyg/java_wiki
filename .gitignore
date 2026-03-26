@@ -30,9 +30,12 @@ graph/*_debug*.txt
 graph/test_*.json
 /feiqi
 /output
+/internal_result
 /results
 /wiki-final
 .env
+/mall
+/results
 
 # Python
 __pycache__/
