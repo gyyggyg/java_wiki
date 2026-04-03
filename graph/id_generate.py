@@ -17,9 +17,25 @@ from chains.common_chains import ChainFactory            # 简易链工厂
 from interfaces.data_master import get_file_content
 
 # ====================== 1. 辅助函数 ======================
-def generate_uuid_4digits() -> str:
-    """生成4位唯一ID"""
-    return str(uuid.uuid4().int)[:4]
+def generate_uuid_4digits(existing_ids: set = None) -> str:
+    """生成8位唯一ID，保证不与existing_ids中的已有ID碰撞。
+
+    函数名保留为4digits以保持向后兼容，实际已升级为8位。
+
+    Args:
+        existing_ids: 已有ID集合，传入时会自动避免碰撞并将新ID加入集合
+    """
+    for _ in range(100):
+        sid = str(uuid.uuid4().int)[:8]
+        if existing_ids is None or sid not in existing_ids:
+            if existing_ids is not None:
+                existing_ids.add(sid)
+            return sid
+    # 极端情况fallback到12位
+    sid = str(uuid.uuid4().int)[:12]
+    if existing_ids is not None:
+        existing_ids.add(sid)
+    return sid
 
 def find_code_line_range(full_code: str, target_code: str, name: str) -> List[str]:
     """

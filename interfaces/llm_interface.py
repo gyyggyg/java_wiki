@@ -134,6 +134,14 @@ class LLMInterface:
 #         except Exception:
 #             return False
 
+    def get_json_llm(self):
+        """返回强制JSON输出的LLM实例。
+        OpenAI/兼容接口使用 response_format JSON mode；其他provider原样返回。
+        """
+        if self.provider == "openai":
+            return self.llm.bind(response_format={"type": "json_object"})
+        return self.llm
+
     def get_model_info(self) -> Dict[str, Any]:
         """获取模型信息
 
