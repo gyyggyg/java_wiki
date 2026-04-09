@@ -6,6 +6,7 @@
   2. Root 文档（root_doc_workflow）→ 生成 output/root_doc.meta.json
   3. 中间层 Block（internal_block_workflow）→ 生成中间层文档 + internal_result/file_leaves.json + internal_result/file_block_leaves.json
   4. 叶子 Block + 混合 Block（并发执行）→ 读取步骤3输出的列表，生成各 Block 的 Wiki 文档
+  5. 可选章节（optional_sections_workflow）→ 扫描已生成的Wiki，追加状态机/消息队列等可选章节
 
 用法:
     python run_all.py                          # 默认配置
@@ -14,6 +15,7 @@
     python run_all.py --skip-name              # 跳过取名步骤（已有 block_new_names.json）
     python run_all.py --skip-root              # 跳过 root 文档生成
     python run_all.py --skip-internal          # 跳过中间层生成
+    python run_all.py --skip-optional          # 跳过可选章节生成
     python run_all.py --only-leaves            # 只执行叶子+混合 Block 生成（需已有 file_leaves.json）
 """
 
@@ -263,17 +265,52 @@ async def step4_leaf_and_hybrid(
             logger.warning(f"  [{fb['type']}] {fb['name']} (ID: {fb['id']}): {fb['error']}")
 
 
+# ====================== 步骤 5: 可选章节 ======================
+async def step5_optional_sections(llm: LLMInterface, neo4j: Neo4jInterface, logger: logging.Logger):
+    logger.info("=" * 60)
+    logger.info("[步骤 5/5] 可选章节生成")
+    logger.info("=" * 60)
+
+    wiki_path = os.environ.get("WIKI_PATH", "")
+    source_root = os.environ.get("SOURCE_ROOT_PATH", "")
+
+    if not wiki_path:
+        logger.warning("未配置 WIKI_PATH 环境变量，跳过可选章节")
+        return
+    if not source_root:
+        logger.warning("未配置 SOURCE_ROOT_PATH 环境变量，跳过可选章节")
+        return
+
+    from workflows.optional_sections_workflow import optional_sections_workflow
+
+    app = optional_sections_workflow(
+        neo4j_interface=neo4j,
+        llm_interface=llm,
+        wiki_path=wiki_path,
+        source_root=source_root,
+    )
+    result = await app.ainvoke(
+        {},
+        config={"configurable": {"thread_id": "optional-sections"}}
+    )
+
+    final = result.get("final_output", {})
+    logger.info(f"可选章节生成完成: {json.dumps(final, ensure_ascii=False)[:200]}")
+    return result
+
+
 # ====================== 主函数 ======================
 async def main():
     load_dotenv()
 
     parser = argparse.ArgumentParser(description="全局启动脚本 — 按顺序执行全部 Wiki 生成工作流")
-    parser.add_argument("--model", default="gpt-4.1", help="LLM模型名称 (默认: gpt-4.1)")
+    parser.add_argument("--model", default="gpt-5-mini", help="LLM模型名称 (默认: gpt-5-mini)")
     parser.add_argument("--provider", default="openai", help="LLM提供商: openai/claude/google (默认: openai)")
     parser.add_argument("--skeleton", action="store_true", help="精简UML源码输入（减少token）")
     parser.add_argument("--skip-name", action="store_true", help="跳过步骤1（模块取名），使用已有的 block_new_names.json")
     parser.add_argument("--skip-root", action="store_true", help="跳过步骤2（Root文档生成）")
     parser.add_argument("--skip-internal", action="store_true", help="跳过步骤3（中间层Block生成）")
+    parser.add_argument("--skip-optional", action="store_true", help="跳过步骤5（可选章节生成）")
     parser.add_argument("--only-leaves", action="store_true", help="只执行步骤4（需已有 file_leaves.json 和 file_block_leaves.json）")
     args = parser.parse_args()
 
@@ -284,7 +321,7 @@ async def main():
     # 记录启动参数
     logger.info(f"启动参数: model={args.model}, provider={args.provider}, skeleton={args.skeleton}")
     logger.info(f"跳过选项: skip_name={args.skip_name}, skip_root={args.skip_root}, "
-                f"skip_internal={args.skip_internal}, only_leaves={args.only_leaves}")
+                f"skip_internal={args.skip_internal}, skip_optional={args.skip_optional}, only_leaves={args.only_leaves}")
 
     # 初始化连接
     llm = LLMInterface(model_name=args.model, provider=args.provider)
@@ -344,6 +381,15 @@ async def main():
         await step4_leaf_and_hybrid(llm, neo4j, logger, skeleton=args.skeleton, max_concurrent=max_concurrent)
         step_times["步骤4-叶子+混合Block"] = time.time() - step_start
         logger.info(f"步骤4耗时: {step_times['步骤4-叶子+混合Block']:.1f}s")
+
+        # 步骤 5: 可选章节
+        if not args.only_leaves and not args.skip_optional:
+            step_start = time.time()
+            await step5_optional_sections(llm, neo4j, logger)
+            step_times["步骤5-可选章节"] = time.time() - step_start
+            logger.info(f"步骤5耗时: {step_times['步骤5-可选章节']:.1f}s")
+        else:
+            logger.info("跳过步骤5（可选章节）")
 
     finally:
         neo4j.close()
