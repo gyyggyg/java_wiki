@@ -1,0 +1,662 @@
+[
+  {
+    "nodeId": "18468",
+    "name": "后台管理系统",
+    "children": [
+      {
+        "nodeId": "18467",
+        "name": "应用层",
+        "children": [
+          {
+            "nodeId": "18424",
+            "name": "配置管理",
+            "children": []
+          },
+          {
+            "nodeId": "18433",
+            "name": "业务接口",
+            "children": [
+              {
+                "nodeId": "18428",
+                "name": "权限接口",
+                "children": []
+              },
+              {
+                "nodeId": "18430",
+                "name": "优惠券接口",
+                "children": []
+              },
+              {
+                "nodeId": "18429",
+                "name": "限时购接口",
+                "children": []
+              },
+              {
+                "nodeId": "18425",
+                "name": "首页推荐接口",
+                "children": []
+              },
+              {
+                "nodeId": "18427",
+                "name": "订单与售后接口",
+                "children": []
+              },
+              {
+                "nodeId": "18426",
+                "name": "商品接口",
+                "children": []
+              },
+              {
+                "nodeId": "18431",
+                "name": "专题与优选接口",
+                "children": []
+              },
+              {
+                "nodeId": "18432",
+                "name": "对象存储接口",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18437",
+            "name": "数据访问",
+            "children": [
+              {
+                "nodeId": "18435",
+                "name": "批量与关系访问",
+                "children": []
+              },
+              {
+                "nodeId": "18436",
+                "name": "自定义数据访问",
+                "children": []
+              },
+              {
+                "nodeId": "18434",
+                "name": "商品属性访问",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18446",
+            "name": "传输对象",
+            "children": [
+              {
+                "nodeId": "18444",
+                "name": "管理员安全对象",
+                "children": []
+              },
+              {
+                "nodeId": "18445",
+                "name": "业务参数对象",
+                "children": []
+              },
+              {
+                "nodeId": "18443",
+                "name": "MinIO对象",
+                "children": []
+              },
+              {
+                "nodeId": "18441",
+                "name": "订单参数对象",
+                "children": []
+              },
+              {
+                "nodeId": "18439",
+                "name": "OSS上传对象",
+                "children": []
+              },
+              {
+                "nodeId": "18442",
+                "name": "商品属性对象",
+                "children": []
+              },
+              {
+                "nodeId": "18440",
+                "name": "商品分类对象",
+                "children": []
+              },
+              {
+                "nodeId": "18438",
+                "name": "商品维护对象",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18466",
+            "name": "服务接口",
+            "children": [
+              {
+                "nodeId": "18462",
+                "name": "首页推荐服务",
+                "children": []
+              },
+              {
+                "nodeId": "18464",
+                "name": "领域服务",
+                "children": []
+              },
+              {
+                "nodeId": "18465",
+                "name": "支持服务",
+                "children": []
+              },
+              {
+                "nodeId": "18463",
+                "name": "属性服务",
+                "children": []
+              },
+              {
+                "nodeId": "18461",
+                "name": "服务实现",
+                "children": [
+                  {
+                    "nodeId": "18452",
+                    "name": "权限服务实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18455",
+                    "name": "公司与优选服务实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18457",
+                    "name": "优惠券服务实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18451",
+                    "name": "限时购服务实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18460",
+                    "name": "首页与专题推荐服务实现",
+                    "children": [
+                      {
+                        "nodeId": "18447",
+                        "name": "首页推广服务实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "18456",
+                        "name": "专题与首页推荐服务实现",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "18458",
+                    "name": "核心服务实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18454",
+                    "name": "会员服务实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18450",
+                    "name": "订单与退货服务实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18459",
+                    "name": "商品属性品牌分类服务实现",
+                    "children": [
+                      {
+                        "nodeId": "18449",
+                        "name": "属性分类服务实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "18453",
+                        "name": "品牌分类服务实现",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "18448",
+                    "name": "商品信息服务实现",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "18423",
+            "name": "状态校验注解",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nodeId": "18475",
+    "name": "基础能力支撑",
+    "children": [
+      {
+        "nodeId": "18472",
+        "name": "接口响应管理",
+        "children": [
+          {
+            "nodeId": "18471",
+            "name": "响应格式与错误码",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "18469",
+        "name": "配置与文档集成",
+        "children": []
+      },
+      {
+        "nodeId": "18470",
+        "name": "配置与操作日志",
+        "children": []
+      },
+      {
+        "nodeId": "18473",
+        "name": "异常处理与断言",
+        "children": []
+      },
+      {
+        "nodeId": "18474",
+        "name": "Redis访问服务",
+        "children": []
+      }
+    ]
+  },
+  {
+    "nodeId": "18505",
+    "name": "电商演示系统",
+    "children": [
+      {
+        "nodeId": "18504",
+        "name": "演示功能",
+        "children": [
+          {
+            "nodeId": "18500",
+            "name": "框架配置",
+            "children": []
+          },
+          {
+            "nodeId": "18503",
+            "name": "品牌接口演示",
+            "children": []
+          },
+          {
+            "nodeId": "18501",
+            "name": "品牌服务实现",
+            "children": []
+          },
+          {
+            "nodeId": "18502",
+            "name": "状态校验与合规",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nodeId": "18499",
+    "name": "数据模型与持久化基础",
+    "children": [
+      {
+        "nodeId": "18498",
+        "name": "代码生成与文档集成",
+        "children": []
+      },
+      {
+        "nodeId": "18497",
+        "name": "数据访问与持久化接口",
+        "children": []
+      },
+      {
+        "nodeId": "18496",
+        "name": "业务数据模型",
+        "children": [
+          {
+            "nodeId": "18489",
+            "name": "权限管理数据模型",
+            "children": []
+          },
+          {
+            "nodeId": "18493",
+            "name": "内容与评论数据模型",
+            "children": [
+              {
+                "nodeId": "18492",
+                "name": "内容区域与评论模型",
+                "children": []
+              },
+              {
+                "nodeId": "18485",
+                "name": "内容发布与分类模型",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18482",
+            "name": "优惠券数据模型",
+            "children": []
+          },
+          {
+            "nodeId": "18478",
+            "name": "实体关联关系模型",
+            "children": []
+          },
+          {
+            "nodeId": "18494",
+            "name": "限时促销数据模型",
+            "children": [
+              {
+                "nodeId": "18490",
+                "name": "促销活动与场次模型",
+                "children": []
+              },
+              {
+                "nodeId": "18491",
+                "name": "促销商品与日志模型",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18495",
+            "name": "动态查询条件构建",
+            "children": [
+              {
+                "nodeId": "18477",
+                "name": "统一查询条件构建",
+                "children": []
+              },
+              {
+                "nodeId": "18476",
+                "name": "SQL查询辅助",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18486",
+            "name": "首页推荐内容模型",
+            "children": []
+          },
+          {
+            "nodeId": "18484",
+            "name": "会员基础数据模型",
+            "children": []
+          },
+          {
+            "nodeId": "18483",
+            "name": "会员积分与激励模型",
+            "children": []
+          },
+          {
+            "nodeId": "18481",
+            "name": "订单与退货数据模型",
+            "children": []
+          },
+          {
+            "nodeId": "18487",
+            "name": "商品相册与图片模型",
+            "children": []
+          },
+          {
+            "nodeId": "18480",
+            "name": "商品属性与库存模型",
+            "children": []
+          },
+          {
+            "nodeId": "18488",
+            "name": "商品信息与评价模型",
+            "children": []
+          },
+          {
+            "nodeId": "18479",
+            "name": "商品定价优惠模型",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nodeId": "18535",
+    "name": "门户系统",
+    "children": [
+      {
+        "nodeId": "18533",
+        "name": "主程序",
+        "children": [
+          {
+            "nodeId": "18532",
+            "name": "订单取消与异步处理",
+            "children": []
+          },
+          {
+            "nodeId": "18515",
+            "name": "全局配置",
+            "children": [
+              {
+                "nodeId": "18513",
+                "name": "支付宝配置",
+                "children": []
+              },
+              {
+                "nodeId": "18514",
+                "name": "Spring配置",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18519",
+            "name": "业务接口",
+            "children": [
+              {
+                "nodeId": "18516",
+                "name": "会员接口",
+                "children": []
+              },
+              {
+                "nodeId": "18517",
+                "name": "订单购物车接口",
+                "children": []
+              },
+              {
+                "nodeId": "18518",
+                "name": "内容展示接口",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18521",
+            "name": "数据访问",
+            "children": [
+              {
+                "nodeId": "18520",
+                "name": "订单购物车数据访问",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18512",
+            "name": "领域模型",
+            "children": [
+              {
+                "nodeId": "18509",
+                "name": "购物车促销模型",
+                "children": []
+              },
+              {
+                "nodeId": "18508",
+                "name": "首页内容模型",
+                "children": []
+              },
+              {
+                "nodeId": "18507",
+                "name": "会员行为模型",
+                "children": []
+              },
+              {
+                "nodeId": "18511",
+                "name": "订单模型",
+                "children": []
+              },
+              {
+                "nodeId": "18510",
+                "name": "促销商品模型",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "18506",
+            "name": "会员行为数据访问",
+            "children": []
+          },
+          {
+            "nodeId": "18531",
+            "name": "业务服务",
+            "children": [
+              {
+                "nodeId": "18530",
+                "name": "购物车促销服务",
+                "children": []
+              },
+              {
+                "nodeId": "18528",
+                "name": "会员服务",
+                "children": []
+              },
+              {
+                "nodeId": "18527",
+                "name": "会员行为服务",
+                "children": []
+              },
+              {
+                "nodeId": "18529",
+                "name": "订单退货服务",
+                "children": []
+              },
+              {
+                "nodeId": "18526",
+                "name": "业务实现",
+                "children": [
+                  {
+                    "nodeId": "18522",
+                    "name": "会员行为实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18525",
+                    "name": "内容商品实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18523",
+                    "name": "会员实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "18524",
+                    "name": "订单促销实现",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "nodeId": "18534",
+        "name": "自动化测试",
+        "children": []
+      }
+    ]
+  },
+  {
+    "nodeId": "18541",
+    "name": "商品搜索系统",
+    "children": [
+      {
+        "nodeId": "18540",
+        "name": "搜索服务实现",
+        "children": [
+          {
+            "nodeId": "18539",
+            "name": "搜索数据访问与索引管理",
+            "children": []
+          },
+          {
+            "nodeId": "18538",
+            "name": "搜索配置集成",
+            "children": []
+          },
+          {
+            "nodeId": "18537",
+            "name": "搜索数据结构与实体",
+            "children": []
+          },
+          {
+            "nodeId": "18536",
+            "name": "搜索业务逻辑与服务接口",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nodeId": "18548",
+    "name": "安全与缓存框架",
+    "children": [
+      {
+        "nodeId": "18547",
+        "name": "缓存异常处理",
+        "children": []
+      },
+      {
+        "nodeId": "18545",
+        "name": "安全认证与权限控制",
+        "children": [
+          {
+            "nodeId": "18543",
+            "name": "动态权限控制",
+            "children": []
+          },
+          {
+            "nodeId": "18544",
+            "name": "安全异常响应",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "18546",
+        "name": "安全与缓存配置",
+        "children": []
+      },
+      {
+        "nodeId": "18542",
+        "name": "安全工具与令牌",
+        "children": []
+      }
+    ]
+  }
+]

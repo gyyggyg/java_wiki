@@ -15,7 +15,7 @@ from interfaces.neo4j_interface import Neo4jInterface
 from chains.common_chains import ChainFactory
 from interfaces.data_master import get_file
 from interfaces.simple_validate_mermaid import SimpleMermaidValidator
-from chains.prompts.type_chart_prompt import MODULE_NAME_PROMPT
+from chains.prompts.type_chart_prompt import MODULE_NAME_PROMPT, MODULE_NAME_SHORTEN_PROMPT
 from collections import deque, defaultdict
 from time import sleep
 
@@ -92,11 +92,43 @@ async def get_block_tree(neo4j_interface: Neo4jInterface, high_block) -> dict:
         "old_name": old_name,
         "explanation": explanation,
         "children": children
-    } 
+    }
+
+
+def build_slim_tree(full_tree: dict, draft_names: dict, with_explanation: bool = True) -> dict:
+    """
+    用阶段一的草稿名替换树中的name。
+    with_explanation=True 时保留 explanation（当前树用），
+    with_explanation=False 时只保留 nodeId、name、children（其他树用）。
+    """
+    node_id = str(full_tree["nodeId"])
+    result = {
+        "nodeId": node_id,
+        "name": draft_names.get(node_id, full_tree.get("old_name", "")),
+        "children": [build_slim_tree(c, draft_names, with_explanation) for c in full_tree.get("children", [])]
+    }
+    if with_explanation:
+        explanation = full_tree.get("explanation", "")
+        if explanation:
+            result["explanation"] = explanation
+    return result
+
+
+def collect_names_from_tree(slim_tree: dict) -> list:
+    """
+    从精简树中提取所有节点名称的扁平列表（纯字符串）。
+    """
+    result = [slim_tree["name"]]
+    for child in slim_tree.get("children", []):
+        result.extend(collect_names_from_tree(child))
+    return result
+
 
 async def get_block_newname(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface):
     """
-    为每个Block树生成新的模块名称
+    两阶段为每个Block树生成新的模块名称：
+    阶段一：逐棵子树生成草稿名
+    阶段二：逐树精简，输入 = 当前树(带explanation) + 其他树的名字列表
     """
     path = os.environ.get("POM_PATHS", "pom.xml")
     pom_content = get_file(path)
@@ -116,21 +148,61 @@ async def get_block_newname(llm_interface: LLMInterface, neo4j_interface: Neo4jI
 
     print(f"[INFO] 找到 {len(high_blocks)} 个高层Block节点")
 
-    # 存储所有Block的新名称
+    # ====================== 阶段一：并发生成草稿名 ======================
     all_block_names = {}
 
-    # 遍历每个高层Block，构建其树结构
-    for idx, high_block in enumerate(high_blocks):
-        print(f"\n[INFO] 处理第 {idx+1}/{len(high_blocks)} 个Block树: {high_block['name']}")
+    # 先并发构建所有Block树
+    all_full_trees = await asyncio.gather(
+        *[get_block_tree(neo4j_interface, hb) for hb in high_blocks]
+    )
+    print(f"[INFO] 已构建 {len(all_full_trees)} 棵Block树")
 
-        # 获取该Block树的完整JSON结构
-        block_tree = await get_block_tree(neo4j_interface, high_block)
+    # 并发调用LLM为每棵树生成草稿名
+    async def generate_draft_name(idx, block_tree):
+        print(f"[INFO] 【阶段一】生成第 {idx+1}/{len(all_full_trees)} 棵树草稿名...")
         name_result = await name_generate_chain.ainvoke({"module_information": block_tree, "pom_content": pom_content})
-        print(f"[INFO] 生成的新名称结果: {name_result}")
-        name_result =  json.loads(name_result)
-        all_block_names.update(name_result)
+        print(f"[INFO] 第 {idx+1} 棵树草稿名完成")
+        return json.loads(name_result)
 
-    # 将新名称写入本地文件
+    draft_results = await asyncio.gather(
+        *[generate_draft_name(i, tree) for i, tree in enumerate(all_full_trees)]
+    )
+    for result in draft_results:
+        all_block_names.update(result)
+
+    print(f"\n[INFO] 阶段一完成，共生成 {len(all_block_names)} 个草稿名")
+
+    # ====================== 阶段二：逐树精简 ======================
+    print(f"\n[INFO] 【阶段二】开始逐树精简名称...")
+
+    shorten_chain = ChainFactory.create_generic_chain(llm_interface, MODULE_NAME_SHORTEN_PROMPT)
+
+    for idx, full_tree in enumerate(all_full_trees):
+        print(f"\n[INFO] 【阶段二】精简第 {idx+1}/{len(all_full_trees)} 棵树...")
+
+        # 当前树：带 explanation
+        current_tree = build_slim_tree(full_tree, all_block_names, with_explanation=True)
+
+        # 其他树：只提取 {nodeId, name} 扁平列表
+        other_names = []
+        for j, other_tree in enumerate(all_full_trees):
+            if j != idx:
+                other_slim = build_slim_tree(other_tree, all_block_names, with_explanation=False)
+                other_names.extend(collect_names_from_tree(other_slim))
+
+        shorten_result = await shorten_chain.ainvoke({
+            "current_tree": json.dumps(current_tree, ensure_ascii=False),
+            "other_names": json.dumps(other_names, ensure_ascii=False)
+        })
+        print(f"[INFO] 精简结果: {shorten_result}")
+        shorten_result = json.loads(shorten_result)
+
+        # 用精简结果覆盖草稿名（后续树能看到已精简的名字）
+        all_block_names.update(shorten_result)
+
+    print(f"\n[INFO] 阶段二完成")
+
+    # 将最终名称写入本地文件
     out_path = os.path.join(os.path.dirname(__file__), "block_new_names.json")
     try:
         with open(out_path, 'w', encoding='utf-8') as f:
@@ -138,6 +210,16 @@ async def get_block_newname(llm_interface: LLMInterface, neo4j_interface: Neo4jI
         print(f"\n[SUCCESS] 已将 {len(all_block_names)} 个Block的新名称写入 {out_path}")
     except Exception as e:
         print(f"[ERR] 写入文件失败: {e}")
+
+    # 生成可视化树结构文件
+    watch_trees = [build_slim_tree(ft, all_block_names, with_explanation=False) for ft in all_full_trees]
+    watch_path = os.path.join(os.path.dirname(__file__), "block_new_names_watch.json")
+    try:
+        with open(watch_path, 'w', encoding='utf-8') as f:
+            json.dump(watch_trees, f, ensure_ascii=False, indent=2)
+        print(f"[SUCCESS] 已将树结构写入 {watch_path}")
+    except Exception as e:
+        print(f"[ERR] 写入watch文件失败: {e}")
 
     return all_block_names
 

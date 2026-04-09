@@ -701,7 +701,7 @@ async def main():
     load_dotenv()
     print("=== 独立运行叶子Block文档生成工作流 ===")
 
-    llm = LLMInterface(model_name="gpt-4.1", provider="openai")
+    llm = LLMInterface(model_name="gpt-5-mini", provider="openai")
     neo4j = Neo4jInterface(
         uri=os.environ["WIKI_NEO4J_URI"],
         user=os.environ["WIKI_NEO4J_USER"],
@@ -758,7 +758,7 @@ async def main():
     print(f"[INFO] 共有 {len(blocks_to_process)} 个叶子Block需要生成文档")
 
     # 从环境变量读取最大并发数
-    max_concurrent = int(os.environ.get("MAX_CONCURRENT_BLOCKS", "15"))
+    max_concurrent = int(os.environ.get("MAX_CONCURRENT_BLOCKS", "10"))
     print(f"[INFO] 最大并发数: {max_concurrent}")
 
     # 创建信号量控制并发

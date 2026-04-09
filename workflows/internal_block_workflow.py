@@ -206,7 +206,7 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
             return {"generated_docs": []}
 
         # 从环境变量读取最大并发数，默认10
-        max_concurrent = int(os.environ.get("MAX_CONCURRENT_BLOCKS", "10"))
+        max_concurrent = int(os.environ.get("MAX_CONCURRENT_BLOCKS", "5"))
         print(f"[INFO] 开始并发生成文档，最大并发数: {max_concurrent}")
         print(f"[INFO] 共需生成 {len(intermediate_blocks)} 个文档")
 
@@ -404,7 +404,7 @@ async def main():
     load_dotenv()
     print("=== 独立运行内部Block文档生成工作流 ===")
 
-    llm = LLMInterface(model_name="gpt-4.1-mini", provider="openai")
+    llm = LLMInterface(model_name="gpt-5-mini", provider="openai")
     neo4j = Neo4jInterface(
         uri=os.environ["WIKI_NEO4J_URI"],
         user=os.environ["WIKI_NEO4J_USER"],
