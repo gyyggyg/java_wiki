@@ -47,3 +47,6 @@ __pycache__/
 /node_modules
 /logs
 *.log
+
+/results
+/wiki-final

@@ -2,106 +2,45 @@
 flowchart TB
     direction TB
     subgraph Initialization
-        A1["读取请求头中配置的 tokenHeader（例如 Authorization）\n并保存到 authHeader"]
-        style A1 fill:#fff,stroke:#333,stroke-width:2px
+        A1["收到GET /product/categoryTreeList 请求
+方法签名: categoryTreeList()"]
     end
-
-    subgraph TokenProcessing
-        D1["请求头存在且以 tokenHead 前缀开始?"]
-        style D1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
-
-        A2["截取 tokenHead 后的 JWT\n解析出用户名并记录检查日志"]
-        style A2 fill:#0af,stroke:#044,stroke-width:3px
+    subgraph MainFlow
+        B1["调用 portalProductService.categoryTreeList()
+获取商品分类树形列表"]
+        B2["调用 CommonResult.success
+封装为标准成功响应"]
+        B3["返回JSON给前端
+用于构建商品分类树展示"]
     end
-
-    subgraph Authentication
-        D2["用户名解析成功且当前无认证?"]
-        style D2 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
-
-        A3["加载用户详情并验证 token 是否匹配且未过期"]
-        style A3 fill:#0af,stroke:#044,stroke-width:3px
-
-        D3["验证通过?"]
-        style D3 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
-
-        A4["构建认证对象并设置到安全上下文\n完成用户认证"]
-        style A4 fill:#0af,stroke:#044,stroke-width:3px
-
-        E1["Token 无效或用户名缺失，跳过认证"]
-        style E1 fill:#fbb,stroke:#f00,stroke-width:2px,stroke-dasharray:5 5
-    end
-
-    subgraph Continue
-        A5["继续过滤链，调用 chain.doFilter\n继续后续处理"]
-        style A5 fill:#fff,stroke:#333,stroke-width:2px
-    end
-
-    %% 流向定义
-    A1 --> D1
-    D1 -- 是 --> A2
-    D1 -- 否 --> A5
-
-    A2 --> D2
-    D2 -- 是 --> A3
-    D2 -- 否 --> A5
-
-    A3 --> D3
-    D3 -- 是 --> A4
-    D3 -- 否 --> E1
-
-    E1 --> A5
-    A4 --> A5
-
-    %% 链路样式：关键路径加粗为 3px（主要成功认证流）
-    linkStyle 0 stroke:#0af,stroke-width:3px
-    linkStyle 1 stroke:#0af,stroke-width:3px
-    linkStyle 3 stroke:#0af,stroke-width:3px
-    linkStyle 4 stroke:#0af,stroke-width:3px
-    linkStyle 6 stroke:#0af,stroke-width:3px
-    linkStyle 7 stroke:#0af,stroke-width:3px
-    linkStyle 10 stroke:#0af,stroke-width:3px
-
-    %% 其余路径为默认粗细
-    linkStyle 2 stroke:#333,stroke-width:2px
-    linkStyle 5 stroke:#333,stroke-width:2px
-    linkStyle 8 stroke:#333,stroke-width:2px
-    linkStyle 9 stroke:#333,stroke-width:2px
-
+    A1 --> B1
+    B1 --> B2
+    B2 --> B3
+    style A1 fill:#f96,stroke:#333,stroke-width:2px
+    style B1 fill:#0af,stroke:#003366,stroke-width:3px
+    style B2 fill:#0af,stroke:#003366,stroke-width:3px
+    style B3 fill:#0af,stroke:#003366,stroke-width:3px
+    linkStyle 0 stroke-width:3px
+    linkStyle 1 stroke-width:3px
+    linkStyle 2 stroke-width:3px
 ```
-- 总体说明（代码控制流对应关系）
-  - 该控制流图对应 doFilterInternal 方法的执行路径，描述了从请求头读取 JWT、解析用户名、根据条件加载并验证用户、设置认证信息到 SecurityContext，以及最终继续过滤链的流程（完全基于提供的源码说明与图）。
-
-- 初始化
-  - 读取配置的 tokenHeader（例如 Authorization）并保存到局部变量 authHeader（图中节点 A1，对应源码首行获取 request.getHeader(this.tokenHeader)）。
-
-- 判断请求头与前缀
-  - 检查请求头是否存在且以预定义 tokenHead（例如 "Bearer "）开头（图中菱形判断 D1，对应 if (authHeader != null && authHeader.startsWith(this.tokenHead))）。
-  - 若为否，直接跳到继续过滤链（A5，对应 chain.doFilter）并结束本次处理。
-
-- 截取并解析 token
-  - 若为是，则截取 tokenHead 后的 JWT（authToken = authHeader.substring(this.tokenHead.length())），并调用 jwtTokenUtil.getUserNameFromToken(authToken) 解析出用户名，记录检查日志（图中 A2 与源码中的 LOGGER.info("checking username:{}" , username)）。
-
-- 判断是否需要认证
-  - 判断解析出的用户名非空且当前 SecurityContext 中无认证信息（D2，对应 username != null && SecurityContextHolder.getContext().getAuthentication() == null）。
-  - 若为否，跳过认证并继续过滤链（A5）。
-
-- 加载用户并验证 token
-  - 若为是，使用 userDetailsService.loadUserByUsername(username) 加载 UserDetails（图中 A3）。
-  - 调用 jwtTokenUtil.validateToken(authToken, userDetails) 验证 token 是否与该用户匹配且未过期（图中 D3，validateToken 的语义在源码说明中给出）。
-
-- 验证通过分支
-  - 若验证通过（D3 为是），构建 UsernamePasswordAuthenticationToken，将请求详细信息设置到该认证对象（authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request))），并将其设置到 SecurityContextHolder 中完成认证（图中 A4，对应源码中构造、设置和 LOGGER.info("authenticated user:{}") 的步骤）。
-  - 该从读取到成功认证的主路径在图中被标记为关键路径（加粗/上色），表示正常的成功认证流程。
-
-- 验证不通过或用户名缺失分支
-  - 若验证未通过或用户名为 null（D3 为否或 D2 为否），则视为 Token 无效或用户名缺失、跳过认证（图中 E1，带有跳过说明）。
-
-- 始终继续过滤链
-  - 无论是否完成认证，方法最终都会调用 chain.doFilter(request, response) 继续后续过滤器或请求处理（图中 A5，为所有分支的汇合点）。
+- 概要：这是一个代码控制流图，表示控制器方法 categoryTreeList 在接收到 GET /product/categoryTreeList 请求后的执行流程与返回结果封装过程（方法签名：categoryTreeList()），用于以树形结构获取所有商品分类并返回给前端。
+- 执行顺序（控制流）：
+  - 接收到 HTTP GET 请求访问 /product/categoryTreeList，Spring MVC 将该请求映射到 controller 的 categoryTreeList() 方法。
+  - 在方法内部，调用注入的 portalProductService.categoryTreeList()，由该服务方法获取商品分类的树形结构列表（返回类型为 List<PmsProductCategoryNode>）。
+  - 将获取到的列表作为参数，调用 CommonResult.success(list) 静态方法，将数据封装为一个标准的成功响应对象（使用预定义的成功状态码和成功消息）。
+  - 将封装后的 CommonResult 作为 JSON 响应体返回给前端，用于前端构建商品分类树形展示。
+- 关键类型与职责（基于提供信息）：
+  - portalProductService：由 Spring 注入的 PmsPortalProductService 类型字段，负责提供商品相关的核心业务服务（包括获取分类树形结构）。
+  - PmsProductCategoryNode：构成分类树的节点类型，封装在返回的 List 中以表示层级关系。
+  - CommonResult<T>：通用的接口返回结果封装类（包含 code、message、data 三个成员），其静态泛型方法 success 用于生成表示操作成功的统一返回结果并封装传入的数据。
+- 额外重要点（代码说明中明确的约束）：
+  - 该控制器方法不接受任何请求参数，所有业务逻辑和数据构建均由 service 层完成。
+  - 最终返回的数据以 JSON 格式提供给前端，用于展示商品分类的树形结构。
 
 下面介绍该函数所属的文件、类、函数的基本信息
 
 | 文件 | 类 | 函数 |
 | --- | --- | --- |
-| mall-security/src/main/java/com/macro/mall/security/component/JwtAuthenticationTokenFilter.java | JwtAuthenticationTokenFilter | JwtAuthenticationTokenFilter.doFilterInternal |
-| 该文件定义了一个名为JwtAuthenticationTokenFilter的Spring Security过滤器类，继承自OncePerRequestFilter，用于在每次HTTP请求时从请求头中提取JWT令牌，解析用户名，基于用户名通过UserDetailsService加载用户详情，验证JWT令牌的有效性，并将认证信息设置到SecurityContext中，从而实现基于JWT的用户身份认证和授权。 | JwtAuthenticationTokenFilter是一个继承自Spring Security的OncePerRequestFilter的过滤器类，用于在每次HTTP请求时从请求头中提取JWT令牌，解析出用户名，加载用户详情，验证令牌的有效性，并将认证信息设置到SecurityContext中，从而实现基于JWT的用户身份认证和授权。 | 该方法是继承自Spring Security的OncePerRequestFilter的JWT登录授权过滤器的核心方法，用于在每次HTTP请求时从请求头中提取JWT令牌，解析出用户名，验证令牌的有效性，并将认证信息存入Spring Security的SecurityContext，从而实现基于JWT的用户身份验证和授权。 |
+| mall-portal/src/main/java/com/macro/mall/portal/controller/PmsPortalProductController.java | PmsPortalProductController | PmsPortalProductController.categoryTreeList |
+| 该文件定义了商城门户系统中负责前台商品管理的控制器类PmsPortalProductController。它通过提供RESTful接口处理商品相关的HTTP请求，包括商品的综合搜索（支持关键词、品牌、分类筛选及多种排序方式）、以树形结构获取商品分类列表、以及获取指定商品的详细信息。控制器将请求参数传递给业务层服务PmsPortalProductService，并将服务返回的结果封装成统一的响应格式返回给前端。 | PmsPortalProductController是商城门户前台的商品管理控制器类，负责处理与商品相关的HTTP请求。它提供了商品综合搜索（支持关键词、品牌和分类筛选及多种排序方式）、以树形结构获取商品分类列表，以及获取指定商品详细信息的接口。该控制器通过调用PmsPortalProductService的业务方法，实现具体的商品查询和数据组织，并将结果以统一格式返回给前端。 | categoryTreeList方法是商城门户前台商品管理控制器中的一个接口，用于以树形结构获取所有商品分类。该方法通过调用业务服务portalProductService的categoryTreeList方法，获取包含商品分类节点的列表，并将其封装在统一的CommonResult成功响应中返回给前端，便于前端展示商品分类的层级关系。 |

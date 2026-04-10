@@ -23,21 +23,30 @@ from datetime import datetime
 from neo4j import GraphDatabase
 from llm_interface import LLMInterface
 
+# 单独运行时加载项目根的 .env
+try:
+    from dotenv import load_dotenv
+    # analyzer_v3.py 位于 java_wiki/Api_and_Rabbitmq/rabbitmq_analyzer/，.env 在往上两级
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".env"))
+except ImportError:
+    pass
+
 
 # ============================================================================
 # 配置
 # ============================================================================
 
-NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7689")
-NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "c8a3974ba62qcc2")
+# 兼容 WIKI_NEO4J_* 与 NEO4J_* 两种命名
+NEO4J_URI = os.environ.get("NEO4J_URI") or os.environ.get("WIKI_NEO4J_URI", "bolt://localhost:7689")
+NEO4J_USER = os.environ.get("NEO4J_USER") or os.environ.get("WIKI_NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD") or os.environ.get("WIKI_NEO4J_PASSWORD", "")
 
 LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "openai")
-LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-4.1")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "your_openai_api_key_here")
+LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-5-mini")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 # 项目根目录（neo4j 图中路径不含根目录，需要拼接）
-PROJECT_ROOT = os.environ.get("PROJECT_ROOT", "mall")
+PROJECT_ROOT = os.environ.get("PROJECT_ROOT") or os.environ.get("ROOT_PREFIX", "mall")
 
 
 # ============================================================================

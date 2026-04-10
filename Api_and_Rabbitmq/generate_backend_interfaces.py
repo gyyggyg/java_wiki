@@ -1,13 +1,24 @@
 import os
 import re
+import json
 from neo4j import GraphDatabase
 from ruamel.yaml import YAML
 from pathlib import Path
 
-# Configuration
-NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7689")
-NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "c8a3974ba62qcc2")
+# 单独运行时加载 .env，与 run_all.py 入口保持一致
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# Configuration — 兼容 WIKI_NEO4J_* 与 NEO4J_* 两种命名
+NEO4J_URI = os.environ.get("NEO4J_URI") or os.environ.get("WIKI_NEO4J_URI", "bolt://localhost:7689")
+NEO4J_USER = os.environ.get("NEO4J_USER") or os.environ.get("WIKI_NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD") or os.environ.get("WIKI_NEO4J_PASSWORD", "")
+
+# Neo4j中的文件路径不包括根目录，此处添加根目录前缀（与 generate_api_docs.py 保持一致）
+ROOT_PREFIX = os.environ.get("ROOT_PREFIX", "mall")
 
 class ConfigParser:
     def __init__(self, root_dir="."):
@@ -76,7 +87,39 @@ class BackendInterfaceGenerator:
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         self.config = ConfigParser()
         self.enum_constants = {}  # 缓存枚举常量值
+        self._source_id_map = {}  # 页面级源码定位表，key=sid字符串
         self._load_enum_constants()
+
+    # ---------------- source_id / 文件路径 helper（模仿 generate_api_docs.py） ----------------
+    def _get_file_path_with_root(self, file_name):
+        """给 Neo4j 中的文件路径添加根目录前缀"""
+        if not file_name:
+            return ""
+        if ROOT_PREFIX and not file_name.startswith(ROOT_PREFIX + "/"):
+            return f"{ROOT_PREFIX}/{file_name}"
+        return file_name
+
+    def _register_source(self, node_id, file_name, lines=None):
+        """登记一个 source_id 条目，返回 sid 字符串。
+        - node_id: Neo4j 内部 id（id(n)）或 None
+        - file_name: Neo4j File 节点的 name（已做根目录前缀补齐）
+        - lines: 可选的行号范围列表
+        """
+        if node_id is None:
+            return None
+        sid = str(node_id)
+        full_path = self._get_file_path_with_root(file_name)
+        if sid not in self._source_id_map:
+            self._source_id_map[sid] = {
+                "source_id": sid,
+                "name": full_path,
+                "lines": list(lines) if lines else [],
+            }
+        elif lines:
+            for l in lines:
+                if l not in self._source_id_map[sid]["lines"]:
+                    self._source_id_map[sid]["lines"].append(l)
+        return sid
 
     def _load_enum_constants(self):
         """加载所有枚举常量值，解析构造函数参数"""
@@ -142,40 +185,56 @@ class BackendInterfaceGenerator:
     def close(self):
         self.driver.close()
 
-    def generate_report(self, output_file="backend_interfaces.md"):
+    def generate_report(self, output_file="后端接口清单.meta.json"):
+        """
+        生成后端集成清单为 .meta.json 格式（结构与 generate_api_docs.py 输出一致）：
+        {
+            "wiki": [
+                {"markdown": "...", "neo4j_id": {...}, "source_id": [...]},
+                ...
+            ],
+            "source_id_list": [{"source_id": "...", "name": "...", "lines": [...]}, ...]
+        }
+        """
         print(" Starting Backend Interface Documentation Generation...")
-        
-        sections = []
-        
+
+        # 重置本次生成的 source_id 累积表
+        self._source_id_map = {}
+
+        wiki_entries = []
+
         # 1. Overview & Architecture
         print(" Generating Overview...")
-        sections.append(self._generate_overview())
-        
+        wiki_entries.append(self._generate_overview())
+
         # 2. RabbitMQ
         print(" Scanning RabbitMQ...")
-        sections.append(self._scan_rabbitmq())
-        
+        wiki_entries.append(self._scan_rabbitmq())
+
         # 3. Scheduled Tasks
         print(" Scanning Scheduled Tasks...")
-        sections.append(self._scan_scheduled())
-        
+        wiki_entries.append(self._scan_scheduled())
+
         # 4. Data Storage (ES & Mongo)
         print(" Scanning Data Storage (ES/Mongo)...")
-        sections.append(self._scan_data_storage())
-        
+        wiki_entries.append(self._scan_data_storage())
+
         # 5. Redis
         print(" Scanning Redis...")
-        sections.append(self._scan_redis())
-        
+        wiki_entries.append(self._scan_redis())
+
         # 6. Object Storage
         print(" Scanning Object Storage...")
-        sections.append(self._scan_object_storage())
+        wiki_entries.append(self._scan_object_storage())
 
-        from datetime import datetime
-        final_content = "\n\n".join(sections).replace("{{GEN_TIME}}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        
+        wiki_data = {
+            "wiki": wiki_entries,
+            "source_id_list": list(self._source_id_map.values()),
+        }
+
+        os.makedirs(os.path.dirname(os.path.abspath(output_file)) or ".", exist_ok=True)
         with open(output_file, "w", encoding="utf-8") as f:
-            f.write(final_content)
+            json.dump(wiki_data, f, ensure_ascii=False, indent=4)
         print(f" Report generated: {output_file}")
 
     def _clean_se(self, text, parse_json=True):
@@ -223,7 +282,7 @@ class BackendInterfaceGenerator:
         """Generate Overview Section with Metadata and Mermaid Diagram"""
         from datetime import datetime
         gen_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        return f"""# 后端系统接口清单
+        markdown = f"""# 后端系统接口清单
 
 > **生成时间**: {gen_time}
 > **脚本版本**: v2.1.0 (Enhanced)
@@ -235,22 +294,22 @@ class BackendInterfaceGenerator:
 ```mermaid
 graph LR
     App[后端应用]
-    
+
     subgraph 消息中间件
         MQ[RabbitMQ]
     end
-    
+
     subgraph 数据存储
         ES[Elasticsearch]
         Mongo[MongoDB]
         Redis[Redis 缓存]
     end
-    
+
     subgraph 对象存储
         OSS[阿里云 OSS]
         MinIO[MinIO]
     end
-    
+
     App -->|发送/监听| MQ
     App -->|索引/搜索| ES
     App -->|文档读写| Mongo
@@ -259,18 +318,26 @@ graph LR
     App -->|文件上传| MinIO
 ```
 """
+        return {"markdown": markdown, "neo4j_id": {}, "source_id": []}
 
     def _scan_rabbitmq(self):
         """Scan RabbitMQ Consumers, Producers and Queue Configurations"""
         doc = ["## 2. 消息队列接口 (RabbitMQ)\n"]
-        
-        # 1. Consumers
+        neo4j_id = {}
+        source_ids = []
+
+        def _collect(sid):
+            if sid and sid not in source_ids:
+                source_ids.append(sid)
+
+        # 1. Consumers — 额外返回 id(c) / id(m) / file.name
         query_consumer = """
         MATCH (c:Class)-[:DECLARES]->(m:Method)
         WHERE (m.modifiers CONTAINS '@RabbitListener' OR c.modifiers CONTAINS '@RabbitListener' OR m.modifiers CONTAINS '@RabbitHandler')
-        RETURN c.name as class_name, 
+        OPTIONAL MATCH (file:File)-[:DECLARES]->(c)
+        RETURN c.name as class_name,
                c.SE_What as class_desc,
-               m.name as method_name, 
+               m.name as method_name,
                m.parameters as params,
                m.SE_What as method_desc,
                m.SE_How as method_logic,
@@ -278,25 +345,29 @@ graph LR
                m.modifiers as modifiers,
                m.source_code as source_code,
                c.modifiers as class_modifiers,
-               c.source_code as class_source
+               c.source_code as class_source,
+               id(c) as class_id,
+               id(m) as method_id,
+               file.name as file_name
         """
-        
+
         with self.driver.session() as session:
             consumers = [record.data() for record in session.run(query_consumer)]
-            
+
         if consumers:
-            for r in consumers:
-                all_modifiers = (r.get('class_modifiers', '') + " " + r.get('modifiers', '') + " " + 
+            for idx, r in enumerate(consumers, 1):
+                all_modifiers = (r.get('class_modifiers', '') + " " + r.get('modifiers', '') + " " +
                                  r.get('class_source', '') + " " + r.get('source_code', ''))
-                
+
                 queue_match = re.search(r'queues\s*=\s*"([a-zA-Z0-9\._\-]+)"', all_modifiers)
                 queue_name_raw = queue_match.group(1) if queue_match else "Unknown"
                 queue_name = self.config.get(queue_name_raw)
-                
+
                 params = r['params'].strip("()")
                 payload_type = params.split(" ")[0] if params else "Unknown"
                 if "," in payload_type: payload_type = payload_type.split(",")[0]
 
+                sub_label = f"消费者_{idx}"
                 doc.append(f"### 消费者: `{r['class_name']}.{r['method_name']}`")
                 doc.append(f"- **监听队列**: `{queue_name}`")
                 doc.append(f"- **消息载体**: `{payload_type}`")
@@ -305,42 +376,61 @@ graph LR
                 doc.append(f"- **业务目的**: {self._clean_se(r.get('method_purpose') or r.get('method_desc'))}")
                 doc.append(f"- **处理逻辑**: {self._clean_se(r['method_logic'])}")
                 doc.append("")
+
+                # 收集 neo4j_id / source_id：消费者以 method 为主
+                if r.get('method_id') is not None:
+                    neo4j_id[sub_label] = r['method_id']
+                    _collect(self._register_source(r['method_id'], r.get('file_name')))
+                if r.get('class_id') is not None:
+                    _collect(self._register_source(r['class_id'], r.get('file_name')))
         else:
             doc.append("*未发现 RabbitMQ 消费者*")
-            
+
         # 2. Producers with Resolved Info
         doc.append("### 消息发送链路 (Producers)")
         query_sender = """
         MATCH (c:Class)-[:DECLARES]->(f:Field)
         WHERE f.type CONTAINS 'RabbitTemplate' OR f.type CONTAINS 'AmqpTemplate'
-        RETURN c.name as class_name, c.SE_What as desc, c.modifiers as class_modifiers, c.source_code as class_source
+        OPTIONAL MATCH (file:File)-[:DECLARES]->(c)
+        RETURN c.name as class_name, c.SE_What as desc,
+               c.modifiers as class_modifiers, c.source_code as class_source,
+               id(c) as class_id, file.name as file_name
         """
         with self.driver.session() as session:
             senders = [record.data() for record in session.run(query_sender)]
-            
+
         if senders:
             mermaid_lines = ["```mermaid", "graph TD"]
-            for s in senders:
+            for s_idx, s in enumerate(senders, 1):
                 doc.append(f"#### 发送组件: `{s['class_name']}`")
                 if not self._is_spring_bean(s.get('class_modifiers', ''), s.get('class_source', '')):
                     doc.append("> Status: disabled (class is not a Spring bean)")
                 doc.append(f"> {self._clean_se(s['desc'])}\n")
-                
+
+                sub_label = f"发送组件_{s_idx}"
+                if s.get('class_id') is not None:
+                    neo4j_id[sub_label] = s['class_id']
+                    _collect(self._register_source(s['class_id'], s.get('file_name')))
+
                 query_calls = f"""
                 MATCH (senderClass:Class {{name: '{s['class_name']}'}})-[:DECLARES]->(sendMethod:Method)
                 WHERE sendMethod.source_code CONTAINS 'convertAndSend'
                 MATCH (caller:Method)-[:CALLS]->(sendMethod)
                 MATCH (callerClass:Class)-[:DECLARES]->(caller)
-                RETURN sendMethod.name as send_method, 
+                OPTIONAL MATCH (callerFile:File)-[:DECLARES]->(callerClass)
+                RETURN sendMethod.name as send_method,
                        sendMethod.source_code as send_code,
-                       callerClass.name as caller_class, 
-                       caller.name as caller_method, 
-                       caller.SE_What as caller_desc
+                       callerClass.name as caller_class,
+                       caller.name as caller_method,
+                       caller.SE_What as caller_desc,
+                       id(caller) as caller_method_id,
+                       id(callerClass) as caller_class_id,
+                       callerFile.name as caller_file_name
                 LIMIT 15
                 """
                 with self.driver.session() as session:
                     calls = [record.data() for record in session.run(query_calls)]
-                
+
                 if calls:
                     doc.append("| 触发业务方 | 触发方法 | 交换机 (Exchange) | 路由键 (Routing Key) | 业务场景 |")
                     doc.append("|---|---|---|---|---|")
@@ -348,10 +438,14 @@ graph LR
                         exch, rout = self._extract_mq_info(c['send_code'])
                         resolved_exch = self._resolve_enum_value(exch) if exch else self.config.get(exch, "Default")
                         resolved_rout = self._resolve_enum_value(rout) if rout else self.config.get(rout, "None")
-                        
+
                         doc.append(f"| `{c['caller_class']}` | `{c['caller_method']}` | `{resolved_exch}` | `{resolved_rout}` | {self._clean_se(c['caller_desc'])} |")
                         mermaid_lines.append(f"    {c['caller_class']}.{c['caller_method']} -->|send| {resolved_exch}:{resolved_rout}")
-                    
+
+                        # 收集 caller 的 source_id
+                        if c.get('caller_method_id') is not None:
+                            _collect(self._register_source(c['caller_method_id'], c.get('caller_file_name')))
+
                     doc.append("\n**消息流向图**:")
                     # 添加延迟机制子图
                     mermaid_lines.insert(2, "    subgraph 延迟机制")
@@ -364,7 +458,7 @@ graph LR
                 doc.append("")
         else:
             doc.append("\n*未发现显式消息发送组件*")
-            
+
         # 3. Internal Queue Details (DLX/DLQ)
         doc.append("### 队列与交换机详细配置")
         query_config = """
@@ -374,13 +468,16 @@ graph LR
             m.return_type CONTAINS 'Queue' OR m.return_type CONTAINS 'Exchange' OR m.return_type CONTAINS 'Binding'
             OR m.source_code CONTAINS 'QueueBuilder' OR m.source_code CONTAINS 'ExchangeBuilder' OR m.source_code CONTAINS 'BindingBuilder'
           )
-        RETURN c.name as class_name, m.name as method_name, m.source_code as code, m.SE_What as desc, m.return_type as return_type
+        OPTIONAL MATCH (file:File)-[:DECLARES]->(c)
+        RETURN c.name as class_name, m.name as method_name, m.source_code as code,
+               m.SE_What as desc, m.return_type as return_type,
+               id(m) as method_id, id(c) as class_id, file.name as file_name
         """
         with self.driver.session() as session:
             configs = [record.data() for record in session.run(query_config)]
-            
+
         if configs:
-            for cfg in configs:
+            for cfg_idx, cfg in enumerate(configs, 1):
                 code = cfg['code']
                 ret = cfg.get('return_type') or ""
                 ctype = "Unknown"
@@ -398,31 +495,36 @@ graph LR
                     ctype = "Exchange (Direct)"
                 elif "Binding" in code:
                     ctype = "Binding"
-                
+
                 # Extract extra info like DLX/DLK/TTL
                 extra = []
                 dlx_match = re.search(r'x-dead-letter-exchange",\s*([\w\.\(\)]+)', code)
                 if dlx_match:
                     dlx_val = self._resolve_enum_value(dlx_match.group(1).split(',')[0].strip())
                     extra.append(f"DLX: {dlx_val}")
-                
+
                 dlr_match = re.search(r'x-dead-letter-routing-key",\s*([\w\.\(\)]+)', code)
                 if dlr_match:
                     dlr_val = self._resolve_enum_value(dlr_match.group(1).split(',')[0].strip())
                     extra.append(f"DLK: {dlr_val}")
-                
+
                 ttl_match = re.search(r'x-message-ttl",\s*(\d+)', code)
                 if ttl_match: extra.append(f"TTL: {ttl_match.group(1)}ms")
-                
+
                 # 卡片布局
                 doc.append(f"\n#### 组件: `{cfg['method_name']}`")
                 doc.append(f"- **类型**: {ctype}")
                 if extra:
                     doc.append(f"- **配置**: {', '.join(extra)}")
                 doc.append(f"- **业务背景**: {self._clean_se(cfg['desc'])}")
+
+                sub_label = f"MQ配置_{cfg_idx}"
+                if cfg.get('method_id') is not None:
+                    neo4j_id[sub_label] = cfg['method_id']
+                    _collect(self._register_source(cfg['method_id'], cfg.get('file_name')))
             doc.append("")
-            
-        return "\n".join(doc)
+
+        return {"markdown": "\n".join(doc), "neo4j_id": neo4j_id, "source_id": source_ids}
 
     def _extract_mq_info(self, source_code):
         """Extract exchange and routing key from convertAndSend call with enum support"""
@@ -442,30 +544,36 @@ graph LR
         query = """
         MATCH (c:Class)-[:DECLARES]->(m:Method)
         WHERE m.modifiers CONTAINS '@Scheduled'
-        RETURN c.name as class_name, 
-               m.name as method_name, 
+        OPTIONAL MATCH (file:File)-[:DECLARES]->(c)
+        RETURN c.name as class_name,
+               m.name as method_name,
                m.modifiers as modifiers,
                m.source_code as source_code,
                m.SE_What as desc,
                m.SE_How as logic,
                c.modifiers as class_modifiers,
-               c.source_code as class_source
+               c.source_code as class_source,
+               id(m) as method_id,
+               id(c) as class_id,
+               file.name as file_name
         """
         doc = ["## 3. 定时任务接口\n"]
-        
+        neo4j_id = {}
+        source_ids = []
+
         with self.driver.session() as session:
             tasks = [record.data() for record in session.run(query)]
-            
+
         if not tasks:
             doc.append("*未发现定时任务*")
-            return "\n".join(doc)
-            
+            return {"markdown": "\n".join(doc), "neo4j_id": neo4j_id, "source_id": source_ids}
+
         disabled = []
-        for t in tasks:
+        for idx, t in enumerate(tasks, 1):
             cron_match = re.search(r'cron\s*=\s*"([^"]+)"', t['source_code'])
             cron_exp = cron_match.group(1) if cron_match else "FixedRate/Delay"
             is_bean = self._is_spring_bean(t.get('class_modifiers', ''), t.get('class_source', ''))
-            
+
             doc.append(f"### Task: `{t['method_name']}`")
             doc.append(f"- **Class**: `{t['class_name']}`")
             doc.append(f"- **Schedule**: `{cron_exp}`")
@@ -475,47 +583,66 @@ graph LR
             doc.append(f"- **任务描述**: {self._clean_se(t['desc'])}")
             doc.append(f"- **执行逻辑**: {self._clean_se(t['logic'])}")
             doc.append("")
-            
+
+            sub_label = f"定时任务_{idx}"
+            if t.get('method_id') is not None:
+                neo4j_id[sub_label] = t['method_id']
+                sid = self._register_source(t['method_id'], t.get('file_name'))
+                if sid and sid not in source_ids:
+                    source_ids.append(sid)
+
         if disabled:
             doc.append("**Note**: The tasks above are detected by annotation, but their classes are not Spring beans. They will not run unless the class is registered.")
-        
-        return "\n".join(doc)
+
+        return {"markdown": "\n".join(doc), "neo4j_id": neo4j_id, "source_id": source_ids}
 
     def _scan_data_storage(self):
         """Scan Elasticsearch and MongoDB with enhanced Setting and Index extraction"""
         doc_header = ["## 4. 数据存储接口\n"]
         doc_es = ["### 4.1 Elasticsearch 索引\n"]
         doc_mongo = ["### 4.2 MongoDB 集合\n"]
-        
-        # Scanning Classes with @Document
+        neo4j_id = {}
+        source_ids = []
+
+        def _collect(sid):
+            if sid and sid not in source_ids:
+                source_ids.append(sid)
+
+        # Scanning Classes with @Document — 带上 id(c) 和文件路径
         query = """
         MATCH (c:Class)
         WHERE c.modifiers CONTAINS '@Document'
-        RETURN c.name as class_name, 
+        OPTIONAL MATCH (file:File)-[:DECLARES]->(c)
+        RETURN c.name as class_name,
                c.modifiers as modifiers,
                c.source_code as source_code,
                c.SE_What as desc,
                c.SE_Why as purpose,
-               c.SE_When as usage
+               c.SE_When as usage,
+               id(c) as class_id,
+               file.name as file_name
         """
-        
+
         with self.driver.session() as session:
             models = [record.data() for record in session.run(query)]
-            
+
+        es_idx = 0
+        mongo_idx = 0
         for m in models:
             mods = m['modifiers']
             src = m['source_code']
             all_txt = mods + " " + src
-            
+
             # Identify ES vs Mongo
             if 'indexName' in mods or 'indexName' in src:
                 # ES
+                es_idx += 1
                 index_match = re.search(r'indexName\s*=\s*"([^"]+)"', all_txt)
                 index_name = index_match.group(1) if index_match else "Unknown"
-                
+
                 doc_es.append(f"### 索引: `{index_name}`")
                 doc_es.append(f"- **映射类**: `{m['class_name']}`")
-                
+
                 # Extract Shards/Replicas
                 shards_match = re.search(r'shards\s*=\s*(\d+)', all_txt)
                 replicas_match = re.search(r'replicas\s*=\s*(\d+)', all_txt)
@@ -527,7 +654,7 @@ graph LR
                 doc_es.append(f"- **用途**: {self._clean_se(m['desc'])}")
                 doc_es.append(f"- **设计意图**: {self._clean_se(m['purpose'])}")
                 doc_es.append(f"- **使用场景**: {self._clean_se(m['usage'])}")
-                
+
                 # Fetch Fields
                 fields = self._get_class_fields(m['class_name'])
                 if fields:
@@ -545,19 +672,26 @@ graph LR
                             if info: es_conf = ", ".join(info)
                         elif "@Id" in f['modifiers']:
                             es_conf = "ID"
-                            
+
                         doc_es.append(f"| `{f['name']}` | `{f['type']}` | {es_conf} |")
                 doc_es.append("")
-                
+
+                # 收集 neo4j_id / source_id
+                sub_label = f"ES索引_{es_idx}"
+                if m.get('class_id') is not None:
+                    neo4j_id[sub_label] = m['class_id']
+                    _collect(self._register_source(m['class_id'], m.get('file_name')))
+
             else:
                 # Mongo
+                mongo_idx += 1
                 coll_match = re.search(r'collection\s*=\s*"([^"]+)"', all_txt)
                 coll_name = coll_match.group(1) if coll_match else m['class_name'][0].lower() + m['class_name'][1:]
-                
+
                 doc_mongo.append(f"### 集合: `{coll_name}`")
                 doc_mongo.append(f"- **映射类**: `{m['class_name']}`")
                 doc_mongo.append(f"- **用途**: {self._clean_se(m['desc'])}")
-                
+
                 # Fetch Fields and Identify Indexes
                 fields = self._get_class_fields(m['class_name'])
                 indexed_fields = [f['name'] for f in fields if "@Indexed" in f['modifiers']]
@@ -566,7 +700,7 @@ graph LR
 
                 doc_mongo.append(f"- **设计意图**: {self._clean_se(m['purpose'])}")
                 doc_mongo.append(f"- **使用场景**: {self._clean_se(m['usage'])}")
-                
+
                 if fields:
                     doc_mongo.append("\n**文档结构**:")
                     doc_mongo.append("| 字段名 | 类型 | 说明 |")
@@ -574,8 +708,15 @@ graph LR
                     for f in fields:
                         doc_mongo.append(f"| `{f['name']}` | `{f['type']}` | {self._clean_se(f.get('SE_What', ''))} |")
                 doc_mongo.append("")
-                
-        return "\n".join(doc_header) + "\n" + "\n".join(doc_es) + "\n\n" + "\n".join(doc_mongo)
+
+                # 收集 neo4j_id / source_id
+                sub_label = f"Mongo集合_{mongo_idx}"
+                if m.get('class_id') is not None:
+                    neo4j_id[sub_label] = m['class_id']
+                    _collect(self._register_source(m['class_id'], m.get('file_name')))
+
+        markdown = "\n".join(doc_header) + "\n" + "\n".join(doc_es) + "\n\n" + "\n".join(doc_mongo)
+        return {"markdown": markdown, "neo4j_id": neo4j_id, "source_id": source_ids}
 
     def _get_class_fields(self, class_name):
         query = f"""
@@ -588,46 +729,51 @@ graph LR
     def _scan_redis(self):
         """Scan Redis Keys and Configuration with pattern extraction from source code"""
         doc = ["## 5. Redis 缓存接口\n"]
-        
+        neo4j_id = {}
+        source_ids = []
+
         # 1. 查找所有带有 Redis 相关 @Value 的类及其方法源码
         query = """
         MATCH (c:Class)-[:DECLARES]->(f:Field)
-        WHERE f.modifiers CONTAINS '@Value' 
+        WHERE f.modifiers CONTAINS '@Value'
           AND (f.name CONTAINS 'REDIS' OR f.name CONTAINS 'key')
-          AND NOT f.name CONTAINS 'DATABASE' 
+          AND NOT f.name CONTAINS 'DATABASE'
           AND NOT f.name CONTAINS 'HOST'
           AND NOT f.name CONTAINS 'PORT'
           AND NOT f.name CONTAINS 'PASSWORD'
         WITH c, collect({name: f.name, mods: f.modifiers}) as fields
         MATCH (c)-[:DECLARES]->(m:Method)
         WHERE m.source_code CONTAINS 'redis' OR m.source_code CONTAINS 'Redis'
-        RETURN c.name as class_name, 
+        OPTIONAL MATCH (file:File)-[:DECLARES]->(c)
+        RETURN c.name as class_name,
                c.SE_What as class_desc,
                fields,
-               collect({method: m.name, code: m.source_code}) as methods
+               collect({method: m.name, code: m.source_code}) as methods,
+               id(c) as class_id,
+               file.name as file_name
         """
-        
+
         query_ttl = """
         MATCH (c:Class)-[:DECLARES]->(f:Field)
         WHERE f.modifiers CONTAINS '@Value' AND f.name CONTAINS 'EXPIRE'
         RETURN c.name as class_name, f.name as field_name, f.modifiers as modifiers
         """
-        
+
         with self.driver.session() as session:
             results = [record.data() for record in session.run(query)]
             ttls = [record.data() for record in session.run(query_ttl)]
 
         if not results:
             doc.append("*未发现明确定义的 Redis Key*")
-            return "\n".join(doc)
-            
+            return {"markdown": "\n".join(doc), "neo4j_id": neo4j_id, "source_id": source_ids}
+
         doc.append("| 业务组件 | 缓存项说明 | Key 模式 (代码提取) | TTL 配置 |")
         doc.append("|---|---|---|---|")
-        
+
         # 预解析全局配置映射，确保所有类共享常量
         field_to_val = {}
         query_all_fields = """
-        MATCH (f:Field) 
+        MATCH (f:Field)
         WHERE f.modifiers CONTAINS '@Value' AND (f.name CONTAINS 'REDIS' OR f.name CONTAINS 'key')
         RETURN f.name as name, f.modifiers as mods
         """
@@ -637,10 +783,10 @@ graph LR
                 key_config = self._extract_value_key(f['mods'])
                 field_to_val[f['name']] = self.config.get(key_config)
 
-        for r in results:
+        for idx, r in enumerate(results, 1):
             comp = r['class_name']
             comp_desc = self._clean_se(r['class_desc'])
-            
+
             # 找到该类的 TTL
             comp_ttls = [t for t in ttls if t['class_name'] == comp]
             ttl_vals = []
@@ -652,11 +798,19 @@ graph LR
 
             # 增强的 Key 模式提取
             patterns = self._extract_redis_keys_enhanced(r['methods'], field_to_val)
-            
+
             key_pattern = " / ".join(patterns) if patterns else "提取失败"
             doc.append(f"| `{comp}` | {comp_desc} | `{key_pattern}` | {ttl_str} |")
-                
-        return "\n".join(doc)
+
+            # 收集 neo4j_id / source_id：每个业务组件对应的类节点
+            sub_label = f"Redis组件_{idx}"
+            if r.get('class_id') is not None:
+                neo4j_id[sub_label] = r['class_id']
+                sid = self._register_source(r['class_id'], r.get('file_name'))
+                if sid and sid not in source_ids:
+                    source_ids.append(sid)
+
+        return {"markdown": "\n".join(doc), "neo4j_id": neo4j_id, "source_id": source_ids}
 
     def _extract_redis_keys_enhanced(self, methods, field_to_val):
         """Enhanced extraction covering String.format, StringBuilder and multiple patterns"""
@@ -720,27 +874,33 @@ graph LR
     def _scan_object_storage(self):
         """Scan OSS and MinIO usage"""
         doc = ["## 6. 对象存储接口\n"]
-        
+        neo4j_id = {}
+        source_ids = []
+
         query = """
         MATCH (c:Class)-[:DECLARES]->(f:Field)
         WHERE f.type CONTAINS 'OSSClient' OR f.type CONTAINS 'MinioClient'
-        RETURN c.name as class_name, c.SE_What as desc, c.modifiers as class_modifiers, c.source_code as class_source, f.type as client_type
+        OPTIONAL MATCH (file:File)-[:DECLARES]->(c)
+        RETURN c.name as class_name, c.SE_What as desc,
+               c.modifiers as class_modifiers, c.source_code as class_source,
+               f.type as client_type,
+               id(c) as class_id, file.name as file_name
         """
-        
+
         with self.driver.session() as session:
             clients = [record.data() for record in session.run(query)]
-            
+
         if not clients:
             doc.append("*未发现对象存储客户端*")
-            return "\n".join(doc)
-            
+            return {"markdown": "\n".join(doc), "neo4j_id": neo4j_id, "source_id": source_ids}
+
         # Add Operation Config
         oss_endpoint = self.config.get("aliyun.oss.endpoint", "Unknown")
         oss_bucket = self.config.get("aliyun.oss.bucketName", "Unknown")
         oss_prefix = self.config.get("aliyun.oss.dir.prefix", "Unknown")
         minio_endpoint = self.config.get("minio.endpoint", "Unknown")
         minio_bucket = self.config.get("minio.bucketName", "Unknown")
-        
+
         doc.append("### 运维配置")
         if oss_endpoint != "Unknown":
             doc.append(f"- **Aliyun OSS Endpoint**: `{oss_endpoint}`")
@@ -750,19 +910,26 @@ graph LR
             doc.append(f"- **MinIO Endpoint**: `{minio_endpoint}`")
             doc.append(f"- **MinIO Bucket**: `{minio_bucket}`")
         doc.append("")
-            
+
         doc.append("| 存储类型 | 使用组件 | 组件用途 |")
         doc.append("|---|---|---|")
-        
-        for c in clients:
+
+        for idx, c in enumerate(clients, 1):
             type_name = "阿里云 OSS" if "OSSClient" in c['client_type'] else "MinIO"
             doc.append(f"| {type_name} | `{c['class_name']}` | {self._clean_se(c['desc'])} |")
-            
-        return "\n".join(doc)
+
+            sub_label = f"对象存储_{idx}"
+            if c.get('class_id') is not None:
+                neo4j_id[sub_label] = c['class_id']
+                sid = self._register_source(c['class_id'], c.get('file_name'))
+                if sid and sid not in source_ids:
+                    source_ids.append(sid)
+
+        return {"markdown": "\n".join(doc), "neo4j_id": neo4j_id, "source_id": source_ids}
 
 if __name__ == "__main__":
     generator = BackendInterfaceGenerator(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
     try:
-        generator.generate_report()
+        generator.generate_report(output_file="后端接口清单.meta.json")
     finally:
         generator.close()

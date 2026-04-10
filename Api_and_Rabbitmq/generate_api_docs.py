@@ -6,20 +6,28 @@ import urllib.request
 from neo4j import GraphDatabase
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Configuration
-NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7689")
-NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "c8a3974ba62qcc2")
+# 单独运行时加载 .env，与 run_all.py 入口保持一致
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
-# LLM Configuration
-ENABLE_LLM = True 
-LLM_API_KEY = os.environ.get("LLM_API_KEY", "") # User must provide this
-LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://api.zhec.moe/v1")
-LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-4.1")
+# Configuration — 兼容 WIKI_NEO4J_* 与 NEO4J_* 两种命名
+NEO4J_URI = os.environ.get("NEO4J_URI") or os.environ.get("WIKI_NEO4J_URI", "bolt://localhost:7689")
+NEO4J_USER = os.environ.get("NEO4J_USER") or os.environ.get("WIKI_NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD") or os.environ.get("WIKI_NEO4J_PASSWORD", "")
+
+# LLM Configuration — 兼容 OPENAI_API_KEY / BASE_URL 两种命名
+ENABLE_LLM = True
+LLM_API_KEY = os.environ.get("LLM_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+LLM_BASE_URL = os.environ.get("LLM_BASE_URL") or os.environ.get("BASE_URL", "https://api.zhec.moe/v1")
+LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-5-mini")
 
 # Performance Configuration
 MAX_WORKERS_LLM = 3  # Reduced to avoid connection reset
 MAX_WORKERS_DB = 3   # Control concurrency for Neo4j queries
+LLM_TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "120"))  # 单次 LLM 调用超时（秒），默认 120
 
 # File path root prefix (neo4j中的路径不包括根目录，此处添加根目录前缀)
 ROOT_PREFIX = os.environ.get("ROOT_PREFIX", "mall")
@@ -64,7 +72,7 @@ class LLMClient:
                     headers=headers,
                     method="POST"
                 )
-                with urllib.request.urlopen(req, timeout=30) as response:
+                with urllib.request.urlopen(req, timeout=LLM_TIMEOUT) as response:
                     result = json.loads(response.read().decode('utf-8'))
                     msg = result['choices'][0]['message']['content']
                     # Clean up potential markdown fences

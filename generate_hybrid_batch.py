@@ -83,8 +83,8 @@ async def main():
     load_dotenv()
 
     parser = argparse.ArgumentParser(description="批量生成混合型Block Wiki")
-    parser.add_argument("--model", default="gpt-4.1", help="LLM模型名称 (默认: gpt-4.1)")
-    parser.add_argument("--provider", default="openai", help="LLM提供商: openai/claude/google (默认: openai)")
+    parser.add_argument("--model", default=None, help="LLM模型名称（默认读取 .env 中的 LLM_MODEL）")
+    parser.add_argument("--provider", default=None, help="LLM提供商: openai/claude/google（默认读取 .env 中的 LLM_PROVIDER）")
     parser.add_argument("--skeleton", action="store_true", help="精简UML源码输入")
     parser.add_argument("--ids", nargs="*", type=int, help="只生成指定的节点ID（默认全部）")
     args = parser.parse_args()

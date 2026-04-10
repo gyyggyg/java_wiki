@@ -338,7 +338,7 @@ if __name__ == "__main__":
     
     async def main():
         print("=== 独立运行对外提供接口说明文档生成应用 ===")
-        llm = LLMInterface(model_name="gpt-4.1-2025-04-14", provider="openai")
+        llm = LLMInterface()  # 模型/提供商从 .env 的 LLM_MODEL / LLM_PROVIDER 读取
         uri = os.environ.get("WIKI_NEO4J_URI")
         user = os.environ.get("WIKI_NEO4J_USER")
         password = os.environ.get("WIKI_NEO4J_PASSWORD")

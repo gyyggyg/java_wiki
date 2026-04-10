@@ -4,47 +4,109 @@ LLM接口
 提供层级化模块生成所需的语言模型调用功能
 """
 
+import os
 from typing import Dict, Any, Optional
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema import HumanMessage, SystemMessage
 
+# 导入时自动加载 .env，保证单独运行 graph/*.py、workflows/*.py 等调试入口时
+# 也能读到 LLM_MODEL / LLM_PROVIDER / OPENAI_API_KEY / BASE_URL 等配置。
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# 全局 fallback 默认值（当 .env 与调用方都没指定时使用）
+_DEFAULT_MODEL = "gpt-5-mini"
+_DEFAULT_PROVIDER = "openai"
+
+# chain 级别的 transient error 重试配置
+_LLM_CHAIN_MAX_RETRIES = int(os.environ.get("LLM_CHAIN_MAX_RETRIES", "4"))
+
+
+def _build_retry_exceptions():
+    """构建需要在 chain 级别自动重试的 transient error 类型列表。
+
+    包含两类常见的可恢复错误：
+    1. openai SDK 的 APIConnectionError / APITimeoutError —— 真正的网络/超时问题
+    2. openai SDK 的 BadRequestError —— 本地 LLM 网关反向代理流式响应时，
+       上游偶发"流式传输中断"会以 HTTP 400 的形式返回（本质上是 transient），
+       需要重试以避免整条 chain 因为一次闪断而失败
+    """
+    exceptions = []
+    try:
+        from openai import APIConnectionError, APITimeoutError, BadRequestError
+        exceptions.extend([APIConnectionError, APITimeoutError, BadRequestError])
+    except ImportError:
+        pass
+    try:
+        from httpx import RemoteProtocolError, ReadError, ConnectError
+        exceptions.extend([RemoteProtocolError, ReadError, ConnectError])
+    except ImportError:
+        pass
+    return tuple(exceptions) if exceptions else (Exception,)
+
 
 class LLMInterface:
     """LLM接口封装，专门用于层级化模块生成"""
 
     def __init__(self,
-                 model_name: str = "gpt-4.1",
-                 provider: str = "openai",
+                 model_name: Optional[str] = None,
+                 provider: Optional[str] = None,
                  temperature: float = 0.7,
                  max_tokens: int = 16000,
                  retry_count: int = 3,
                  **model_kwargs):
         """初始化LLM接口
 
+        优先级：显式参数 > .env 中的 LLM_MODEL/LLM_PROVIDER > 硬编码 fallback。
+
         Args:
-            model_name: 模型名称
-            provider: 提供商 (openai, claude, google)
+            model_name: 模型名称。None 时从 env LLM_MODEL 读取，再 fallback 到 "gpt-5-mini"
+            provider: 提供商 (openai, claude, google)。None 时从 env LLM_PROVIDER 读取，再 fallback 到 "openai"
             temperature: 温度参数
             max_tokens: 最大令牌数
             retry_count: 重试次数
             **model_kwargs: 其他模型参数
         """
+        resolved_model = model_name or os.environ.get("LLM_MODEL") or _DEFAULT_MODEL
+        resolved_provider = provider or os.environ.get("LLM_PROVIDER") or _DEFAULT_PROVIDER
+
         self.model_kwargs = {
-            "model_name": model_name,
+            "model_name": resolved_model,
             "temperature": temperature,
             "max_tokens": max_tokens,
             **model_kwargs
         }
-        self.provider = provider.lower()
+        self.provider = resolved_provider.lower()
         self.retry_count = retry_count
         self._initialize_llm()
 
     def _initialize_llm(self):
         """初始化LLM模型"""
         if self.provider == "openai":
-            self.llm = ChatOpenAI(**self.model_kwargs)
+            # 优先使用调用方显式传入的 base_url/api_key，其次才读环境变量，
+            # 支持 OpenAI 兼容网关（如 .env 中的 BASE_URL + OPENAI_API_KEY）
+            openai_kwargs = self.model_kwargs.copy()
+            base_url = (
+                openai_kwargs.pop("base_url", None)
+                or openai_kwargs.pop("openai_api_base", None)
+                or os.environ.get("OPENAI_BASE_URL")
+                or os.environ.get("BASE_URL")
+            )
+            if base_url:
+                openai_kwargs["base_url"] = base_url
+            api_key = (
+                openai_kwargs.pop("api_key", None)
+                or openai_kwargs.pop("openai_api_key", None)
+                or os.environ.get("OPENAI_API_KEY")
+            )
+            if api_key:
+                openai_kwargs["api_key"] = api_key
+            self.llm = ChatOpenAI(**openai_kwargs)
         elif self.provider == "claude":
             self.llm = ChatAnthropic(**self.model_kwargs)
         elif self.provider == "google":
@@ -54,8 +116,35 @@ class LLMInterface:
                 google_kwargs['model'] = google_kwargs.pop('model_name')
             self.llm = ChatGoogleGenerativeAI(**google_kwargs)
         else:
-            # 默认使用OpenAI
-            self.llm = ChatOpenAI(**self.model_kwargs)
+            # 默认使用OpenAI（同样的 base_url / api_key 处理）
+            openai_kwargs = self.model_kwargs.copy()
+            base_url = (
+                openai_kwargs.pop("base_url", None)
+                or openai_kwargs.pop("openai_api_base", None)
+                or os.environ.get("OPENAI_BASE_URL")
+                or os.environ.get("BASE_URL")
+            )
+            if base_url:
+                openai_kwargs["base_url"] = base_url
+            api_key = (
+                openai_kwargs.pop("api_key", None)
+                or openai_kwargs.pop("openai_api_key", None)
+                or os.environ.get("OPENAI_API_KEY")
+            )
+            if api_key:
+                openai_kwargs["api_key"] = api_key
+            self.llm = ChatOpenAI(**openai_kwargs)
+
+        # 给 llm 包一层 chain 级的 transient error 重试，
+        # 以应对本地 LLM 网关反向代理流式响应时偶发的"流式传输中断"（会以 HTTP 400 抛出）。
+        # 所有通过 `prompt | self.llm | parser` 构造的 chain 都自动享有重试能力。
+        retry_exceptions = _build_retry_exceptions()
+        if retry_exceptions:
+            self.llm = self.llm.with_retry(
+                retry_if_exception_type=retry_exceptions,
+                stop_after_attempt=_LLM_CHAIN_MAX_RETRIES,
+                wait_exponential_jitter=True,
+            )
 
     async def generate_with_retry(self,
                                  system_prompt: str,

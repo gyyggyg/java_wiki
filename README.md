@@ -33,7 +33,7 @@ npm install
 
 ### 3. 环境变量
 
-复制 `.env.example` 或手动创建 `.env` 文件，配置以下变量：
+手动创建 `.env` 文件，配置以下变量（`.env` 已在 `.gitignore` 中）：
 
 ```bash
 # Neo4j 连接（必需）
@@ -43,49 +43,101 @@ WIKI_NEO4J_PASSWORD=your_password
 
 # LLM API（必需）
 OPENAI_API_KEY=your_api_key
-BASE_URL=https://api.openai.com/v1
+BASE_URL=https://api.openai.com/v1   # 或自建 OpenAI 兼容网关
 
-# 并发控制（可选）
+# 并发控制（可选，默认 10）
 MAX_CONCURRENT_BLOCKS=10
+
+# 源码路径前缀（可选，默认 "mall"，用于 API 文档/RabbitMQ 分析中拼接文件路径）
+ROOT_PREFIX=mall
 ```
+
+**关于环境变量的透传**：
+
+- `run_all.py` 在启动时会 `load_dotenv()`，然后在 step5/6/7 自动把 `WIKI_NEO4J_*` / `OPENAI_API_KEY` / `BASE_URL` 映射到 `Api_and_Rabbitmq/` 里脚本期望的变量名（`NEO4J_*` / `LLM_API_KEY` / `LLM_BASE_URL`），无需在 .env 里重复配置
+- 若看到 `ConnectError` 且 trace 里出现 `http_proxy.py`，检查 shell 里是否有 `HTTPS_PROXY` 指向不可达的代理。默认情况下 `interfaces/llm_interface.py` 会把 `.env` 里的 `BASE_URL` 传给 `ChatOpenAI`，使请求走 HTTP 而非 HTTPS，代理将被自动绕过
 
 ## 快速开始
 
 ### 一键生成全部文档
 
 ```bash
-python run_all.py --skeleton
+python run_all.py
 ```
 
-执行 4 个步骤：
+默认启用 `--skeleton` 源码精简模式，**执行 7 个步骤**（step8 默认关闭，见下方说明）：
 
 1. **模块取名** — 为每个 Block 生成可读名称 → `graph/block_new_names.json`
 2. **Root 文档** — 生成项目总览页 → `output/root_doc.meta.json`
 3. **中间层 Block** — 生成中间层模块文档 + 分类叶子/混合 Block
 4. **叶子 + 混合 Block** — 并发生成所有末端模块文档
+5. **API 文档** — 扫描 Controller 生成 REST API 接口文档 → `output/API说明文档/*.meta.json`（与步骤 4 并发）
+6. **后端集成清单** — 扫描 RabbitMQ/定时任务/ES/Mongo/Redis/OSS 依赖 → `output/后端接口清单.meta.json`（与步骤 4/5 并发）
+7. **RabbitMQ 消息流分析** — 确定性查询 + LLM 结构化提取 + 链路匹配 → `output/RabbitMQ消息流分析.meta.json`（与步骤 4/5/6 并发）
+8. **Block 级可选章节**（**⚠️ 默认关闭**）— 为每个 Block 追加状态机/消息队列等可选章节
+
+步骤 4-7 在同一个 `asyncio.gather` 里并发执行，显著缩短总耗时。步骤 8 依赖步骤 4 的产物，必须串行在并发块之后。
+
+### ⚠️ 步骤 8（Block 级可选章节）默认关闭
+
+步骤 8 代价较高，**不会在默认 `python run_all.py` 中自动运行**。原因：
+
+- **扫描阶段**：对所有 root 分支 × 每个可选章节类型各发一次 OpenAI LLM 调用做相关性判断，中型项目约 10-20 次调用、每次 3-10k tokens
+- **生成阶段**：对识别出的每个 `(Block, 章节类型)` 组合调用一次本地 `claude` CLI 进程，Claude 自主读源码生成内容，单次几分钟级
+- **依赖**：需要 `SOURCE_ROOT_PATH` + 本地已安装 Claude Code CLI
+- 适合只在**需要补充状态机/MQ 分析**时显式启用，而不是作为默认流程的一部分
+
+显式启用步骤 8：
+
+```bash
+# 前置：在 .env 配置 SOURCE_ROOT_PATH，并本地装 Claude Code（which claude 能找到）
+python run_all.py --run-optional
+```
+
+未启用时，日志会显示：
+```
+[INFO] 跳过步骤8（Block 级可选章节）—— 如需启用请加 --run-optional
+```
 
 ### 常用命令
 
 ```bash
-# 完整执行
+# 默认：跑 step1~7，跳过 step8
 python run_all.py
+
+# 完整跑 step1~8（包括 Block 级可选章节，需 SOURCE_ROOT_PATH + claude CLI）
+python run_all.py --run-optional
+
+# 关闭源码精简（当 LLM 上下文充足、追求更完整的 UML 细节时）
+python run_all.py --no-skeleton
 
 # 指定模型
 python run_all.py --model gpt-4.1 --provider openai
 
-# 精简 UML 输入（减少 token 消耗）
-python run_all.py --skeleton
-
-# 跳过已完成的步骤
+# 跳过已完成/不需要的步骤
 python run_all.py --skip-name --skip-root    # 跳过取名和 Root
-python run_all.py --only-leaves              # 只跑叶子+混合 Block
+python run_all.py --skip-api                 # 跳过 API 文档生成
+python run_all.py --skip-backend             # 跳过后端集成清单
+python run_all.py --skip-rabbitmq            # 跳过 RabbitMQ 消息流分析
+python run_all.py --only-leaves              # 只跑叶子+混合 Block（仍会跳过 5/6/7/8）
 
-# 单独生成某个节点
+# 单独生成某个 Block 节点
 python generate_wiki.py 318
 python generate_wiki.py 318 327 --skeleton
 
 # 批量生成混合型 Block
 python generate_hybrid_batch.py --skeleton --ids 18468 18475
+
+# 单独运行 API / RabbitMQ 分析（需在 shell 里 export 对应环境变量）
+python Api_and_Rabbitmq/generate_api_docs.py
+python Api_and_Rabbitmq/generate_backend_interfaces.py
+python Api_and_Rabbitmq/rabbitmq_analyzer/analyzer_v3.py
+
+# 单独跑 Block 级可选章节工作流（不经过 run_all）
+python workflows/optional_sections_workflow.py --list-sections
+python workflows/optional_sections_workflow.py                        # 对所有 Block 跑所有可选章节
+python workflows/optional_sections_workflow.py --section state_machine  # 只做状态机
+python workflows/optional_sections_workflow.py --block "Portal Order Service"  # 只做指定 Block
 ```
 
 ## 代码逻辑
@@ -117,7 +169,7 @@ python generate_hybrid_batch.py --skeleton --ids 18468 18475
 - **章节 2** 同时包含核心组件（直连 File）和子模块概览
 - **章节 6** 使用 `namespace` 分组，区分直连类和子模块类
 
-### 并发执行流程
+### 单个 Block 的内部并发
 
 ```
 章节1: generate_summary
@@ -130,11 +182,58 @@ python generate_hybrid_batch.py --skeleton --ids 18468 18475
 
 章节 1 先执行，然后 2/3/4/5 并发，章节 6 等章节 4 完成后执行。
 
+### 全局步骤之间的并发
+
+`run_all.py` 中步骤 4-7 共享同一个 `asyncio.gather`：
+
+```
+step1: 模块取名 ──▶ step2: Root 文档 ──▶ step3: 中间层 Block
+                                              │
+                                              ▼
+                                   ┌──────────┴──────────┬──────────────┐
+                                   ▼                     ▼              ▼
+                             step4: 叶子+混合      step5: API 文档   step6: 后端集成清单
+                                                                       ▼
+                                                                 step7: RabbitMQ 消息流
+                                                 （step4/5/6/7 同时执行）
+```
+
+- 步骤 4 由 `MAX_CONCURRENT_BLOCKS` 控制 LLM 调用并发
+- 步骤 5/6/7 各自是一个独立任务，通过 `asyncio.gather` 与步骤 4 一起并发推进
+- 任一专项步骤失败不会影响其它步骤（通过 `try/except` 隔离）
+
+## 专项文档生成器
+
+`Api_and_Rabbitmq/` 下的三个脚本都是**独立的 `.meta.json` 生成器**，与 Block 文档使用相同的输出格式，便于前端统一消费。
+
+### step5 — REST API 文档（[generate_api_docs.py](Api_and_Rabbitmq/generate_api_docs.py)）
+
+- 扫描 `@RestController` / `@Controller`，结合 LLM 生成模块介绍、架构分析、请求/响应示例
+- 支持自动解析 `@PathVariable` / `@RequestParam` / `@RequestBody` + DTO 字段
+- 按模块分组输出到 `output/API说明文档/<模块名>.meta.json`
+- 每个方法配 Mermaid 时序图（调用链 trace）
+
+### step6 — 后端集成清单（[generate_backend_interfaces.py](Api_and_Rabbitmq/generate_backend_interfaces.py)）
+
+- **不调用 LLM**，全靠 Cypher 查询 + 正则解析，速度快
+- 六个章节：概览、RabbitMQ、定时任务、ES/Mongo、Redis、OSS/MinIO
+- 解析 Spring `application.yml`（自动匹配 `spring.profiles.active`）以解析配置占位符
+- 解析枚举常量的构造函数参数（如 `QueueEnum.QUEUE_ORDER_CANCEL` → 真实 queue 名）
+- 输出 `output/后端接口清单.meta.json`
+
+### step7 — RabbitMQ 消息流分析（[analyzer_v3.py](Api_and_Rabbitmq/rabbitmq_analyzer/analyzer_v3.py)）
+
+- 使用 **analyzer_v3**（v1/v2 已弃用，v3 直接产出 `.meta.json`）
+- 流程：确定性 Cypher 查询 → LLM 结构化提取（每个组件的 queue/exchange/routing key）→ 确定性链路匹配（基于 RabbitMQ 语义）
+- 识别 **TTL + 死信队列** 的延时消息链路
+- 每条消息流转链路配 Mermaid `graph LR` 可视化图
+- 输出 `output/RabbitMQ消息流分析.meta.json`
+
 ## 目录结构
 
 ```
 java_wiki/
-├── run_all.py                    # 全局启动脚本（4 步顺序执行）
+├── run_all.py                    # 全局启动脚本（7 步并发执行）
 ├── generate_wiki.py              # 单节点/全量生成脚本
 ├── generate_hybrid_batch.py      # 混合型 Block 批量生成
 │
@@ -160,13 +259,25 @@ java_wiki/
 │
 ├── interfaces/                   # 外部服务接口
 │   ├── neo4j_interface.py        #   Neo4j 异步查询接口
-│   ├── llm_interface.py          #   LLM 多提供商抽象（OpenAI/Claude/Google）
+│   ├── llm_interface.py          #   LLM 多提供商抽象（OpenAI/Claude/Google，支持自定义 base_url）
 │   └── simple_validate_mermaid.py#   Mermaid 图表校验器
+│
+├── Api_and_Rabbitmq/             # 专项文档生成器（独立脚本，被 run_all 集成）
+│   ├── generate_api_docs.py      #   REST API 文档（StrictApiDocGenerator，LLM 增强）
+│   ├── generate_backend_interfaces.py  # 后端集成清单（扫描 MQ/DB/Cache/OSS，无 LLM）
+│   └── rabbitmq_analyzer/        #   RabbitMQ 消息流分析
+│       ├── analyzer.py           #     v1 — 锚点 + LLM 逐个分析（已弃用）
+│       ├── analyzer_v2.py        #     v2 — 全量查 + 正则解析（已弃用）
+│       ├── analyzer_v3.py        #     v3 — 确定性查询 + LLM 结构化提取（run_all 采用）
+│       └── llm_interface.py      #     独立的轻量 LLM 客户端（httpx + OpenAI 兼容）
 │
 ├── scripts/
 │   └── validate_mermaid.mjs      # Node.js Mermaid 语法校验（替代 Chrome）
 │
-├── output/                       # 生成的 Wiki 文档（JSON）
+├── output/                       # 生成的 Wiki 文档（.meta.json）
+│   ├── API说明文档/              #   step5 输出：按模块分组的 API 接口文档
+│   ├── 后端接口清单.meta.json     #   step6 输出：后端集成清单
+│   └── RabbitMQ消息流分析.meta.json  # step7 输出：MQ 消息流转
 ├── internal_result/              # 中间结果（Block 分类列表）
 └── logs/                         # 执行日志
 ```
@@ -208,9 +319,9 @@ java_wiki/
 
 ## 关键设计
 
-### UML 输入优化
+### UML 输入优化（默认开启）
 
-UML 图生成时，通过 `--skeleton` 模式将完整 Java 源码压缩为结构化摘要：
+UML 图生成时，`--skeleton` 模式（默认开启）将完整 Java 源码压缩为结构化摘要：
 
 ```
 # 原始源码（~1500 tokens）
@@ -227,7 +338,7 @@ fields: private OrderDao orderDao
 methods: public createOrder(CreateOrderRequest):Order
 ```
 
-配合跨类去重，总 token 减少约 98%。
+配合跨类去重，总 token 减少约 98%。如果追求更完整的 UML 细节，可以用 `--no-skeleton` 关闭。
 
 ### Mermaid 校验
 
@@ -245,3 +356,6 @@ methods: public createOrder(CreateOrderRequest):Order
 - 所有输出写入本地 `output/` 目录
 - 日志文件按时间戳存储在 `logs/` 目录
 - `graph/block_new_names.json` 是所有工作流的共享依赖，步骤 1 生成后后续步骤引用
+- 步骤 5/6/7 中任一专项失败不会中断其它步骤（通过 `try/except` 隔离，失败时写 error log 继续）
+- 若 `OPENAI_API_KEY` 未配置，步骤 5/7 会降级或跳过（步骤 5 输出无 LLM 增强内容，步骤 7 直接跳过并 warning）
+- 步骤 6 不依赖 LLM，只要 Neo4j 可连通即可运行，适合在 CI 环境离线生成

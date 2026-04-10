@@ -420,8 +420,8 @@ async def main():
     parser = argparse.ArgumentParser(description="根据Neo4j节点ID生成Wiki文档")
     parser.add_argument("node_ids", nargs="*", type=int, help="要生成wiki的节点ID列表")
     parser.add_argument("--all", action="store_true", help="生成所有Block的wiki")
-    parser.add_argument("--model", default="gpt-4.1", help="LLM模型名称 (默认: gpt-4.1)")
-    parser.add_argument("--provider", default="openai", help="LLM提供商: openai/claude/google (默认: openai)")
+    parser.add_argument("--model", default=None, help="LLM模型名称（默认读取 .env 中的 LLM_MODEL）")
+    parser.add_argument("--provider", default=None, help="LLM提供商: openai/claude/google（默认读取 .env 中的 LLM_PROVIDER）")
     parser.add_argument("--skeleton", action="store_true", help="精简UML源码输入，只保留类签名和字段，去掉方法体（减少60-80%%token）")
     args = parser.parse_args()
 

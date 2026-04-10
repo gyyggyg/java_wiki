@@ -1177,7 +1177,7 @@ async def main():
 
     print("[INFO] Neo4j 连接成功")
 
-    llm = LLMInterface(model_name="gpt-5-mini", provider="openai")
+    llm = LLMInterface()  # 模型/提供商从 .env 的 LLM_MODEL / LLM_PROVIDER 读取
 
     app = optional_sections_workflow(
         neo4j_interface=neo4j,

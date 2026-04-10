@@ -230,7 +230,7 @@ async def main():
     load_dotenv()
     print("=== 独立运行模块命名生成应用 ===")
 
-    llm = LLMInterface(model_name="gpt-4.1", provider="openai")
+    llm = LLMInterface()  # 模型/提供商从 .env 的 LLM_MODEL / LLM_PROVIDER 读取
     neo4j = Neo4jInterface(
         uri=os.environ["WIKI_NEO4J_URI"],
         user=os.environ["WIKI_NEO4J_USER"],
