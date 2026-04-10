@@ -6,7 +6,6 @@
   2. Root 文档（root_doc_workflow）→ 生成 output/root_doc.meta.json
   3. 中间层 Block（internal_block_workflow）→ 生成中间层文档 + file_leaves.json + file_block_leaves.json
   4. 叶子 Block + 混合 Block（并发执行）→ 读取步骤3输出的列表，生成各 Block 的 Wiki 文档
-  5. 专项文档（与步骤4并发）→ API 文档 + 后端接口文档 + RabbitMQ 消息链路分析
 
 用法:
     python run_all.py                          # 默认配置
@@ -15,7 +14,6 @@
     python run_all.py --skip-name              # 跳过取名步骤（已有 block_new_names.json）
     python run_all.py --skip-root              # 跳过 root 文档生成
     python run_all.py --skip-internal          # 跳过中间层生成
-    python run_all.py --skip-extra             # 跳过专项文档（API/接口/RabbitMQ）
     python run_all.py --only-leaves            # 只执行叶子+混合 Block 生成（需已有 file_leaves.json）
 """
 
@@ -265,89 +263,17 @@ async def step4_leaf_and_hybrid(
             logger.warning(f"  [{fb['type']}] {fb['name']} (ID: {fb['id']}): {fb['error']}")
 
 
-# ====================== 步骤 5: 专项文档（API/接口/RabbitMQ） ======================
-EXTRA_DIR = os.path.join(PROJECT_ROOT, "Api_and_Rabbitmq")
-
-async def _run_subprocess(cmd: list, name: str, logger: logging.Logger) -> bool:
-    """在子进程中运行脚本，返回是否成功"""
-    logger.info(f"  [{name}] 启动: {' '.join(cmd)}")
-    start = time.time()
-    try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=os.path.dirname(cmd[1]) if len(cmd) > 1 else PROJECT_ROOT,
-        )
-        stdout, stderr = await proc.communicate()
-        elapsed = time.time() - start
-
-        if proc.returncode == 0:
-            logger.info(f"  [{name}] 完成 ({elapsed:.1f}s)")
-            if stdout:
-                logger.debug(f"  [{name}] stdout: {stdout.decode('utf-8', errors='replace')[-500:]}")
-            return True
-        else:
-            logger.error(f"  [{name}] 失败 (退出码 {proc.returncode}, {elapsed:.1f}s)")
-            if stderr:
-                logger.error(f"  [{name}] stderr: {stderr.decode('utf-8', errors='replace')[-500:]}")
-            return False
-    except Exception as e:
-        elapsed = time.time() - start
-        logger.error(f"  [{name}] 异常 ({elapsed:.1f}s): {e}")
-        return False
-
-
-async def step5_extra_docs(logger: logging.Logger):
-    logger.info("=" * 60)
-    logger.info("[步骤 5] 专项文档生成（API / 后端接口 / RabbitMQ）")
-    logger.info("=" * 60)
-
-    python = sys.executable
-    tasks = []
-
-    # API 文档
-    api_script = os.path.join(EXTRA_DIR, "generate_api_docs.py")
-    if os.path.exists(api_script):
-        tasks.append(_run_subprocess([python, api_script], "API文档", logger))
-    else:
-        logger.warning(f"  未找到 {api_script}，跳过 API 文档生成")
-
-    # 后端接口文档
-    backend_script = os.path.join(EXTRA_DIR, "generate_backend_interfaces.py")
-    if os.path.exists(backend_script):
-        tasks.append(_run_subprocess([python, backend_script], "后端接口文档", logger))
-    else:
-        logger.warning(f"  未找到 {backend_script}，跳过后端接口文档生成")
-
-    # RabbitMQ 消息链路分析
-    rabbitmq_script = os.path.join(EXTRA_DIR, "rabbitmq_analyzer", "analyzer_v3.py")
-    if os.path.exists(rabbitmq_script):
-        tasks.append(_run_subprocess([python, rabbitmq_script], "RabbitMQ链路分析", logger))
-    else:
-        logger.warning(f"  未找到 {rabbitmq_script}，跳过 RabbitMQ 分析")
-
-    if not tasks:
-        logger.info("  无可用的专项文档脚本，跳过")
-        return
-
-    results = await asyncio.gather(*tasks)
-    success = sum(1 for r in results if r)
-    logger.info(f"  专项文档完成: {success}/{len(results)} 成功")
-
-
 # ====================== 主函数 ======================
 async def main():
     load_dotenv()
 
     parser = argparse.ArgumentParser(description="全局启动脚本 — 按顺序执行全部 Wiki 生成工作流")
-    parser.add_argument("--model", default="gpt-4.1", help="LLM模型名称 (默认: gpt-4.1)")
+    parser.add_argument("--model", default="gpt-5-mini", help="LLM模型名称 (默认: gpt-5-mini)")
     parser.add_argument("--provider", default="openai", help="LLM提供商: openai/claude/google (默认: openai)")
     parser.add_argument("--skeleton", action="store_true", help="精简UML源码输入（减少token）")
     parser.add_argument("--skip-name", action="store_true", help="跳过步骤1（模块取名），使用已有的 block_new_names.json")
     parser.add_argument("--skip-root", action="store_true", help="跳过步骤2（Root文档生成）")
     parser.add_argument("--skip-internal", action="store_true", help="跳过步骤3（中间层Block生成）")
-    parser.add_argument("--skip-extra", action="store_true", help="跳过步骤5（API/接口/RabbitMQ 专项文档）")
     parser.add_argument("--only-leaves", action="store_true", help="只执行步骤4（需已有 file_leaves.json 和 file_block_leaves.json）")
     args = parser.parse_args()
 
@@ -358,7 +284,7 @@ async def main():
     # 记录启动参数
     logger.info(f"启动参数: model={args.model}, provider={args.provider}, skeleton={args.skeleton}")
     logger.info(f"跳过选项: skip_name={args.skip_name}, skip_root={args.skip_root}, "
-                f"skip_internal={args.skip_internal}, skip_extra={args.skip_extra}, only_leaves={args.only_leaves}")
+                f"skip_internal={args.skip_internal}, only_leaves={args.only_leaves}")
 
     # 初始化连接
     llm = LLMInterface(model_name=args.model, provider=args.provider)
@@ -435,6 +361,15 @@ async def main():
         if run_extra:
             step_times["步骤5-专项文档"] = time.time() - step5_start
             logger.info(f"步骤5耗时: {step_times['步骤5-专项文档']:.1f}s")
+
+        # 步骤 5: 可选章节
+        if not args.only_leaves and not args.skip_optional:
+            step_start = time.time()
+            await step5_optional_sections(llm, neo4j, logger)
+            step_times["步骤5-可选章节"] = time.time() - step_start
+            logger.info(f"步骤5耗时: {step_times['步骤5-可选章节']:.1f}s")
+        else:
+            logger.info("跳过步骤5（可选章节）")
 
     finally:
         neo4j.close()

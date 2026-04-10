@@ -13,10 +13,10 @@
 === class_source_map ===
 {
   "JwtAuthenticationTokenFilter": "__direct__",
-  "RestAuthenticationEntryPoint": "REST风格安全异常响应",
-  "RestfulAccessDeniedHandler": "REST风格安全异常响应",
-  "DynamicSecurityService": "动态权限校验与决策服务",
-  "DynamicAccessDecisionManager": "动态权限校验与决策服务",
-  "DynamicSecurityMetadataSource": "动态权限校验与决策服务",
-  "DynamicSecurityFilter": "动态权限校验与决策服务"
+  "RestAuthenticationEntryPoint": "安全异常响应",
+  "RestfulAccessDeniedHandler": "安全异常响应",
+  "DynamicSecurityService": "动态权限控制",
+  "DynamicAccessDecisionManager": "动态权限控制",
+  "DynamicSecurityMetadataSource": "动态权限控制",
+  "DynamicSecurityFilter": "动态权限控制"
 }
