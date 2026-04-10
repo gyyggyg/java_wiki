@@ -117,6 +117,7 @@ python run_all.py
 
 1. **模块取名** — 为每个 Block 生成可读名称 → `graph/block_new_names.json`
 2. **Root 文档** — 生成项目总览页 → `output/root_doc.meta.json`
+   > 默认只生成 3 个基础章节。**如果 `.env` 配置了 `SOURCE_ROOT_PATH` 且本地装了 Claude CLI**，会额外补充 5 个扩展章节（技术栈/分层/核心类/业务流程/数据模型），详见 [⚠️ 步骤 2 的扩展章节默认不开启](#️-步骤-2-的扩展章节默认不开启)
 3. **中间层 Block** — 生成中间层模块文档 + 分类叶子/混合 Block
 4. **叶子 + 混合 Block** — 并发生成所有末端模块文档
 5. **API 文档** — 扫描 Controller 生成 REST API 接口文档 → `output/API说明文档/*.meta.json`（与步骤 4 并发）
@@ -160,9 +161,20 @@ python run_all.py --run-optional
 [WARNING] 未找到 claude CLI，跳过步骤 8（请先安装 Claude Code）
 ```
 
-### 关于 step2 的扩展章节（也依赖 Claude CLI）
+### ⚠️ 步骤 2 的扩展章节默认不开启
 
-步骤 2 Root 文档默认会生成三个基础章节（项目介绍 / 模块架构 / 架构图）。如果 `.env` 中配置了 `SOURCE_ROOT_PATH` 并且本地装了 Claude Code CLI，**会自动补充 5 个扩展章节**：
+步骤 2 Root 文档**默认只生成 3 个基础章节**（项目介绍 / 模块架构 / 架构图）。要额外补充下面 5 个扩展章节，**必须同时满足两个条件**：
+
+1. **`.env` 中配置了 `SOURCE_ROOT_PATH`**（Java 源码根目录的绝对路径）
+2. **本地已安装 Claude Code CLI**（`which claude` 能找到）
+
+任一条件缺失，step2 会自动跳过扩展章节，只输出 1-3 章基础内容，日志显示：
+
+```
+[INFO] 未配置 SOURCE_ROOT_PATH，跳过 Root 扩展章节（仅生成 1-3 章基础内容）
+```
+
+满足条件时才会**自动**追加的扩展章节：
 
 | 章节 | 内容 |
 |---|---|
@@ -172,15 +184,28 @@ python run_all.py --run-optional
 | 核心业务流程 | 追跨模块调用链，生成时序图 |
 | 核心数据模型 | 扫实体类生成 ER 图 |
 
-与步骤 8 的区别：**步骤 2 扩展章节不需要额外加 `--run-optional` 开关**，只要 `SOURCE_ROOT_PATH` 有配且 claude CLI 可用就会自动启用。两者的执行代价差异：
+**如何启用**：
 
-|  | step2 扩展章节 | step8 可选章节 |
+```bash
+# 持久启用（推荐）：.env 追加一行
+SOURCE_ROOT_PATH=/path/to/java/source/root
+
+# 一次性启用：shell 环境变量
+SOURCE_ROOT_PATH=/path/to/java/source/root python run_all.py
+```
+
+**step2 扩展章节 vs step8 可选章节**：
+
+两者都依赖 Claude CLI，但触发条件完全不同：
+
+|  | step2 扩展章节 | step8 Block 级可选章节 |
 |---|---|---|
-| 扫描代价 | 无（直接 claude CLI 决策） | 对所有 Block 做 LLM 相关性评分 |
-| 生成代价 | 5 次 claude CLI 调用（项目级） | `N × M` 次（Block 数 × 章节类型数） |
-| 默认行为 | 自动（`SOURCE_ROOT_PATH` 存在就跑） | **默认关闭**，需要 `--run-optional` |
+| **默认行为** | 默认**不启用**：要 `SOURCE_ROOT_PATH` 有配 | 默认**彻底关闭**：即便 `SOURCE_ROOT_PATH` 有配也不跑 |
+| **启用开关** | 在 `.env` 配 `SOURCE_ROOT_PATH` | 额外加 CLI 参数 `--run-optional` |
+| **扫描代价** | 无（直接 claude CLI 决策） | 对所有 Block 做 LLM 相关性评分 |
+| **生成代价** | 低：最多 5 次 claude CLI 调用（项目级） | 高：`N × M` 次（Block 数 × 章节类型数） |
 
-如果想跳过 step2 扩展章节（只保留 1-3 章），不要配 `SOURCE_ROOT_PATH`，或用 `--skip-root`（但这会连基础 1-3 章一起跳过）。
+> **一句话总结**：step2 扩展章节是"**可选的、有 `SOURCE_ROOT_PATH` 就跑**"，step8 可选章节是"**双重保险：既要 `SOURCE_ROOT_PATH` 又要 `--run-optional`**"。
 
 ### 常用命令
 
