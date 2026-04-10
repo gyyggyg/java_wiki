@@ -24,9 +24,22 @@ _sanitize_class_diagram = SimpleMermaidValidator.sanitize_class_diagram
 from chains.prompts.type_chart_prompt import SOURCE_ID_PROMPT, CFG_PROMPT, UML_PROMPT, HYBRID_UML_PROMPT, HYBRID_UML_DESC_PROMPT, TIME_PROMPT, BLOCK_PROMPT, CFG_ID_PROMPT, MERMIAD_DESC_PROMPT
 
 
-def generate_uuid_4digits() -> str:
-    """生成4位唯一ID"""
-    return str(uuid.uuid4().int)[:4]
+def generate_uuid_4digits(existing_ids: set = None) -> str:
+    """生成8位唯一ID，保证不与existing_ids中的已有ID碰撞。
+
+    Args:
+        existing_ids: 已有ID集合，传入时会自动避免碰撞并将新ID加入集合
+    """
+    for _ in range(100):
+        sid = str(uuid.uuid4().int)[:8]
+        if existing_ids is None or sid not in existing_ids:
+            if existing_ids is not None:
+                existing_ids.add(sid)
+            return sid
+    sid = str(uuid.uuid4().int)[:12]
+    if existing_ids is not None:
+        existing_ids.add(sid)
+    return sid
 
 
 def _strip_json_comments(text: str) -> str:
