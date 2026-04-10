@@ -50,3 +50,6 @@ __pycache__/
 
 /results
 /wiki-final
+
+# 独立子仓库：CodeNexus-Team/rabbitmq_agent（嵌套 .git，目前未被 run_all 使用）
+Api_and_Rabbitmq/rabbitmq_agent/

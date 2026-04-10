@@ -31,9 +31,39 @@ pip install -r requirement.txt
 npm install
 ```
 
-### 3. 环境变量
+### 3. Claude Code CLI（可选，启用 step2 扩展章节 / step8 时必需）
 
-手动创建 `.env` 文件，配置以下变量（`.env` 已在 `.gitignore` 中）：
+step2 的 Root 文档扩展章节和 step8 的 Block 级可选章节**依赖本地 `claude` 命令**（Claude Code CLI），由 Claude 自主读源码生成高质量内容。如果不使用这两个功能，可以跳过本小节。
+
+**安装 Claude Code CLI**：
+
+```bash
+# macOS / Linux
+brew install anthropics/tap/claude       # Homebrew
+# 或
+npm install -g @anthropic-ai/claude-code  # npm
+
+# 验证
+which claude   # 应能输出 claude 可执行文件路径
+claude --version
+```
+
+**登录 / 配置**：首次使用需要运行 `claude` 并按提示登录 Anthropic 账号，CLI 会使用你的 Claude 订阅进行调用（**不占用项目的 `OPENAI_API_KEY`**，是独立的计费通道）。
+
+**什么时候需要**：
+
+| 场景 | 是否需要 Claude CLI |
+|---|---|
+| 默认 `python run_all.py` 跑完整 7 步 | ❌ 不需要（未配置 `SOURCE_ROOT_PATH` 时自动跳过扩展章节） |
+| step2 生成技术栈/分层/核心类等扩展章节 | ✅ 需要（`SOURCE_ROOT_PATH` + `claude`） |
+| `python run_all.py --run-optional` 生成状态机/MQ 可选章节 | ✅ 需要 |
+| 单独运行 `python workflows/optional_sections_workflow.py` | ✅ 需要 |
+
+**为什么用 Claude CLI 而不是 OpenAI API**：这两个扩展功能需要**真实读取源码**文件（Grep / Read / Glob 大量源码文件来总结），Claude Code 内置工具可以直接访问本地文件系统，OpenAI API 做不到。
+
+### 4. 环境变量
+
+手动创建 `.env` 文件（已在 `.gitignore` 中），参考 [.env.example](.env.example)：
 
 ```bash
 # Neo4j 连接（必需）
@@ -43,19 +73,37 @@ WIKI_NEO4J_PASSWORD=your_password
 
 # LLM API（必需）
 OPENAI_API_KEY=your_api_key
-BASE_URL=https://api.openai.com/v1   # 或自建 OpenAI 兼容网关
+BASE_URL=https://api.openai.com/v1       # 或自建 OpenAI 兼容网关
+LLM_MODEL=gpt-5-mini                     # 所有 step 的默认模型
+LLM_PROVIDER=openai
 
-# 并发控制（可选，默认 10）
-MAX_CONCURRENT_BLOCKS=10
+# 并发 / 超时 / 重试（可选）
+MAX_CONCURRENT_BLOCKS=10                 # Block 生成并发度，默认 10
+LLM_TIMEOUT=120                          # step5 API 文档的 urllib 单次超时（秒）
+LLM_CHAIN_MAX_RETRIES=4                  # LangChain 链路 transient error 重试次数
 
-# 源码路径前缀（可选，默认 "mall"，用于 API 文档/RabbitMQ 分析中拼接文件路径）
+# 源码路径前缀（可选，默认 "mall"，用于 API 文档 / RabbitMQ 分析中拼接文件路径）
 ROOT_PREFIX=mall
+
+# ====== 以下仅在使用 Claude CLI 扩展章节 / 可选章节时需要 ======
+# Java 源码根目录（绝对路径），被 step2 扩展章节和 step8 共用
+# SOURCE_ROOT_PATH=/path/to/java/source/root
+
+# Claude CLI 使用的模型，默认 sonnet，可选 opus / haiku
+# CLAUDE_MODEL=sonnet
+
+# Claude CLI 单次调用超时（秒）
+# AGENT_TIMEOUT=600
+
+# Claude CLI 调用失败重试次数
+# AGENT_MAX_RETRIES=2
 ```
 
 **关于环境变量的透传**：
 
 - `run_all.py` 在启动时会 `load_dotenv()`，然后在 step5/6/7 自动把 `WIKI_NEO4J_*` / `OPENAI_API_KEY` / `BASE_URL` 映射到 `Api_and_Rabbitmq/` 里脚本期望的变量名（`NEO4J_*` / `LLM_API_KEY` / `LLM_BASE_URL`），无需在 .env 里重复配置
 - 若看到 `ConnectError` 且 trace 里出现 `http_proxy.py`，检查 shell 里是否有 `HTTPS_PROXY` 指向不可达的代理。默认情况下 `interfaces/llm_interface.py` 会把 `.env` 里的 `BASE_URL` 传给 `ChatOpenAI`，使请求走 HTTP 而非 HTTPS，代理将被自动绕过
+- **Claude CLI 不经过 `.env`** — Claude Code CLI 使用它自己的登录态（`~/.claude/` 下的配置），与 `OPENAI_API_KEY` 完全独立
 
 ## 快速开始
 
@@ -84,13 +132,20 @@ python run_all.py
 
 - **扫描阶段**：对所有 root 分支 × 每个可选章节类型各发一次 OpenAI LLM 调用做相关性判断，中型项目约 10-20 次调用、每次 3-10k tokens
 - **生成阶段**：对识别出的每个 `(Block, 章节类型)` 组合调用一次本地 `claude` CLI 进程，Claude 自主读源码生成内容，单次几分钟级
-- **依赖**：需要 `SOURCE_ROOT_PATH` + 本地已安装 Claude Code CLI
+- **两个硬依赖**：
+  1. `.env` 里配好 `SOURCE_ROOT_PATH`（Java 源码根目录的绝对路径）
+  2. 本地安装了 Claude Code CLI，且 `which claude` 能找到它（参见 [环境准备 § 3](#3-claude-code-cli可选启用-step2-扩展章节--step8-时必需)）
 - 适合只在**需要补充状态机/MQ 分析**时显式启用，而不是作为默认流程的一部分
+
+任一前置条件缺失时，步骤 8 会**自动跳过并 warning**，不会导致整个流程失败。
 
 显式启用步骤 8：
 
 ```bash
-# 前置：在 .env 配置 SOURCE_ROOT_PATH，并本地装 Claude Code（which claude 能找到）
+# 前置：
+#   1. pip install / npm install 都已完成
+#   2. .env 里配好 SOURCE_ROOT_PATH=/path/to/java/source/root
+#   3. which claude 能找到 Claude Code CLI
 python run_all.py --run-optional
 ```
 
@@ -98,6 +153,34 @@ python run_all.py --run-optional
 ```
 [INFO] 跳过步骤8（Block 级可选章节）—— 如需启用请加 --run-optional
 ```
+
+前置缺失时，日志会显示：
+```
+[WARNING] 未配置 SOURCE_ROOT_PATH，跳过步骤 8（Block 级可选章节）
+[WARNING] 未找到 claude CLI，跳过步骤 8（请先安装 Claude Code）
+```
+
+### 关于 step2 的扩展章节（也依赖 Claude CLI）
+
+步骤 2 Root 文档默认会生成三个基础章节（项目介绍 / 模块架构 / 架构图）。如果 `.env` 中配置了 `SOURCE_ROOT_PATH` 并且本地装了 Claude Code CLI，**会自动补充 5 个扩展章节**：
+
+| 章节 | 内容 |
+|---|---|
+| 技术栈概览 | 扫 pom.xml / 注解 / application.yml 自动识别 |
+| 分层架构设计 | 扫 Controller/Service/DAO 分层生成 mermaid 图 |
+| 核心类与接口 | 识别最核心的 Service 接口和实现类，生成类图 |
+| 核心业务流程 | 追跨模块调用链，生成时序图 |
+| 核心数据模型 | 扫实体类生成 ER 图 |
+
+与步骤 8 的区别：**步骤 2 扩展章节不需要额外加 `--run-optional` 开关**，只要 `SOURCE_ROOT_PATH` 有配且 claude CLI 可用就会自动启用。两者的执行代价差异：
+
+|  | step2 扩展章节 | step8 可选章节 |
+|---|---|---|
+| 扫描代价 | 无（直接 claude CLI 决策） | 对所有 Block 做 LLM 相关性评分 |
+| 生成代价 | 5 次 claude CLI 调用（项目级） | `N × M` 次（Block 数 × 章节类型数） |
+| 默认行为 | 自动（`SOURCE_ROOT_PATH` 存在就跑） | **默认关闭**，需要 `--run-optional` |
+
+如果想跳过 step2 扩展章节（只保留 1-3 章），不要配 `SOURCE_ROOT_PATH`，或用 `--skip-root`（但这会连基础 1-3 章一起跳过）。
 
 ### 常用命令
 
@@ -359,3 +442,8 @@ methods: public createOrder(CreateOrderRequest):Order
 - 步骤 5/6/7 中任一专项失败不会中断其它步骤（通过 `try/except` 隔离，失败时写 error log 继续）
 - 若 `OPENAI_API_KEY` 未配置，步骤 5/7 会降级或跳过（步骤 5 输出无 LLM 增强内容，步骤 7 直接跳过并 warning）
 - 步骤 6 不依赖 LLM，只要 Neo4j 可连通即可运行，适合在 CI 环境离线生成
+- **Claude CLI 与 OpenAI API 是两条独立通道**：
+  - OpenAI API 通过 `OPENAI_API_KEY` + `BASE_URL` 配置，被 step1-7 使用
+  - Claude Code CLI 使用本地 `~/.claude/` 下的登录态，被 step2 扩展章节、step8 使用
+  - 两者互不影响，单独缺失不会影响另一条通道
+- Claude CLI 是**本地子进程**，并发数受 `MAX_CONCURRENT_BLOCKS` 控制，建议不超过 5（CPU / 网络压力大）
