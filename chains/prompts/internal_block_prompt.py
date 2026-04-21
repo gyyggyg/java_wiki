@@ -2,13 +2,13 @@ from langchain.prompts import PromptTemplate
 
 # 1. 模块功能概述提示词
 INTERNAL_BLOCK_OVERVIEW_PROMPT = PromptTemplate(
-    input_variables=["block_name", "block_explaination", "child_modules_info"],
+    input_variables=["block_name", "block_explanation", "child_modules_info"],
     template="""
 你的任务是为项目的中间层模块生成功能概述文档。
 
 ## 输入数据
 - **当前模块名称**: {block_name}
-- **当前模块说明**: {block_explaination}
+- **当前模块说明**: {block_explanation}
 
 ## 子模块信息
 ```
@@ -40,7 +40,7 @@ INTERNAL_BLOCK_CHILDREN_PROMPT = PromptTemplate(
 ## 输入数据说明
 `child_modules` 包含所有子模块信息，每个子模块包含：
 - 模块名称 (name)
-- 模块功能说明 (module_explaination)
+- 模块功能说明 (module_explanation)
 - 模块ID (nodeId)
 
 ## 输出要求

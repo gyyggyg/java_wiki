@@ -178,7 +178,7 @@ def module_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface):
         # query_explanation = """
         # UNWIND $target_ids AS target_id
         # MATCH (b:Block {nodeId: target_id})
-        # RETURN b.name AS block_name, b.module_explaination AS explanation
+        # RETURN b.name AS block_name, b.module_explanation AS explanation
         # """
 
         # path_results = await asyncio.gather(

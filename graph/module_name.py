@@ -69,7 +69,7 @@ async def get_block_tree(neo4j_interface: Neo4jInterface, high_block) -> dict:
     query = """
     MATCH (b:Block)
     WHERE b.nodeId = $node_id
-    RETURN b.nodeId AS nodeId, b.name AS name, b.module_explaination AS explanation
+    RETURN b.nodeId AS nodeId, b.name AS name, b.module_explanation AS explanation
     """
     result = await neo4j_interface.execute_query(query, {"node_id": node_id})
 
@@ -230,7 +230,7 @@ async def main():
     load_dotenv()
     print("=== 独立运行模块命名生成应用 ===")
 
-    llm = LLMInterface(model_name="gpt-4.1", provider="openai")
+    llm = LLMInterface(model_name="gpt-5.1", provider="openai")
     neo4j = Neo4jInterface(
         uri=os.environ["WIKI_NEO4J_URI"],
         user=os.environ["WIKI_NEO4J_USER"],

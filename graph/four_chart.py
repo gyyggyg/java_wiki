@@ -1092,7 +1092,7 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
         MATCH (n)<-[:DECLARES*1..]-(n0:Class|Interface)<-[:DECLARES]-(f:File)<-[:f2c]-(b:Block)
         WHERE n.nodeId IN $node_list
         RETURN n.name AS name, n0.name AS n0_name, b.name AS block_name, p.name AS package_name, f.name AS file_name,
-               p.semantic_explanation AS package_sema, b.module_explaination AS block_sema
+               p.semantic_explanation AS package_sema, b.module_explanation AS block_sema
         """
         key_target = []
         package_info = {}

@@ -67,8 +67,8 @@ def hybrid_block_workflow(
         # 查询直连File（不穿透子Block）
         query_direct_files = """
         MATCH (b:Block {nodeId: $nodeId})-[:f2c]->(f:File)
-        RETURN b.module_explaination AS block_explanation,
-               f.module_explaination AS file_explanation,
+        RETURN b.module_explanation AS block_explanation,
+               f.module_explanation AS file_explanation,
                f.name AS file_name
         """
         # 查询子Block信息
@@ -76,7 +76,7 @@ def hybrid_block_workflow(
         MATCH (b:Block {nodeId: $nodeId})-[:f2c]->(child:Block)
         RETURN child.name AS child_name,
                child.nodeId AS child_nodeId,
-               child.module_explaination AS child_explanation
+               child.module_explanation AS child_explanation
         ORDER BY child.name
         """
         file_result, child_result = await asyncio.gather(
@@ -101,7 +101,7 @@ def hybrid_block_workflow(
 
         section1_content = await generate_summary_chain.ainvoke({
             "block_name": name,
-            "block_explaination": block_explanation,
+            "block_explanation": block_explanation,
             "direct_files": "\n".join(direct_files),
             "child_modules": "\n".join(child_modules)
         })
@@ -124,7 +124,7 @@ def hybrid_block_workflow(
         MATCH (b:Block {nodeId: $nodeId})-[:f2c]->(child:Block)
         RETURN child.nodeId AS nodeId,
                child.name AS name,
-               child.module_explaination AS module_explaination
+               child.module_explanation AS module_explanation
         ORDER BY child.name
         """
         comp_result, child_result = await asyncio.gather(
@@ -164,7 +164,7 @@ def hybrid_block_workflow(
             content.append("> 点击子模块标题可跳转至对应子模块的详细wiki说明\n")
             for child_idx, child in enumerate(child_result, 1):
                 child_name = new_names.get(str(child["nodeId"]), child["name"])
-                child_exp = child.get("module_explaination") or "暂无说明"
+                child_exp = child.get("module_explanation") or "暂无说明"
                 content.append(f"#### 2.2.{child_idx} {child_name}\n")
                 content.append(f"{child_exp}\n")
                 neo4j_id[f"2.2.{child_idx}"] = [child["nodeId"]]
@@ -252,6 +252,7 @@ def hybrid_block_workflow(
     async def main_control_flow(state: HybridBlockState) -> HybridBlockState:
         query = """
         MATCH (b:Block {nodeId: $nodeId})-[:f2c]->(f:File)-[:DECLARES]->(c)-[:DECLARES*]->(m:Method)
+        WHERE m.source_code IS NOT NULL AND size(split(m.source_code, '\n')) > 10
         RETURN c.name AS class_name, m.name AS method_name,
                m.nodeId AS method_nodeId, m.layer_num AS layer_num
         ORDER BY layer_num DESC
@@ -340,7 +341,7 @@ def hybrid_block_workflow(
 
         UNION ALL
 
-        MATCH (b1:Block{nodeId:$nodeId})-[:f2c*]->(f1:File)-[:DECLARES]->(c1)-[:DECLARES]->(target)<-[:ANNOTATES]-(anno:Annotation)<-[:DECLARES]-(f2:File)<-[:f2c*]-(b2:Block)
+        MATCH (b1:Block{nodeId:$nodeId})-[:f2c*]->(f1:File)-[:DECLARES]->(c1)-[:DECLARES]->(target)-[:ANNOTATED_BY]->(anno:Annotation)<-[:DECLARES]-(f2:File)<-[:f2c*]-(b2:Block)
         WHERE b1<>b2 AND (b1)<-[:f2c]-(:Block)-[:f2c]->(b2) AND (target:Method OR target:Field)
         RETURN 'ANNOTATES_MEMBER' AS rel_type, c1.name AS from_entity, c1.nodeId AS from_entityId, target.SE_What AS from_what,
                anno.name AS to_entity, anno.nodeId AS to_entityId, anno.SE_What AS to_what,
@@ -348,7 +349,7 @@ def hybrid_block_workflow(
 
         UNION ALL
 
-        MATCH (b1:Block{nodeId:$nodeId})-[:f2c*]->(f1:File)-[:DECLARES]->(c1)<-[:ANNOTATES]-(anno:Annotation)<-[:DECLARES]-(f2:File)<-[:f2c*]-(b2:Block)
+        MATCH (b1:Block{nodeId:$nodeId})-[:f2c*]->(f1:File)-[:DECLARES]->(c1)-[:ANNOTATED_BY]->(anno:Annotation)<-[:DECLARES]-(f2:File)<-[:f2c*]-(b2:Block)
         WHERE b1<>b2 AND (b1)<-[:f2c]-(:Block)-[:f2c]->(b2)
         RETURN 'ANNOTATES_CLASS' AS rel_type, c1.name AS from_entity, c1.nodeId AS from_entityId, c1.SE_What AS from_what,
                anno.name AS to_entity, anno.nodeId AS to_entityId, anno.SE_What AS to_what,
@@ -413,7 +414,7 @@ def hybrid_block_workflow(
 
         UNION ALL
 
-        MATCH (b2:Block)-[:f2c*]->(f2:File)-[:DECLARES]->(c2)-[:DECLARES]->(target)<-[:ANNOTATES]-(anno:Annotation)<-[:DECLARES]-(f1:File)<-[:f2c*]-(b1:Block{nodeId:$nodeId})
+        MATCH (b2:Block)-[:f2c*]->(f2:File)-[:DECLARES]->(c2)-[:DECLARES]->(target)-[:ANNOTATED_BY]->(anno:Annotation)<-[:DECLARES]-(f1:File)<-[:f2c*]-(b1:Block{nodeId:$nodeId})
         WHERE b1<>b2 AND (b1)<-[:f2c]-(:Block)-[:f2c]->(b2) AND (target:Method OR target:Field)
         RETURN 'ANNOTATES_MEMBER' AS rel_type, target.name AS to_entity, target.nodeId AS to_entityId, target.SE_What AS to_what,
                anno.name AS from_entity, anno.nodeId AS from_entityId, anno.SE_What AS from_what,
@@ -421,7 +422,7 @@ def hybrid_block_workflow(
 
         UNION ALL
 
-        MATCH (b2:Block)-[:f2c*]->(f2:File)-[:DECLARES]->(anno:Annotation)-[:ANNOTATES]->(c1)<-[:DECLARES]-(f1:File)<-[:f2c*]-(b1:Block{nodeId:$nodeId})
+        MATCH (b2:Block)-[:f2c*]->(f2:File)-[:DECLARES]->(anno:Annotation)<-[:ANNOTATED_BY]-(c1)<-[:DECLARES]-(f1:File)<-[:f2c*]-(b1:Block{nodeId:$nodeId})
         WHERE b1<>b2 AND (b1)<-[:f2c]-(:Block)-[:f2c]->(b2)
         RETURN 'ANNOTATES_CLASS' AS rel_type, c1.name AS to_entity, c1.nodeId AS to_entityId, c1.SE_What AS to_what,
                anno.name AS from_entity, anno.nodeId AS from_entityId, anno.SE_What AS from_what,

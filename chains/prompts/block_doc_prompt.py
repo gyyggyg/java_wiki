@@ -2,13 +2,13 @@ from langchain.prompts import PromptTemplate
 
 # 1. 模块功能概述提示词
 BLOCK_OVERVIEW_PROMPT = PromptTemplate(
-    input_variables=["block_name", "block_explaination", "file_info"],
+    input_variables=["block_name", "block_explanation", "file_info"],
     template="""
 你的任务是为项目的某一模块生成功能概述文档。
 
 ## 输入数据
 - **当前模块名称**: {block_name}
-- **当前模块说明**: {block_explaination}
+- **当前模块说明**: {block_explanation}
 
 ## 包含文件说明信息
 ```
@@ -40,7 +40,7 @@ CORE_COMPONENTS_PROMPT = PromptTemplate(
 ## 输入数据说明
 `child_modules` 包含所有子模块信息，每个子模块包含：
 - 模块名称 (name)
-- 模块功能说明 (module_explaination)
+- 模块功能说明 (module_explanation)
 - 模块ID (nodeId)
 
 ## 输出要求
@@ -143,13 +143,13 @@ BLOCK_RELATIONSHIP_PROMPT = PromptTemplate(
 
 # 混合型Block模块概述提示词
 HYBRID_BLOCK_OVERVIEW_PROMPT = PromptTemplate(
-    input_variables=["block_name", "block_explaination", "direct_files", "child_modules"],
+    input_variables=["block_name", "block_explanation", "direct_files", "child_modules"],
     template="""
 你的任务是为一个大型Java代码仓库中的混合型模块生成功能概述文档。本章节是文档的导读，让读者快速了解模块定位和各部分分工。
 
 ## 输入数据
 - **模块名称**: {block_name}
-- **模块说明**: {block_explaination}
+- **模块说明**: {block_explanation}
 
 ### 直接包含的代码文件
 {direct_files}

@@ -58,7 +58,7 @@ async def get_child_blocks(
     WHERE parent.nodeId = $block_id
     RETURN child.nodeId AS nodeId,
            child.name AS name,
-           child.module_explaination AS module_explaination
+           child.module_explanation AS module_explanation
     ORDER BY child.name
     """
     return await neo4j_interface.execute_query(query, {"block_id": block_node_id})
@@ -88,7 +88,7 @@ async def get_block_info(
     WHERE b.nodeId = $block_id
     RETURN b.nodeId AS nodeId,
            b.name AS name,
-           b.module_explaination AS module_explaination
+           b.module_explanation AS module_explanation
     """
     result = await neo4j_interface.execute_query(query, {"block_id": block_node_id})
     return result[0] if result else None
@@ -240,7 +240,7 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
                         child_modules_info.append(
                             f"{idx}. 模块名称: {child_name}\n"
                             f"   模块ID: {child['nodeId']}\n"
-                            f"   功能说明: {child['module_explaination'] or '暂无说明'}"
+                            f"   功能说明: {child['module_explanation'] or '暂无说明'}"
                         )
                     child_modules_info_str = "\n\n".join(child_modules_info)
 
@@ -251,14 +251,14 @@ def internal_block_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jI
                         child_modules_text.append(
                             f"{idx}. 模块名称: {child_name}\n"
                             f"   模块ID: {child['nodeId']}\n"
-                            f"   功能说明: {child['module_explaination'] or '暂无说明'}"
+                            f"   功能说明: {child['module_explanation'] or '暂无说明'}"
                         )
                     child_modules_str = "\n\n".join(child_modules_text)
 
                     # 并发调用两个LLM生成章节
                     overview_task = overview_chain.ainvoke({
                         "block_name": block_name,
-                        "block_explaination": block_detail["module_explaination"] or "暂无说明",
+                        "block_explanation": block_detail["module_explanation"] or "暂无说明",
                         "child_modules_info": child_modules_info_str
                     })
 
@@ -404,7 +404,7 @@ async def main():
     load_dotenv()
     print("=== 独立运行内部Block文档生成工作流 ===")
 
-    llm = LLMInterface(model_name="gpt-5-mini", provider="openai")
+    llm = LLMInterface(model_name="gpt-5.1", provider="openai")
     neo4j = Neo4jInterface(
         uri=os.environ["WIKI_NEO4J_URI"],
         user=os.environ["WIKI_NEO4J_USER"],

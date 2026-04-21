@@ -145,7 +145,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
     # async def select_file(state: NodeState) -> NodeState:
     #     neo4j_query2="""
     #     MATCH (n:Block {nodeId: $block_id})-[:f2c*]->(m:File)
-    #     RETURN m.name AS name, m.nodeId AS nodeId, m.module_explaination AS module_explaination
+    #     RETURN m.name AS name, m.nodeId AS nodeId, m.module_explanation AS module_explanation
     #     """
     #     files = []
     #     reasons = []
@@ -153,7 +153,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
     #         all_info = []
     #         result = await neo4j_interface.execute_query(neo4j_query2, {"block_id": block_id})
     #         for record in result:
-    #             all_info.append(f"nodeId: {record['nodeId']}, name: {record['name']}, module_explaination: {record['module_explaination']}")
+    #             all_info.append(f"nodeId: {record['nodeId']}, name: {record['name']}, module_explanation: {record['module_explanation']}")
     #         all_information = "\n".join(all_info)
     #         selected_files_node = await select_file_chain.ainvoke({"query": query, "all_information": all_information})
     #         files.extend(json.loads(selected_files_node).get("file_id", []))
@@ -316,7 +316,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
             block_id: Block的nodeId
 
         返回:
-            File信息列表，每个元素包含 {nodeId, name, module_explaination}
+            File信息列表，每个元素包含 {nodeId, name, module_explanation}
         """
         # 使用递归关系 [:f2c*] 查询Block下所有File
         query = """
@@ -324,7 +324,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         RETURN DISTINCT
             f.nodeId AS file_id,
             f.name AS file_name,
-            f.module_explaination AS module_explaination
+            f.module_explanation AS module_explanation
         ORDER BY f.nodeId
         """
         result = await neo4j_interface.execute_query(query, {"block_id": block_id})
@@ -335,7 +335,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
             files.append({
                 'nodeId': record['file_id'],
                 'name': record['file_name'],
-                'module_explaination': record['module_explaination']
+                'module_explanation': record['module_explanation']
             })
         return files
 
@@ -344,7 +344,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         判断root直连File的相关性
 
         参数:
-            file_record: File记录，包含 {file_id, file_name, module_explaination}
+            file_record: File记录，包含 {file_id, file_name, module_explanation}
 
         返回:
             {relevant: bool, reason: str}
@@ -355,7 +355,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         # 调用LLM判断
         result = await judge_root_file_chain.ainvoke({
             "query": query,
-            "file_info": f"file_id: {file_record['file_id']}, file_name: {file_record['file_name']}, module_explaination: {file_record.get('module_explaination', '')}",
+            "file_info": f"file_id: {file_record['file_id']}, file_name: {file_record['file_name']}, module_explanation: {file_record.get('module_explanation', '')}",
         })
 
         # 解析JSON结果
@@ -377,7 +377,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         # 格式化files信息
         files_info = []
         for file in block_info['files']:
-            files_info.append(f"file_id: {file['nodeId']}, file_name: {file['name']}, module_explaination: {file.get('module_explaination', 'N/A')}")
+            files_info.append(f"file_id: {file['nodeId']}, file_name: {file['name']}, module_explanation: {file.get('module_explanation', 'N/A')}")
 
         # 调用LLM判断
         result = await judge_files_chain.ainvoke({
@@ -453,7 +453,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
     #     for file in all_files:
     #         files_info_lines.append(
     #             f"- File ID: {file['nodeId']}, File Name: {file['name']}, "
-    #             f"Module Explanation: {file.get('module_explaination', 'N/A')}"
+    #             f"Module Explanation: {file.get('module_explanation', 'N/A')}"
     #         )
     #     files_info = "\n".join(files_info_lines)
 

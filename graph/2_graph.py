@@ -34,11 +34,11 @@ def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, 
         files = []
         query = f"""
         MATCH (n:File)
-        RETURN n.name AS name, n.nodeId AS nodeId, n.module_explaination AS module_explaination
+        RETURN n.name AS name, n.nodeId AS nodeId, n.module_explanation AS module_explanation
         """
         result = await neo4j_interface.execute_query(query)
         for record in result:
-            files.append(f"fileId: {record['nodeId']}, name: {record['name']}, module_explaination: {record['module_explaination']}")
+            files.append(f"fileId: {record['nodeId']}, name: {record['name']}, module_explanation: {record['module_explanation']}")
         file_instruction = "\n".join(files)
         selected_files1, selected_files2 = await asyncio.gather(
             select_api_file_chain.ainvoke({"file_introduction": file_instruction}),
@@ -53,21 +53,21 @@ def SelectApi_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, 
         query1 = f"""
         MATCH (n:Enum)<-[:DECLARES]-(n0:File)
          WHERE 'public' IN split(replace(n.modifiers, '\n', ' '), ' ') AND n0.nodeId IN {state["selected_files"]}
-        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
+        OPTIONAL MATCH (n)-[:ANNOTATED_BY]->(a:Annotation)
         RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation,
                collect(a.source_code)  AS annotation_sources
         """
         query2 = f"""
         MATCH (n:Interface)<-[:DECLARES]-(n0:File)
          WHERE 'public' IN split(replace(n.modifiers, '\n', ' '), ' ') AND n0.nodeId IN {state["selected_files"]}
-        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
+        OPTIONAL MATCH (n)-[:ANNOTATED_BY]->(a:Annotation)
         RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation,
                collect(a.source_code)  AS annotation_sources
         """
         query3 = f"""
         MATCH (n:Class)<-[:DECLARES]-(n0:File)
          WHERE 'public' IN split(replace(n.modifiers, '\n', ' '), ' ') AND n0.nodeId IN {state["selected_files"]}
-        OPTIONAL MATCH (a:Annotation)-[:ANNOTATES]->(n)
+        OPTIONAL MATCH (n)-[:ANNOTATED_BY]->(a:Annotation)
         RETURN n.name AS name, n.nodeId AS nodeId, n.modifiers AS modifiers, n.semantic_explanation AS semantic_explanation,
                collect(a.source_code)  AS annotation_sources
         """

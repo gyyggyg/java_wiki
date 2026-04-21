@@ -11,7 +11,7 @@ PROJECT_INTRO_PROMPT = PromptTemplate(
 ## 输入数据说明
 `modules_info` 包含项目的所有一级模块信息，每个模块包含：
 - 模块名称 (name)
-- 模块功能说明 (module_explaination)
+- 模块功能说明 (module_explanation)
 
 ## 输出要求
 生成一个Markdown格式的项目介绍项目的整体定位和目标
@@ -50,7 +50,7 @@ MODULE_ARCHITECTURE_PROMPT = PromptTemplate(
 ## 输入数据说明
 `modules_info` 包含项目的所有一级模块信息，每个模块包含：
 - 模块名称 (name)
-- 模块功能说明 (module_explaination)
+- 模块功能说明 (module_explanation)
 - 模块ID (nodeId)
 
 ## 输出要求

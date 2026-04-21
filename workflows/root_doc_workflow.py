@@ -85,6 +85,8 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
         neo4j_interface: Neo4j接口
         source_root: Java源码根目录路径（用于Claude CLI搜索源码生成扩展章节4+）
     """
+    # MCP 配置文件路径
+    mcp_config = os.path.join(PROJECT_ROOT, "mcp_config.json")
     intro_chain = ChainFactory.create_generic_chain(llm_interface, PROJECT_INTRO_PROMPT)
     architecture_chain = ChainFactory.create_generic_chain(llm_interface, MODULE_ARCHITECTURE_PROMPT)
 
@@ -96,7 +98,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
         MATCH (root:Block {name: 'root'})-[:f2c]->(child:Block)
         RETURN child.nodeId AS nodeId,
                child.name AS name,
-               child.module_explaination AS module_explaination
+               child.module_explanation AS module_explanation
         ORDER BY child.name
         """
         high_blocks = []
@@ -110,13 +112,13 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
                 "nodeId": record['nodeId'],
                 "name": new_names.get(str(record['nodeId'])),
                 "path": record['name'],
-                "module_explaination": record['module_explaination'] or "暂无说明"
+                "module_explanation": record['module_explanation'] or "暂无说明"
             })
             high_blocks.append(record['nodeId'])
 
         # 构建模块信息文本（供discover/generate使用）
         modules_info_text = "\n".join(
-            f"- {m['name']}: {m['module_explaination']}" for m in modules_info
+            f"- {m['name']}: {m['module_explanation']}" for m in modules_info
         )
 
         # 查询neo4j全局统计
@@ -193,7 +195,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
         for module in modules_info:
             modules_text.append(
                 f"- 模块名称: {module['name']}\n"
-                f"  功能说明: {module['module_explaination']}"
+                f"  功能说明: {module['module_explanation']}"
             )
         modules_info_str = "\n\n".join(modules_text)
 
@@ -223,7 +225,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
                 f"- 模块名称: {module['name']}\n"
                 f"  模块路径: {module['path']}\n"
                 f"  模块ID: {module['nodeId']}\n"
-                f"  功能说明: {module['module_explaination']}"
+                f"  功能说明: {module['module_explanation']}"
             )
         modules_info_str = "\n\n".join(modules_text)
 
@@ -294,6 +296,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
                 existing_sections_summary=existing_summary,
                 source_root=source_root,
                 timeout=int(os.environ.get("AGENT_TIMEOUT", "300")),
+                mcp_config=mcp_config,
             )
             logger.info(f"规划完成：选中 {len(selected)} 个扩展章节")
             return {"discovered_sections": selected}
@@ -344,6 +347,7 @@ def root_doc_workflow(llm_interface: LLMInterface, neo4j_interface: Neo4jInterfa
                             section_number=section_number,
                             source_root=source_root,
                             timeout=int(os.environ.get("AGENT_TIMEOUT", "600")),
+                            mcp_config=mcp_config,
                         )
 
                         if not result.get("has_content"):
@@ -592,7 +596,7 @@ async def main():
     if not source_root:
         print("[WARN] 未配置 SOURCE_ROOT_PATH，扩展章节将被跳过")
 
-    llm = LLMInterface(model_name="gpt-4.1-2025-04-14", provider="openai")
+    llm = LLMInterface(model_name="gpt-5-mini", provider="openai")
     neo4j = Neo4jInterface(
         uri=os.environ["WIKI_NEO4J_URI"],
         user=os.environ["WIKI_NEO4J_USER"],

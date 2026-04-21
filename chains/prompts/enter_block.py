@@ -144,7 +144,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
     # async def select_file(state: NodeState) -> NodeState:
     #     neo4j_query2="""
     #     MATCH (n:Block {nodeId: $block_id})-[:f2c*]->(m:File)
-    #     RETURN m.name AS name, m.nodeId AS nodeId, m.module_explaination AS module_explaination
+    #     RETURN m.name AS name, m.nodeId AS nodeId, m.module_explanation AS module_explanation
     #     """
     #     files = []
     #     reasons = []
@@ -152,7 +152,7 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
     #         all_info = []
     #         result = await neo4j_interface.execute_query(neo4j_query2, {"block_id": block_id})
     #         for record in result:
-    #             all_info.append(f"nodeId: {record['nodeId']}, name: {record['name']}, module_explaination: {record['module_explaination']}")
+    #             all_info.append(f"nodeId: {record['nodeId']}, name: {record['name']}, module_explanation: {record['module_explanation']}")
     #         all_information = "\n".join(all_info)
     #         selected_files_node = await select_file_chain.ainvoke({"query": query, "all_information": all_information})
     #         files.extend(json.loads(selected_files_node).get("file_id", []))
@@ -169,9 +169,9 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         query = """
         MATCH (n)
         WHERE n.nodeId = $id
-        RETURN n.name AS name, n.module_explaination as module_explanation
+        RETURN n.name AS name, n.module_explanation as module_explanation
         """
-        #module_explaination
+        #module_explanation
         result = await neo4j_interface.execute_query(query, {"id": id})
         return f"name:{result[0]['name']}, module_explanation:{result[0]['module_explanation']}"
 
@@ -186,13 +186,13 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
             child.name AS child_name,
             parent.nodeId AS parent_id,
             parent.name AS parent_name,
-            parent.module_explaination AS parent_module_explanation,
+            parent.module_explanation AS parent_module_explanation,
             collect(DISTINCT {
                 nodeId: sibling.nodeId,
-                module_explanation: sibling.module_explaination
+                module_explanation: sibling.module_explanation
             }) AS siblings
         """
-        #module_explaination
+        #module_explanation
         records = await neo4j_interface.execute_query(parent_query, {"child_ids": block_list})
         parent_groups = defaultdict(lambda: {
             'parent_info': {},
@@ -246,17 +246,17 @@ def Node_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, query
         RETURN
             f.nodeId AS file_id,
             f.name AS file_name,
-            f.module_explaination AS module_explanation,
+            f.module_explanation AS module_explanation,
             b.nodeId AS parent_id,
             b.name AS parent_name,
-            b.module_explaination AS parent_module_explanation,
+            b.module_explanation AS parent_module_explanation,
             collect(DISTINCT {
                 nodeId: sibling.nodeId,
                 name: sibling.name,
-                module_explanation: sibling.module_explaination
+                module_explanation: sibling.module_explanation
             }) AS siblings
         """
-        #module_explaination
+        #module_explanation
         records = await neo4j_interface.execute_query(file_parent_query, {"file_ids": file_list})
         block_groups = defaultdict(lambda: {'block_info': {}, 'files_info': []})
         selected_blocks = []

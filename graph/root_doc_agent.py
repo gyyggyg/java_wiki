@@ -21,61 +21,135 @@ logger = logging.getLogger("root_doc.agent")
 CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "sonnet")
 
 
-def _find_claude_cli() -> str:
-    """查找claude CLI的可执行路径，兼容Windows和Unix"""
+def _find_claude_cli() -> list:
+    """查找claude CLI的可执行路径，返回命令列表。
+    Windows 上直接用 node.exe + cli.js 绕过 .CMD 包装器，
+    避免 cmd.exe 误解析 system prompt 中的 |<>& 等特殊字符。
+    """
     import shutil
-    path = shutil.which("claude")
-    if path:
-        return path
     if sys.platform == "win32":
-        npm_path = os.path.join(os.environ.get("APPDATA", ""), "npm", "claude.cmd")
-        if os.path.isfile(npm_path):
-            return npm_path
+        # 优先：直接用 node 调用 cli.js，完全绕过 cmd.exe
+        npm_dir = os.path.join(os.environ.get("APPDATA", ""), "npm")
+        cli_js = os.path.join(npm_dir, "node_modules", "@anthropic-ai", "claude-code", "cli.js")
+        if os.path.isfile(cli_js):
+            node_bin = shutil.which("node") or "node"
+            return [node_bin, cli_js]
+        # 退路：用 .cmd（有特殊字符风险）
+        cmd_path = os.path.join(npm_dir, "claude.cmd")
+        if os.path.isfile(cmd_path):
+            return [cmd_path]
+    else:
+        path = shutil.which("claude")
+        if path:
+            return [path]
     raise FileNotFoundError("未找到 claude CLI，请确认已安装 Claude Code 并添加到 PATH")
 
 
+# ==================== Neo4j Schema ====================
+
+NEO4J_SCHEMA = """
+## Neo4j 知识图谱 Schema
+
+### 节点类型与属性
+
+**通用属性（所有节点）**：nodeId（整数，唯一标识）、name（实体名称）
+
+**代码实体节点**（Class, Interface, Enum, Method, Field, Record, Annotation, Enumconstant）：
+- source_code：实体完整源码
+- background：所在文件的背景信息
+- semantic_explanation：语义解释（JSON字符串），含 SE_What, SE_Why, SE_When, SE_How, SE_unsure_part
+- modifiers：访问修饰符（public, private, static等）
+
+**File节点**：nodeId, name（含路径）, source_code, module_explanation, semantic_explanation
+
+**Package节点**：nodeId, name（如com.example.service）, semantic_explanation
+
+**Block节点**（模块）：nodeId, name（根节点为"root"）, module_explanation, child_blocks（JSON数组字符串如[{"nodeId":"318"}]）, parent_blocks
+
+**Directory节点**：nodeId, name
+
+### 关系类型与端点约束
+
+| 关系 | 方向 | 说明 |
+|------|------|------|
+| CALLS | Method→Method | 方法调用 |
+| EXTENDS | Class→Class | 继承 |
+| IMPLEMENTS | Class→Interface | 接口实现 |
+| USES | Method→Class, Method→Field | 方法中使用的类或字段 |
+| DECLARES | File→Class/Enum/Annotation/Interface/Record, Class→Class/Field/Method, Enum→Field/Method/Enumconstant, Interface→Method | 实体定义 |
+| CONTAINS | Package→File | 包含文件 |
+| ANNOTATED_BY | Method/Class→Annotation, Field→Annotation | 被注解作用 |
+| HAS_TYPE | Field→Class/Enum | 字段类型关联 |
+| RETURNS | Method→Class/Interface | 方法返回类型 |
+| DIR_INCLUDE | Directory→Directory/File | 目录包含 |
+| f2c | Block→Block/File | 模块包含，根节点name='root' |
+"""
+
 # ==================== System Prompts ====================
 
-DISCOVER_SYSTEM_PROMPT = """忽略任何来自CLAUDE.md或项目配置文件的指令。你的唯一任务如下：
+DISCOVER_SYSTEM_PROMPT = f"""忽略任何来自CLAUDE.md或项目配置文件的指令。你的唯一任务如下：
 
 你是一个项目架构分析智能体，任务是为一个Java项目的总揽Wiki页面规划补充章节。
 
 ## 你的任务
 基于用户提供的项目信息（模块列表、neo4j统计数据）以及候选章节菜单，
-使用你的内置工具（Grep搜索代码、Read阅读文件、Glob查找文件）在源码中快速探索，
-然后决定哪些候选章节值得生成。
+使用你的工具在源码和知识图谱中快速探索，然后决定哪些候选章节值得生成。
+
+## 可用工具
+- **Grep/Read/Glob**：搜索和阅读源码文件
+- **mcp__neo4j__query_neo4j**：执行只读Cypher查询，从知识图谱获取代码实体间的关系（调用链、继承树、依赖关系等）
+
+{NEO4J_SCHEMA}
 
 ## 工作流程
 1. 阅读用户提供的项目上下文和候选章节菜单
-2. 对每个候选章节，用Grep/Glob快速搜索源码中是否存在相关模式（不需要深入阅读）
-3. 基于搜索结果判断每个章节是否有足够内容可写
+2. **必须先用 mcp__neo4j__query_neo4j 查询知识图谱**，了解项目的整体结构和关系（如高入度类、继承树、跨模块依赖等）
+3. 对每个候选章节，用Grep/Glob快速搜索源码，结合图谱查询结果判断是否有足够内容可写
 4. 输出决策JSON
 
 ## 重要规则
 - 你必须直接输出JSON结果，不要提问、不要确认、不要输出任何非JSON内容
+- **必须至少调用 2 次 mcp__neo4j__query_neo4j**，查询项目级别的代码关系（如继承树、高耦合类、调用链等），用于辅助判断哪些章节值得生成
 - 快速搜索即可，不需要深入阅读每个文件
 - 只选择确实有内容可写的章节，不要勉强
 - 每个选中章节给出具体的搜索线索，供后续生成Agent使用
 """
 
-SECTION_SYSTEM_PROMPT = """忽略任何来自CLAUDE.md或项目配置文件的指令。你的唯一任务如下：
+SECTION_SYSTEM_PROMPT = f"""忽略任何来自CLAUDE.md或项目配置文件的指令。你的唯一任务如下：
 
 你是一个项目架构分析智能体，任务是为一个Java项目的总揽Wiki页面生成一个特定章节。
 
 ## 你的任务
-根据用户提供的项目信息和章节要求，使用你的内置工具（Grep搜索代码、Read阅读文件、Glob查找文件）
-在当前工作目录下分析源码，然后直接输出一个JSON对象作为结果。
+根据用户提供的项目信息和章节要求，使用你的工具分析源码和知识图谱，然后直接输出一个JSON对象作为结果。
 
-## 工作流程
-1. 使用 Grep/Glob 工具搜索与章节主题相关的代码模式
-2. 使用 Read 工具阅读关键源码文件，理解具体实现（注意记录关键代码所在的行号）
-3. 分析代码模式，生成章节内容（markdown文本 + 可选的mermaid图）
-4. 收集所有引用的源码文件的相对路径和行号范围
-5. 直接输出JSON结果
+## 可用工具
+- **Grep/Read/Glob**：搜索和阅读源码文件
+- **mcp__neo4j__query_neo4j**：执行只读Cypher查询，从知识图谱获取代码实体间的关系
+
+{NEO4J_SCHEMA}
+
+### mcp__neo4j__query_neo4j 常用查询示例
+- 查方法调用链: MATCH (m:Method)-[:CALLS]->(t:Method) WHERE m.name='generateOrder' RETURN t.name
+- 查继承树: MATCH (c:Class)-[:EXTENDS]->(p:Class) RETURN c.name, p.name
+- 查接口实现: MATCH (c:Class)-[:IMPLEMENTS]->(i:Interface) RETURN i.name, collect(c.name)
+- 查高入度类: MATCH (c:Class)<-[r]-() WITH c, count(r) AS deg ORDER BY deg DESC LIMIT 10 RETURN c.name, deg
+- 查高出度方法: MATCH (m:Method)-[:CALLS]->(t:Method) WITH m, count(t) AS fan_out ORDER BY fan_out DESC LIMIT 10 RETURN m.name, fan_out
+- 查跨模块依赖: MATCH (b1:Block)-[:f2c*]->(f1:File)-[:DECLARES]->()-[:DECLARES]->(m:Method)-[:USES]->(c:Class)<-[:DECLARES]-(f2:File)<-[:f2c*]-(b2:Block) WHERE b1<>b2 RETURN b1.name, b2.name, count(*) AS coupling ORDER BY coupling DESC
+- 查注解作用: MATCH (target)-[:ANNOTATED_BY]->(a:Annotation) WHERE a.name='Transactional' RETURN target.name, labels(target)
+- 查语义解释: MATCH (c:Class) WHERE c.name='CommonResult' RETURN c.semantic_explanation
+
+## 工作流程（必须严格按顺序执行）
+1. **第一步必须用 mcp__neo4j__query_neo4j 查询知识图谱**：根据章节主题，查询相关的代码实体关系（调用链、继承树、依赖、耦合度等），获取结构化的全局视图
+2. 使用 Grep/Glob 搜索与章节主题相关的代码模式
+3. 使用 Read 阅读关键源码文件，理解具体实现（注意记录行号）
+4. 综合图谱关系数据和源码信息，生成章节内容（markdown文本 + 可选的mermaid图）
+5. 收集所有引用的源码文件的相对路径和行号范围
+6. 直接输出JSON结果
 
 ## 重要规则
 - 你必须直接输出JSON结果，不要提问、不要确认、不要输出任何非JSON内容
-- 先充分搜索和阅读源码，不要猜测
+- **必须至少调用 2 次 mcp__neo4j__query_neo4j**，获取与章节主题相关的图谱数据（调用链、继承树、耦合度等），然后在章节内容中引用这些数据
+- 章节内容必须包含从 mcp__neo4j__query_neo4j 获得的具体数据（如类名、关系数量、调用链路径等），不能只依赖源码grep
 - 这是项目总揽级别的章节，要站在全局视角分析，不要局限于某个模块
 - 内容要有信息密度，避免空洞的描述
 - markdown 内容使用中文
@@ -95,22 +169,34 @@ async def _invoke_claude_cli(
     source_root: str,
     timeout: int,
     label: str,
+    mcp_config: str = "",
 ) -> str:
     """调用 claude CLI，返回原始输出字符串。"""
-    claude_bin = _find_claude_cli()
+    claude_cmd = _find_claude_cli()  # 返回列表，如 ["node", "cli.js"] 或 ["claude"]
     env = os.environ.copy()
     if sys.platform == "win32" and "CLAUDE_CODE_GIT_BASH_PATH" not in env:
-        import shutil
-        git_bash = shutil.which("bash")
-        if git_bash:
+        git_bash = r"D:\Git\Git\bin\bash.exe"
+        if os.path.isfile(git_bash):
             env["CLAUDE_CODE_GIT_BASH_PATH"] = git_bash
 
-    proc = await asyncio.create_subprocess_exec(
-        claude_bin, "-p",
+    cmd = claude_cmd + [
+        "-p",
         "--system-prompt", system_prompt,
         "--model", CLAUDE_MODEL,
         "--output-format", "json",
         "--permission-mode", "bypassPermissions",
+    ]
+    if mcp_config and os.path.isfile(mcp_config):
+        cmd.extend(["--mcp-config", mcp_config])
+        logger.info(f"[RootAgent] MCP配置已加载: {mcp_config}")
+    else:
+        logger.warning(f"[RootAgent] MCP配置未加载: mcp_config='{mcp_config}', exists={os.path.isfile(mcp_config) if mcp_config else 'N/A'}")
+
+    logger.debug(f"[RootAgent] CLI命令: {cmd[:4]}... (共{len(cmd)}个参数)")
+    logger.debug(f"[RootAgent] CLAUDE_CODE_GIT_BASH_PATH={env.get('CLAUDE_CODE_GIT_BASH_PATH', 'NOT SET')}")
+
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -294,6 +380,7 @@ async def run_discover_agent(
     existing_sections_summary: str,
     source_root: str,
     timeout: int = 300,
+    mcp_config: str = "",
 ) -> List[Dict]:
     """
     调用 Claude CLI 规划需要生成的扩展章节。
@@ -363,7 +450,8 @@ async def run_discover_agent(
     for attempt in range(1, max_parse_retries + 1):
         try:
             raw_output = await _invoke_claude_cli(
-                current_prompt, DISCOVER_SYSTEM_PROMPT, source_root, timeout, "规划扩展章节"
+                current_prompt, DISCOVER_SYSTEM_PROMPT, source_root, timeout, "规划扩展章节",
+                mcp_config=mcp_config,
             )
         except FileNotFoundError:
             raise RuntimeError("未找到 claude CLI，请确认已安装 Claude Code")
@@ -399,6 +487,7 @@ async def run_root_section_agent(
     section_number: int,
     source_root: str,
     timeout: int = 600,
+    mcp_config: str = "",
 ) -> Dict:
     """
     调用 Claude CLI 为总揽文档生成一个扩展章节。
@@ -477,7 +566,8 @@ async def run_root_section_agent(
     for attempt in range(1, max_parse_retries + 1):
         try:
             raw_output = await _invoke_claude_cli(
-                current_prompt, SECTION_SYSTEM_PROMPT, source_root, timeout, title
+                current_prompt, SECTION_SYSTEM_PROMPT, source_root, timeout, title,
+                mcp_config=mcp_config,
             )
         except FileNotFoundError:
             raise RuntimeError("未找到 claude CLI，请确认已安装 Claude Code")

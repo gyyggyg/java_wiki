@@ -1,189 +1,190 @@
 ```mermaid
 classDiagram
-    class JwtTokenUtil {
-        -Logger LOGGER
-        -String CLAIM_KEY_USERNAME
-        -String CLAIM_KEY_CREATED
-        -String secret
-        -Long expiration
-        -String tokenHead
-        -generateToken(Map~String,Object~)
-        -getClaimsFromToken(String)
-        -generateExpirationDate()
-        +getUserNameFromToken(String)
-        +validateToken(String,UserDetails)
-        -isTokenExpired(String)
-        -getExpiredDateFromToken(String)
-        +generateToken(UserDetails)
-        +refreshHeadToken(String)
-        -tokenRefreshJustBefore(String,int)
+    class SysUserServiceImpl {
+        - SysUserMapper userMapper
+        - SysRoleMapper roleMapper
+        - SysPostMapper postMapper
+        - SysUserRoleMapper userRoleMapper
+        - SysUserPostMapper userPostMapper
+        - ISysConfigService configService
+        # Validator validator
+        +selectUserList(SysUser) List~SysUser~
+        +selectAllocatedList(SysUser) List~SysUser~
+        +selectUnallocatedList(SysUser) List~SysUser~
+        +selectUserByUserName(String) SysUser
+        +selectUsersByUserName(String) List~SysUser~
+        +selectUserById(Long) SysUser
+        +selectUserRoleGroup(String) String
+        +selectUserPostGroup(String) String
+        +checkUserNameUnique(String) String
+        +checkPhoneUnique(SysUser) String
+        +checkEmailUnique(SysUser) String
+        +checkUserAllowed(SysUser)
+        +checkUserDataScope(Long)
+        +insertUser(SysUser) int
+        +registerUser(SysUser) boolean
+        +updateUser(SysUser) int
+        +updateWlxUser(SysUser) int
+        +insertUserAuth(Long,Long[]) void
+        +updateUserStatus(SysUser) int
+        +updateUserProfile(SysUser) int
+        +updateUserAvatar(String,String) boolean
+        +resetPwd(SysUser) int
+        +resetUserPwd(String,String) int
+        +insertUserRole(SysUser) void
+        +insertUserPost(SysUser) void
+        +insertUserRole(Long,Long[]) void
+        +deleteUserById(Long) int
+        +deleteUserByIds(Long[]) int
+        +importUser(List~SysUser~,Boolean,String) String
+        +getByPhone(String) List~SysUser~
+        +getUserCount() Long
+        +listgeLoginDate(Date) List~SysUser~
+        +listgeCreateDate(Date) List~SysUser~
     }
 
-    class SpringUtil {
-        -ApplicationContext applicationContext
-        +getApplicationContext()
-        +setApplicationContext(ApplicationContext)
-        +getBean(String)
-        +getBean~T~(Class~T~)
-        +getBean~T~(String,Class~T~)
-    }
-
-    class Claims {
+    class ISysUserService {
         <<interface>>
-        +getSubject()
-        +getExpiration()
-        +get(String,Class)
+        +selectUserList(SysUser) List~SysUser~
+        +selectAllocatedList(SysUser) List~SysUser~
+        +selectUnallocatedList(SysUser) List~SysUser~
+        +selectUserByUserName(String) SysUser
+        +selectUsersByUserName(String) List~SysUser~
+        +selectUserById(Long) SysUser
+        +selectUserRoleGroup(String) String
+        +selectUserPostGroup(String) String
+        +checkUserNameUnique(String) String
+        +checkPhoneUnique(SysUser) String
+        +checkEmailUnique(SysUser) String
+        +checkUserAllowed(SysUser)
+        +checkUserDataScope(Long)
+        +insertUser(SysUser) int
+        +registerUser(SysUser) boolean
+        +updateUser(SysUser) int
+        +updateWlxUser(SysUser) int
+        +insertUserAuth(Long,Long[]) void
+        +updateUserStatus(SysUser) int
+        +updateUserProfile(SysUser) int
+        +updateUserAvatar(String,String) boolean
+        +resetPwd(SysUser) int
+        +resetUserPwd(String,String) int
+        +deleteUserById(Long) int
+        +deleteUserByIds(Long[]) int
+        +importUser(List~SysUser~,Boolean,String) String
+        +getByPhone(String) List~SysUser~
+        +getUserCount() Long
+        +listgeLoginDate(Date) List~SysUser~
+        +listgeCreateDate(Date) List~SysUser~
     }
 
-    class SignatureAlgorithm {
-        <<enumeration>>
+    class SysUserOnlineServiceImpl {
+        +selectOnlineByIpaddr(String,LoginUser) SysUserOnline
+        +selectOnlineByUserName(String,LoginUser) SysUserOnline
+        +selectOnlineByInfo(String,String,LoginUser) SysUserOnline
+        +loginUserToUserOnline(LoginUser) SysUserOnline
     }
 
-    class Jwts {
-        +builder()
-        +parser()
-    }
-
-    class UserDetails {
+    class ISysUserOnlineService {
         <<interface>>
-        +getUsername()
+        +selectOnlineByIpaddr(String,LoginUser) SysUserOnline
+        +selectOnlineByUserName(String,LoginUser) SysUserOnline
+        +selectOnlineByInfo(String,String,LoginUser) SysUserOnline
+        +loginUserToUserOnline(LoginUser) SysUserOnline
     }
 
-    class Map {
+    class SysUser {
+    }
+
+    class SysUserMapper {
+    }
+
+    class SysRoleMapper {
+    }
+
+    class SysPostMapper {
+    }
+
+    class SysUserRoleMapper {
+    }
+
+    class SysUserPostMapper {
+    }
+
+    class ISysConfigService {
         <<interface>>
     }
 
-    class HashMap {
-        +HashMap()
+    class Validator {
     }
 
-    class StrUtil {
+    class SysUserOnline {
     }
 
-    class DateUtil {
+    class LoginUser {
     }
 
-    class Logger {
-    }
+    SysUserServiceImpl ..|> ISysUserService
+    SysUserOnlineServiceImpl ..|> ISysUserOnlineService
 
-    class LoggerFactory {
-        +getLogger()
-    }
+    SysUserServiceImpl --> SysUserMapper
+    SysUserServiceImpl --> SysRoleMapper
+    SysUserServiceImpl --> SysPostMapper
+    SysUserServiceImpl --> SysUserRoleMapper
+    SysUserServiceImpl --> SysUserPostMapper
+    SysUserServiceImpl --> ISysConfigService
+    SysUserServiceImpl --> Validator
 
-    class Date {
-    }
+    SysUserServiceImpl --> SysUser
+    ISysUserService --> SysUser
 
-    class String {
-    }
+    SysUserOnlineServiceImpl --> SysUserOnline
+    ISysUserOnlineService --> SysUserOnline
 
-    class Long {
-    }
+    SysUserOnlineServiceImpl --> LoginUser
+    ISysUserOnlineService --> LoginUser
 
-    class ApplicationContextAware {
-        <<interface>>
-        +setApplicationContext(ApplicationContext)
-    }
-
-    class ApplicationContext {
-        +getBean(String)
-        +getBean~T~(Class~T~)
-        +getBean~T~(String,Class~T~)
-    }
-
-    class BeansException {
-    }
-
-    %% Relationships
-    JwtTokenUtil --> Logger
-    JwtTokenUtil --> LoggerFactory
-    JwtTokenUtil --> Jwts
-    JwtTokenUtil --> SignatureAlgorithm
-    JwtTokenUtil --> Claims
-    JwtTokenUtil --> UserDetails
-    JwtTokenUtil --> Map
-    JwtTokenUtil --> HashMap
-    JwtTokenUtil --> StrUtil
-    JwtTokenUtil --> DateUtil
-    JwtTokenUtil --> Date
-    JwtTokenUtil --> String
-    JwtTokenUtil --> Long
-
-    ApplicationContextAware <|.. SpringUtil
-    SpringUtil --> ApplicationContext
-    SpringUtil --> BeansException
 ```
-- 概览
-  - 这是一个代码类/接口之间的 UML 图，重点关注 JwtTokenUtil 和 SpringUtil 的类结构、方法以及它们与相关类/接口的关系。
+- 整体说明  
+  - 该图是一个“用户相关服务”的类/接口关系 UML 图，重点展示两个实现类：`SysUserServiceImpl` 和 `SysUserOnlineServiceImpl` 与其对应接口及依赖类之间的关系。
 
-- JwtTokenUtil（职责与字段）
-  - 主要负责 JWT 的生成、解析、校验与刷新。
-  - 关键字段：
-    - LOGGER（Logger），通过 LoggerFactory 获取用于日志记录。
-    - CLAIM_KEY_USERNAME = "sub"（用于在 claims 中存放用户名）。
-    - CLAIM_KEY_CREATED = "created"（用于记录 token 创建时间）。
-    - secret（从配置注入，用作签名密钥）。
-    - expiration（从配置注入，过期时长，单位秒）。
-    - tokenHead（从配置注入，token 前缀）。
-  
-- JwtTokenUtil（主要方法与逻辑）
-  - 私有 String generateToken(Map<String,Object> claims)
-    - 使用 Jwts.builder()、setClaims(claims)、setExpiration(generateExpirationDate())、signWith(SignatureAlgorithm.HS512, secret) 并 compact() 生成签名 token。
-  - 私有 Claims getClaimsFromToken(String token)
-    - 使用 Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody() 解析 token；解析异常时记录日志并返回 null。
-  - 私有 Date generateExpirationDate()
-    - 返回 new Date(System.currentTimeMillis() + expiration * 1000) 作为 token 过期时间。
-  - public String getUserNameFromToken(String token)
-    - 通过 getClaimsFromToken(token) 获取 claims，再调用 claims.getSubject() 得到用户名；异常时返回 null。
-  - public boolean validateToken(String token, UserDetails userDetails)
-    - 从 token 获取用户名并与 userDetails.getUsername() 比较，且调用 !isTokenExpired(token) 确认未过期，两个条件同时满足则返回 true。
-  - 私有 boolean isTokenExpired(String token)
-    - 通过 getExpiredDateFromToken(token) 获取过期时间，比较 expiredDate.before(new Date()) 判断是否过期。
-  - 私有 Date getExpiredDateFromToken(String token)
-    - 从 claims 获取并返回 claims.getExpiration()。
-  - public String generateToken(UserDetails userDetails)
-    - 创建 HashMap claims，放入 CLAIM_KEY_USERNAME（username）和 CLAIM_KEY_CREATED（new Date()），调用 generateToken(claims) 生成 token。
-  - public String refreshHeadToken(String oldToken)
-    - 流程：
-      - 判空 oldToken（借助 StrUtil.isEmpty），若空返回 null。
-      - 去掉 tokenHead 前缀得到实际 token，判空返回 null。
-      - 调用 getClaimsFromToken(token)，若 claims 为 null 返回 null（校验失败）。
-      - 若 isTokenExpired(token) 返回 null（过期不支持刷新）。
-      - 若 tokenRefreshJustBefore(token, 30*60) 为 true，则直接返回原 token（30 分钟内刚刷新过）；否则更新 claims 中 CLAIM_KEY_CREATED 为 new Date() 并用 generateToken(claims) 生成新的 token。
-  - 私有 boolean tokenRefreshJustBefore(String token, int time)
-    - 从 claims 中取出创建时间 created = claims.get(CLAIM_KEY_CREATED, Date.class)。
-    - 以 refreshDate = new Date()，判断 refreshDate.after(created) && refreshDate.before(DateUtil.offsetSecond(created, time))，若在指定秒数内返回 true，否则 false。
+- `SysUserServiceImpl` 与 `ISysUserService` 的关系  
+  - `SysUserServiceImpl` **实现**接口 `ISysUserService`（`SysUserServiceImpl ..|> ISysUserService`）。  
+  - 接口 `ISysUserService` 定义了用户管理相关的全部方法，`SysUserServiceImpl` 对这些方法做具体实现：
+    - 用户查询：`selectUserList`、`selectAllocatedList`、`selectUnallocatedList`、`selectUserByUserName`、`selectUsersByUserName`、`selectUserById`  
+    - 用户关联信息：`selectUserRoleGroup`（角色组）、`selectUserPostGroup`（岗位组）  
+    - 唯一性与权限校验：`checkUserNameUnique`、`checkPhoneUnique`、`checkEmailUnique`、`checkUserAllowed`、`checkUserDataScope`  
+    - 用户增删改：`insertUser`、`updateUser`、`updateWlxUser`、`deleteUserById`、`deleteUserByIds`  
+    - 注册与资料维护：`registerUser`、`updateUserStatus`、`updateUserProfile`、`updateUserAvatar`  
+    - 密码相关：`resetPwd`、`resetUserPwd`  
+    - 用户与角色/岗位关系维护：`insertUserAuth`、`insertUserRole(SysUser)`、`insertUserPost(SysUser)`、`insertUserRole(Long, Long[])`  
+    - 导入和统计：`importUser`、`getByPhone`、`getUserCount`、`listgeLoginDate`、`listgeCreateDate`  
+  - `ISysUserService` 中的方法签名与 `SysUserServiceImpl` 保持一致，说明实现类完整实现了接口定义的所有用户服务能力。
 
-- JwtTokenUtil 的外部依赖（图中箭头所示）
-  - Logger / LoggerFactory：用于日志记录（LOGGER 初始化）。
-  - Jwts、SignatureAlgorithm：用于构建与解析 JWT。
-  - Claims：表示 JWT payload，提供 getSubject(), getExpiration(), get(String,Class) 等方法。
-  - UserDetails：用于从数据库用户信息比对 username。
-  - Map / HashMap：构造 claims 存放用户名与创建时间。
-  - StrUtil：用于判空判断 oldToken/token。
-  - DateUtil：用于计算 created 时间加指定秒数（offsetSecond）。
-  - Date、String、Long：基本类型/类用于时间和配置字段。
+- `SysUserServiceImpl` 的依赖关系  
+  - `SysUserServiceImpl` 通过关联关系（`-->`）依赖多种 Mapper 和服务，用于支撑其用户业务逻辑：
+    - `SysUserMapper`：负责用户数据访问  
+    - `SysRoleMapper`：负责角色数据访问  
+    - `SysPostMapper`：负责岗位数据访问  
+    - `SysUserRoleMapper`：负责用户-角色关系数据访问  
+    - `SysUserPostMapper`：负责用户-岗位关系数据访问  
+    - `ISysConfigService`：获取系统配置相关信息  
+    - `Validator`：用于对用户数据进行校验  
+  - `SysUserServiceImpl` 与 `SysUser` 之间存在使用关系（`--> SysUser`），`ISysUserService` 也同样依赖 `SysUser`，表明用户实体是这些接口和实现的核心业务对象。
 
-- SpringUtil（职责与字段）
-  - 实现 ApplicationContextAware 接口，用于持有 Spring 上下文以便静态访问 Bean。
-  - 关键静态字段：
-    - private static ApplicationContext applicationContext（在 setApplicationContext 中初始化一次）。
+- `SysUserOnlineServiceImpl` 与 `ISysUserOnlineService` 的关系  
+  - `SysUserOnlineServiceImpl` **实现**接口 `ISysUserOnlineService`（`SysUserOnlineServiceImpl ..|> ISysUserOnlineService`）。  
+  - 接口 `ISysUserOnlineService` 定义了在线用户相关的查询与转换能力，`SysUserOnlineServiceImpl` 进行具体实现：
+    - 根据 IP 和登录用户查询在线信息：`selectOnlineByIpaddr(String, LoginUser)`  
+    - 根据用户名和登录用户查询在线信息：`selectOnlineByUserName(String, LoginUser)`  
+    - 根据复合信息（如 IP 和用户名）查询在线信息：`selectOnlineByInfo(String, String, LoginUser)`  
+    - 将 `LoginUser` 转换为 `SysUserOnline`：`loginUserToUserOnline(LoginUser)`  
 
-- SpringUtil（主要方法与行为）
-  - public static ApplicationContext getApplicationContext()
-    - 返回持有的 applicationContext。
-  - @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
-    - 当 Spring 注入时，如果 SpringUtil.applicationContext 为空则赋值（只赋一次）。
-  - public static Object getBean(String name)
-    - 通过 getApplicationContext().getBean(name) 获取 Bean。
-  - public static <T> T getBean(Class<T> clazz)
-    - 通过 getApplicationContext().getBean(clazz) 获取 Bean。
-  - public static <T> T getBean(String name, Class<T> clazz)
-    - 通过 getApplicationContext().getBean(name, clazz) 获取 Bean。
+- `SysUserOnlineServiceImpl` 的依赖关系  
+  - `SysUserOnlineServiceImpl` 与 `SysUserOnline` 存在使用关系（`--> SysUserOnline`），说明这些方法返回在线用户实体对象。  
+  - `SysUserOnlineServiceImpl` 与 `LoginUser` 存在使用关系（`--> LoginUser`），且接口 `ISysUserOnlineService` 同样依赖 `LoginUser`，说明在线用户服务以登录用户信息为输入，生成或查询在线用户数据。
 
-- SpringUtil 的图中关系
-  - SpringUtil 实现（继承） ApplicationContextAware（ApplicationContextAware <|.. SpringUtil）。
-  - SpringUtil 依赖 ApplicationContext 与 BeansException（用于 setApplicationContext 的签名与调用 getBean 时委托给 ApplicationContext）。
-
-- 小结（图意）
-  - 图展示了 JwtTokenUtil 的属性与方法，以及它与 JWT 相关工具类（Jwts、Claims、SignatureAlgorithm）、辅助工具（DateUtil、StrUtil）、日志（Logger/LoggerFactory）和基础类型的依赖关系；并展示了 SpringUtil 作为持有静态 ApplicationContext 的工具类，实现 ApplicationContextAware 并提供多种 getBean 方法供全局访问。
+- 参与但未展开的类  
+  - `SysUser`、`SysUserOnline`、`LoginUser` 等在图中只展示为占位类，没有字段和方法的详细信息，仅表明它们是用户服务与在线用户服务中被使用的核心数据对象。  
+  - `SysUserMapper`、`SysRoleMapper`、`SysPostMapper`、`SysUserRoleMapper`、`SysUserPostMapper` 只在图中作为被依赖的 Mapper 类存在，图中未给出其具体方法。  
+  - `ISysConfigService` 为配置服务接口，`Validator` 为校验类，图中同样仅体现出 `SysUserServiceImpl` 对它们的依赖关系。
 
