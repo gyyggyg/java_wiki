@@ -53,3 +53,25 @@ __pycache__/
 
 # 独立子仓库：CodeNexus-Team/rabbitmq_agent（嵌套 .git，目前未被 run_all 使用）
 Api_and_Rabbitmq/rabbitmq_agent/
+
+# === business_flow / category_wiki / dir_reconstruction 等工作流产物 ===
+# 所有 logs/ 目录（项目内任意位置）
+logs/
+
+# business_flow 多次运行输出
+business_flow/output1/
+business_flow/claude/output_flow/
+# business_flow 顶层生成的 JSON 产物（保留 theme_mapping.json 作为下游配置）
+business_flow/business_flows*.json
+business_flow/business_scenarios*.json
+
+# category_wiki / dir_reconstruction / Api_and_Rabbitmq 产物
+category_wiki/output/
+dir_reconstruction/output/
+Api_and_Rabbitmq/*.meta.json
+
+# 本地 MCP / 凭据配置（仓库内仅保留 mcp_config.example.json）
+mcp_config.json
+
+# 草稿文件
+test.md

@@ -17,4 +17,15 @@ langgraph-supervisor==0.0.27
 langgraph-swarm==0.0.12
 neo4j==5.28.1
 python-dotenv==1.0.1
+ruamel.yaml==0.19.1
 typing_extensions==4.12.2
+
+# 直接 import 的底层库（虽是 langchain-openai 的传递依赖，但代码里显式 import）
+httpx==0.28.1
+openai==1.109.1
+
+# Kafka 消息推送（目前仅 graph/2_graph.py 的 __main__ 调试入口使用）
+kafka-python==2.0.2
+
+# business_flow/claude/branch_analyzer.py —— 对入口方法做 AST 静态分析识别"直通查询"
+javalang==0.13.0

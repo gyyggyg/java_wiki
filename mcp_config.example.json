@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "neo4j": {
+      "command": "${PYTHON_BIN}",
+      "args": [
+        "${PROJECT_ROOT}/interfaces/neo4j_mcp_interface.py"
+      ],
+      "env": {
+        "WIKI_NEO4J_URI": "bolt://localhost:7687",
+        "WIKI_NEO4J_USER": "neo4j",
+        "WIKI_NEO4J_PASSWORD": "${WIKI_NEO4J_PASSWORD}"
+      }
+    }
+  }
+}
