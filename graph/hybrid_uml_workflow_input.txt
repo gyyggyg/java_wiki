@@ -1,22 +1,18 @@
-=== id_list (7 classes) ===
+=== id_list (5 classes) ===
 [
   "Class&Interface",
-  "JwtAuthenticationTokenFilter",
-  "RestAuthenticationEntryPoint",
-  "RestfulAccessDeniedHandler",
-  "DynamicSecurityService",
-  "DynamicAccessDecisionManager",
-  "DynamicSecurityMetadataSource",
-  "DynamicSecurityFilter"
+  "HttpClients",
+  "IrsSignRes",
+  "GatewayReport",
+  "CyzxSynergy",
+  "GatewaySchedule"
 ]
 
 === class_source_map ===
 {
-  "JwtAuthenticationTokenFilter": "__direct__",
-  "RestAuthenticationEntryPoint": "安全异常响应",
-  "RestfulAccessDeniedHandler": "安全异常响应",
-  "DynamicSecurityService": "动态权限控制",
-  "DynamicAccessDecisionManager": "动态权限控制",
-  "DynamicSecurityMetadataSource": "动态权限控制",
-  "DynamicSecurityFilter": "动态权限控制"
+  "HttpClients": "__direct__",
+  "IrsSignRes": "__direct__",
+  "GatewayReport": "网关事件DTO",
+  "CyzxSynergy": "网关事件DTO",
+  "GatewaySchedule": "网关事件DTO"
 }

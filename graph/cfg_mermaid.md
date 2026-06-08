@@ -2,56 +2,84 @@
 flowchart TB
     direction TB
     subgraph Initialization
-        A1["准备当前时间\n将传入时间转换为仅含时间部分"]
-        B1["构造秒杀场次查询条件\n(开始时间 ≤ currTime 且 结束时间 ≥ currTime)"]
-        style A1 fill:#0af,stroke:#045,stroke-width:3px
-        style B1 fill:#0af,stroke:#045,stroke-width:3px
+        A1["开始: toString 被调用"]
+        A2["创建 StringBuilder 实例"]
+        style A2 fill:#0af,stroke:#036,stroke-width:3px
     end
-    subgraph Query
-        C1["执行数据库查询\n检索匹配的秒杀场次"]
-        style C1 fill:#0af,stroke:#045,stroke-width:3px
+
+    subgraph BuildString
+        A2 --> A3["追加类名 IrsSignRes"]
+        style A3 fill:#0af,stroke:#036,stroke-width:3px
+
+        A3 --> A4["追加 '(' 作为字段列表开始"]
+        style A4 fill:#0af,stroke:#036,stroke-width:3px
+
+        A4 --> F1_check{"读取 accessKey 并判断是否为空"}
+        style F1_check fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
+        F1_check -->|是| F1_append["追加: accessKey=null 并追加分隔符或按规则处理"]
+        F1_check -->|否| F1_append
+        style F1_append fill:#f96,stroke:#333,stroke-width:2px
+
+        F1_append --> F2_check{"读取 signature 并判断是否为空"}
+        style F2_check fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
+        F2_check -->|是| F2_append["追加: signature=null 并追加分隔符或按规则处理"]
+        F2_check -->|否| F2_append
+        style F2_append fill:#f96,stroke:#333,stroke-width:2px
+
+        F2_append --> F3_check{"读取 algorithm 并判断是否为空"}
+        style F3_check fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
+        F3_check -->|是| F3_append["追加: algorithm=null 并追加分隔符或按规则处理"]
+        F3_check -->|否| F3_append
+        style F3_append fill:#f96,stroke:#333,stroke-width:2px
+
+        F3_append --> F4_check{"读取 dateTime 并判断是否为空"}
+        style F4_check fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
+        F4_check -->|是| F4_append["追加: dateTime=null（字段末尾不一定追加逗号）"]
+        F4_check -->|否| F4_append
+        style F4_append fill:#f96,stroke:#333,stroke-width:2px
+
+        F4_append --> G1["追加 ')' 结束字段列表"]
+        style G1 fill:#0af,stroke:#036,stroke-width:3px
     end
-    subgraph Result
-        D1["查询结果非空?"]
-        style D1 fill:#fff,stroke:#333,stroke-width:2px,shape:diamond
-        E1["返回首条有效秒杀场次\n(当前生效且优先最高)"]
-        style E1 fill:#0af,stroke:#045,stroke-width:3px
-        F1["无有效秒杀场次\n返回 null"]
-        style F1 fill:#fbb,stroke:#a33,stroke-width:2px
+
+    subgraph Return
+        G1 --> G2["返回拼接后的不可变字符串 (String)"]
+        style G2 fill:#0af,stroke:#036,stroke-width:3px
     end
-    A1 --> B1
-    B1 --> C1
-    C1 --> D1
-    D1 -- "是" --> E1
-    D1 -- "否" --> F1
-    %% 边样式: 默认粗细为2px，关键路径使用粗实线3px并使用主色
-    linkStyle 0 stroke:#333,stroke-width:2px
-    linkStyle 1 stroke:#333,stroke-width:2px
-    linkStyle 2 stroke:#0af,stroke-width:3px
-    linkStyle 3 stroke:#0af,stroke-width:3px
-    linkStyle 4 stroke:#333,stroke-width:2px
+
+    %% 边样式：主要流程保持较粗线条，默认流程为中等粗细
+    linkStyle default stroke-width:2px
 
 ```
-- 该图为代码控制流图，对应方法：private SmsFlashPromotionSession getFlashPromotionSession(Date date)
-- Initialization（初始化）
-  - 调用 DateUtil.getTime(date) 将传入的 Date 转换为仅含时间部分的 Date 对象 currTime（日期部分被重置为 1970-01-01，时间部分保留）
-  - 构造 SmsFlashPromotionSessionExample 查询条件：通过 createCriteria 添加两个约束
-    - andStartTimeLessThanOrEqualTo(currTime)：秒杀场次的开始时间 ≤ currTime
-    - andEndTimeGreaterThanOrEqualTo(currTime)：秒杀场次的结束时间 ≥ currTime
-- Query（查询）
-  - 使用 promotionSessionMapper.selectByExample(sessionExample) 在数据库中检索满足上述条件的 SmsFlashPromotionSession 列表
-- Result（结果判断与返回）
-  - 判断查询结果列表 promotionSessionList 是否非空
-    - 若“是”：返回列表的首条记录 promotionSessionList.get(0)（即当前生效且优先最高的秒杀场次）
-    - 若“否”：返回 null（表示当前时间点无有效秒杀场次）
-- 相关要点（来自代码/类说明）
-  - SmsFlashPromotionSessionExample 用于动态构建查询条件，createCriteria 保证至少有一个 Criteria 用于添加条件
-  - promotionSessionMapper 是用于执行 selectByExample 的 MyBatis Mapper，用以从数据库检索 SmsFlashPromotionSession 实体列表
-  - 方法最终返回类型为 SmsFlashPromotionSession，或在无匹配时返回 null
+- 概览（控制流）：调用 IrsSignRes.toString() 时，按照图中顺序构造字符串并返回不可变的 java.lang.String，不修改对象状态。
+- 初始化：
+  - 开始：toString 被调用。
+  - 创建一个 StringBuilder 实例用于拼接字符串。
+- 构建字符串的固定部分：
+  - 先追加类名 "IrsSignRes"。
+  - 追加 '(' 开始字段列表。
+- 按字段顺序依次处理（顺序：accessKey → signature → algorithm → dateTime）：
+  - 每个字段的处理流程相同的控制逻辑：
+    - 调用对应的 getter（由 Lombok @Data 生成的标准 getter）读取字段值；getter 仅返回字段引用，不改变对象状态。
+    - 判断读取到的值是否为 null（图中为决策菱形）。
+    - 若为 null，则以文本形式追加 "字段名=null" 并按照 toString 的规则追加分隔符或其它处理（图中用“追加分隔符或按规则处理”描述）。
+    - 若不为 null，则按典型实现以 name=value 的形式追加字段值，并在字段之间以逗号分隔（图和说明指出以 name=value 形式拼接并以逗号分隔）。
+  - 对 dateTime 字段有特殊说明：作为最后一个字段时图中指出“字段末尾不一定追加逗号”（即末尾分隔符的处理可能不同）。
+- 字段语义（来自源信息，均为私有 String 字段）：
+  - accessKey：承载访问凭证标识（String），由 getAccessKey() 返回。
+  - signature：承载签名结果的文本（String），由 getSignature() 返回。
+  - algorithm：承载签名/摘要算法标识的字符串（String），由 getAlgorithm() 返回。
+  - dateTime：承载签名相关时间戳的字符串（String），由 getDateTime() 返回。
+- 完成与返回：
+  - 追加 ')' 结束字段列表。
+  - 调用 StringBuilder.toString() 返回最终的不可变 String。
+- 行为约束（来自源信息）：
+  - 拼接过程仅构造并返回字符串，不修改对象状态。
+  - 若字段值为 null，toString 中以字符串 "null" 表示（即按典型 Lombok 实现的语义）。
 
 下面介绍该函数所属的文件、类、函数的基本信息
 
 | 文件 | 类 | 函数 |
 | --- | --- | --- |
-| mall-portal/src/main/java/com/macro/mall/portal/service/impl/HomeServiceImpl.java | HomeServiceImpl | HomeServiceImpl.getFlashPromotionSession |
-| HomeServiceImpl 是商城门户首页内容管理的服务实现类，实现了 HomeService 接口。该类负责整合和处理首页所需的多种业务数据，包括首页广告、推荐品牌、秒杀促销活动、新品推荐、人气推荐以及推荐专题内容。它通过调用多个 Mapper 和 DAO 层接口从数据库获取数据，封装为供前端展示的结构化结果，支持商城首页的动态内容渲染。 | HomeServiceImpl 是商城门户首页内容管理的服务实现类，实现了 HomeService 接口。该类主要负责处理商城首页的核心业务逻辑，包括获取首页广告、推荐品牌、秒杀促销活动、新品推荐、人气推荐以及推荐专题等多种数据，并将这些数据整合封装为供前端展示的结果对象。 | 该方法getFlashPromotionSession用于根据传入的日期参数，查询并返回在该时间点对应的秒杀促销活动时间场次（SmsFlashPromotionSession）对象。其通过比较秒杀场次的开始时间和结束时间，筛选出当前时间段内有效的秒杀场次。 |
+| ruoyi-system/src/main/java/com/ruoyi/wlx/domain/utils/IrsSignRes.java | IrsSignRes | IrsSignRes.toString |
+| IrsSignRes 是一个位于 com.ruoyi.wlx.domain.utils 包下的简单数据传输对象（DTO/POJO），使用 Lombok 的 @Data 注解自动生成 getter/setter、toString、equals/hashCode 等方法。类仅包含四个私有字符串字段：accessKey、signature、algorithm 和 dateTime，用于封装与签名/认证相关的返回或元数据信息（例如签名结果、签名者标识、所用算法和时间戳）。 | IrsSignRes 是位于 com.ruoyi.wlx.domain.utils 包下的一个简单 Java 数据载体（POJO/DTO）。类使用 Lombok 的 @Data 注解声明，包含四个私有 String 字段：accessKey、signature、algorithm 和 dateTime。该类本身不包含业务逻辑，仅用于封装签名相关的元数据（访问凭证标识、签名值、所用算法标识和时间戳），以便在模块间或通过 HTTP/JSON 接口传递这些信息。 | IrsSignRes 的 toString() 是由 Lombok 的 @Data 在编译期自动生成的对象字符串表示方法，用于返回包含类名与四个字段（accessKey、signature、algorithm、dateTime）名称和值的可读文本形式，方便调试与日志记录。 |

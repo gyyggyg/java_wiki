@@ -1,228 +1,43 @@
 [
   {
-    "nodeId": "18468",
-    "name": "后台管理系统",
+    "nodeId": "9807",
+    "name": "Java 标准库",
     "children": [
       {
-        "nodeId": "18467",
-        "name": "应用层",
+        "nodeId": "9804",
+        "name": "IO 与网络",
         "children": [
           {
-            "nodeId": "18424",
-            "name": "配置管理",
-            "children": []
-          },
-          {
-            "nodeId": "18433",
-            "name": "业务接口",
+            "nodeId": "9755",
+            "name": "IO 基础",
             "children": [
               {
-                "nodeId": "18428",
-                "name": "权限接口",
-                "children": []
-              },
-              {
-                "nodeId": "18430",
-                "name": "优惠券接口",
-                "children": []
-              },
-              {
-                "nodeId": "18429",
-                "name": "限时购接口",
-                "children": []
-              },
-              {
-                "nodeId": "18425",
-                "name": "首页推荐接口",
-                "children": []
-              },
-              {
-                "nodeId": "18427",
-                "name": "订单与售后接口",
-                "children": []
-              },
-              {
-                "nodeId": "18426",
-                "name": "商品接口",
-                "children": []
-              },
-              {
-                "nodeId": "18431",
-                "name": "专题与优选接口",
-                "children": []
-              },
-              {
-                "nodeId": "18432",
-                "name": "对象存储接口",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18437",
-            "name": "数据访问",
-            "children": [
-              {
-                "nodeId": "18435",
-                "name": "批量与关系访问",
-                "children": []
-              },
-              {
-                "nodeId": "18436",
-                "name": "自定义数据访问",
-                "children": []
-              },
-              {
-                "nodeId": "18434",
-                "name": "商品属性访问",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18446",
-            "name": "传输对象",
-            "children": [
-              {
-                "nodeId": "18444",
-                "name": "管理员安全对象",
-                "children": []
-              },
-              {
-                "nodeId": "18445",
-                "name": "业务参数对象",
-                "children": []
-              },
-              {
-                "nodeId": "18443",
-                "name": "MinIO对象",
-                "children": []
-              },
-              {
-                "nodeId": "18441",
-                "name": "订单参数对象",
-                "children": []
-              },
-              {
-                "nodeId": "18439",
-                "name": "OSS上传对象",
-                "children": []
-              },
-              {
-                "nodeId": "18442",
-                "name": "商品属性对象",
-                "children": []
-              },
-              {
-                "nodeId": "18440",
-                "name": "商品分类对象",
-                "children": []
-              },
-              {
-                "nodeId": "18438",
-                "name": "商品维护对象",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18466",
-            "name": "服务接口",
-            "children": [
-              {
-                "nodeId": "18462",
-                "name": "首页推荐服务",
-                "children": []
-              },
-              {
-                "nodeId": "18464",
-                "name": "领域服务",
-                "children": []
-              },
-              {
-                "nodeId": "18465",
-                "name": "支持服务",
-                "children": []
-              },
-              {
-                "nodeId": "18463",
-                "name": "属性服务",
-                "children": []
-              },
-              {
-                "nodeId": "18461",
-                "name": "服务实现",
+                "nodeId": "9754",
+                "name": "流与异常",
                 "children": [
                   {
-                    "nodeId": "18452",
-                    "name": "权限服务实现",
+                    "nodeId": "9749",
+                    "name": "字节输入流",
                     "children": []
                   },
                   {
-                    "nodeId": "18455",
-                    "name": "公司与优选服务实现",
+                    "nodeId": "9750",
+                    "name": "字节输出流",
                     "children": []
                   },
                   {
-                    "nodeId": "18457",
-                    "name": "优惠券服务实现",
+                    "nodeId": "9751",
+                    "name": "字符读取器",
                     "children": []
                   },
                   {
-                    "nodeId": "18451",
-                    "name": "限时购服务实现",
+                    "nodeId": "9753",
+                    "name": "IO 异常",
                     "children": []
                   },
                   {
-                    "nodeId": "18460",
-                    "name": "首页与专题推荐服务实现",
-                    "children": [
-                      {
-                        "nodeId": "18447",
-                        "name": "首页推广服务实现",
-                        "children": []
-                      },
-                      {
-                        "nodeId": "18456",
-                        "name": "专题与首页推荐服务实现",
-                        "children": []
-                      }
-                    ]
-                  },
-                  {
-                    "nodeId": "18458",
-                    "name": "核心服务实现",
-                    "children": []
-                  },
-                  {
-                    "nodeId": "18454",
-                    "name": "会员服务实现",
-                    "children": []
-                  },
-                  {
-                    "nodeId": "18450",
-                    "name": "订单与退货服务实现",
-                    "children": []
-                  },
-                  {
-                    "nodeId": "18459",
-                    "name": "商品属性品牌分类服务实现",
-                    "children": [
-                      {
-                        "nodeId": "18449",
-                        "name": "属性分类服务实现",
-                        "children": []
-                      },
-                      {
-                        "nodeId": "18453",
-                        "name": "品牌分类服务实现",
-                        "children": []
-                      }
-                    ]
-                  },
-                  {
-                    "nodeId": "18448",
-                    "name": "商品信息服务实现",
+                    "nodeId": "9752",
+                    "name": "文本写入与打印",
                     "children": []
                   }
                 ]
@@ -230,351 +45,1439 @@
             ]
           },
           {
-            "nodeId": "18423",
-            "name": "状态校验注解",
-            "children": []
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "nodeId": "18475",
-    "name": "基础能力支撑",
-    "children": [
-      {
-        "nodeId": "18472",
-        "name": "接口响应管理",
-        "children": [
-          {
-            "nodeId": "18471",
-            "name": "响应格式与错误码",
-            "children": []
-          }
-        ]
-      },
-      {
-        "nodeId": "18469",
-        "name": "配置与文档集成",
-        "children": []
-      },
-      {
-        "nodeId": "18470",
-        "name": "配置与操作日志",
-        "children": []
-      },
-      {
-        "nodeId": "18473",
-        "name": "异常处理与断言",
-        "children": []
-      },
-      {
-        "nodeId": "18474",
-        "name": "Redis访问服务",
-        "children": []
-      }
-    ]
-  },
-  {
-    "nodeId": "18505",
-    "name": "电商演示系统",
-    "children": [
-      {
-        "nodeId": "18504",
-        "name": "演示功能",
-        "children": [
-          {
-            "nodeId": "18500",
-            "name": "框架配置",
-            "children": []
-          },
-          {
-            "nodeId": "18503",
-            "name": "品牌接口演示",
-            "children": []
-          },
-          {
-            "nodeId": "18501",
-            "name": "品牌服务实现",
-            "children": []
-          },
-          {
-            "nodeId": "18502",
-            "name": "状态校验与合规",
-            "children": []
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "nodeId": "18499",
-    "name": "数据模型与持久化基础",
-    "children": [
-      {
-        "nodeId": "18498",
-        "name": "代码生成与文档集成",
-        "children": []
-      },
-      {
-        "nodeId": "18497",
-        "name": "数据访问与持久化接口",
-        "children": []
-      },
-      {
-        "nodeId": "18496",
-        "name": "业务数据模型",
-        "children": [
-          {
-            "nodeId": "18489",
-            "name": "权限管理数据模型",
-            "children": []
-          },
-          {
-            "nodeId": "18493",
-            "name": "内容与评论数据模型",
+            "nodeId": "9746",
+            "name": "网络基础",
             "children": [
               {
-                "nodeId": "18492",
-                "name": "内容区域与评论模型",
-                "children": []
-              },
-              {
-                "nodeId": "18485",
-                "name": "内容发布与分类模型",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18482",
-            "name": "优惠券数据模型",
-            "children": []
-          },
-          {
-            "nodeId": "18478",
-            "name": "实体关联关系模型",
-            "children": []
-          },
-          {
-            "nodeId": "18494",
-            "name": "限时促销数据模型",
-            "children": [
-              {
-                "nodeId": "18490",
-                "name": "促销活动与场次模型",
-                "children": []
-              },
-              {
-                "nodeId": "18491",
-                "name": "促销商品与日志模型",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18495",
-            "name": "动态查询条件构建",
-            "children": [
-              {
-                "nodeId": "18477",
-                "name": "统一查询条件构建",
-                "children": []
-              },
-              {
-                "nodeId": "18476",
-                "name": "SQL查询辅助",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18486",
-            "name": "首页推荐内容模型",
-            "children": []
-          },
-          {
-            "nodeId": "18484",
-            "name": "会员基础数据模型",
-            "children": []
-          },
-          {
-            "nodeId": "18483",
-            "name": "会员积分与激励模型",
-            "children": []
-          },
-          {
-            "nodeId": "18481",
-            "name": "订单与退货数据模型",
-            "children": []
-          },
-          {
-            "nodeId": "18487",
-            "name": "商品相册与图片模型",
-            "children": []
-          },
-          {
-            "nodeId": "18480",
-            "name": "商品属性与库存模型",
-            "children": []
-          },
-          {
-            "nodeId": "18488",
-            "name": "商品信息与评价模型",
-            "children": []
-          },
-          {
-            "nodeId": "18479",
-            "name": "商品定价优惠模型",
-            "children": []
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "nodeId": "18535",
-    "name": "门户系统",
-    "children": [
-      {
-        "nodeId": "18533",
-        "name": "主程序",
-        "children": [
-          {
-            "nodeId": "18532",
-            "name": "订单取消与异步处理",
-            "children": []
-          },
-          {
-            "nodeId": "18515",
-            "name": "全局配置",
-            "children": [
-              {
-                "nodeId": "18513",
-                "name": "支付宝配置",
-                "children": []
-              },
-              {
-                "nodeId": "18514",
-                "name": "Spring配置",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18519",
-            "name": "业务接口",
-            "children": [
-              {
-                "nodeId": "18516",
-                "name": "会员接口",
-                "children": []
-              },
-              {
-                "nodeId": "18517",
-                "name": "订单购物车接口",
-                "children": []
-              },
-              {
-                "nodeId": "18518",
-                "name": "内容展示接口",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18521",
-            "name": "数据访问",
-            "children": [
-              {
-                "nodeId": "18520",
-                "name": "订单购物车数据访问",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18512",
-            "name": "领域模型",
-            "children": [
-              {
-                "nodeId": "18509",
-                "name": "购物车促销模型",
-                "children": []
-              },
-              {
-                "nodeId": "18508",
-                "name": "首页内容模型",
-                "children": []
-              },
-              {
-                "nodeId": "18507",
-                "name": "会员行为模型",
-                "children": []
-              },
-              {
-                "nodeId": "18511",
-                "name": "订单模型",
-                "children": []
-              },
-              {
-                "nodeId": "18510",
-                "name": "促销商品模型",
-                "children": []
-              }
-            ]
-          },
-          {
-            "nodeId": "18506",
-            "name": "会员行为数据访问",
-            "children": []
-          },
-          {
-            "nodeId": "18531",
-            "name": "业务服务",
-            "children": [
-              {
-                "nodeId": "18530",
-                "name": "购物车促销服务",
-                "children": []
-              },
-              {
-                "nodeId": "18528",
-                "name": "会员服务",
-                "children": []
-              },
-              {
-                "nodeId": "18527",
-                "name": "会员行为服务",
-                "children": []
-              },
-              {
-                "nodeId": "18529",
-                "name": "订单退货服务",
-                "children": []
-              },
-              {
-                "nodeId": "18526",
-                "name": "业务实现",
+                "nodeId": "9745",
+                "name": "主机解析与连接异常",
                 "children": [
                   {
-                    "nodeId": "18522",
-                    "name": "会员行为实现",
+                    "nodeId": "9742",
+                    "name": "IP 与主机解析",
                     "children": []
                   },
                   {
-                    "nodeId": "18525",
-                    "name": "内容商品实现",
+                    "nodeId": "9743",
+                    "name": "连接异常",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "9744",
+                "name": "URL 与 HTTP",
+                "children": [
+                  {
+                    "nodeId": "9740",
+                    "name": "表单 URL 编解码",
                     "children": []
                   },
                   {
-                    "nodeId": "18523",
-                    "name": "会员实现",
+                    "nodeId": "9741",
+                    "name": "URLConnection",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "9800",
+            "name": "NIO",
+            "children": [
+              {
+                "nodeId": "9799",
+                "name": "缓冲区",
+                "children": []
+              },
+              {
+                "nodeId": "9798",
+                "name": "字符集编码",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "nodeId": "9806",
+        "name": "时间与日期",
+        "children": [
+          {
+            "nodeId": "9805",
+            "name": "格式化",
+            "children": [
+              {
+                "nodeId": "9803",
+                "name": "文本格式化",
+                "children": [
+                  {
+                    "nodeId": "9802",
+                    "name": "日期格式化",
                     "children": []
                   },
                   {
-                    "nodeId": "18524",
-                    "name": "订单促销实现",
+                    "nodeId": "9801",
+                    "name": "数字格式化",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "9758",
+                "name": "时间值与时区",
+                "children": [
+                  {
+                    "nodeId": "9756",
+                    "name": "本地日期时间",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9757",
+                    "name": "时区日期时间",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "9797",
+            "name": "通用工具",
+            "children": [
+              {
+                "nodeId": "9796",
+                "name": "集合与并发",
+                "children": [
+                  {
+                    "nodeId": "9795",
+                    "name": "集合与流",
+                    "children": [
+                      {
+                        "nodeId": "9790",
+                        "name": "集合实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9789",
+                        "name": "集合接口",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9793",
+                        "name": "集合工具",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9792",
+                        "name": "流与函数式",
+                        "children": [
+                          {
+                            "nodeId": "9787",
+                            "name": "流 API",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9786",
+                    "name": "并发与执行",
+                    "children": [
+                      {
+                        "nodeId": "9784",
+                        "name": "异步执行",
+                        "children": [
+                          {
+                            "nodeId": "9782",
+                            "name": "异步执行 API",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9785",
+                        "name": "并发映射与原子",
+                        "children": [
+                          {
+                            "nodeId": "9783",
+                            "name": "并发映射实现",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "nodeId": "9791",
+                "name": "日期与区域设置",
+                "children": []
+              },
+              {
+                "nodeId": "9794",
+                "name": "标识与随机",
+                "children": []
+              },
+              {
+                "nodeId": "9781",
+                "name": "正则表达式",
+                "children": []
+              },
+              {
+                "nodeId": "9788",
+                "name": "压缩与解压",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "nodeId": "9748",
+        "name": "AWT 几何",
+        "children": [
+          {
+            "nodeId": "9747",
+            "name": "二维路径",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "9777",
+        "name": "核心类型",
+        "children": [
+          {
+            "nodeId": "9776",
+            "name": "并发与异常",
+            "children": [
+              {
+                "nodeId": "9768",
+                "name": "并发原语与同步",
+                "children": []
+              },
+              {
+                "nodeId": "9767",
+                "name": "异常类型",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "9775",
+            "name": "字符串与数值",
+            "children": [
+              {
+                "nodeId": "9766",
+                "name": "基本类型与数值",
+                "children": []
+              },
+              {
+                "nodeId": "9772",
+                "name": "运行时平台",
+                "children": []
+              },
+              {
+                "nodeId": "9765",
+                "name": "字符串",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "9774",
+            "name": "类型系统与反射",
+            "children": [
+              {
+                "nodeId": "9773",
+                "name": "对象模型",
+                "children": []
+              },
+              {
+                "nodeId": "9771",
+                "name": "类型接口",
+                "children": []
+              },
+              {
+                "nodeId": "9770",
+                "name": "注解",
+                "children": [
+                  {
+                    "nodeId": "9763",
+                    "name": "注解包",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "9769",
+                "name": "反射与元数据",
+                "children": [
+                  {
+                    "nodeId": "9762",
+                    "name": "反射包",
+                    "children": [
+                      {
+                        "nodeId": "9760",
+                        "name": "成员访问与权限",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9761",
+                        "name": "类型模型与泛型",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "9764",
+            "name": "运行时管理与监控",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "9759",
+        "name": "数学与大数",
+        "children": []
+      },
+      {
+        "nodeId": "9780",
+        "name": "安全与加密",
+        "children": [
+          {
+            "nodeId": "9779",
+            "name": "安全算法与接口",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "9778",
+        "name": "JDBC 与数据库",
+        "children": []
+      }
+    ]
+  },
+  {
+    "nodeId": "11578",
+    "name": "Javax 接口与规范",
+    "children": [
+      {
+        "nodeId": "11577",
+        "name": "TLS 与 MAC 接口",
+        "children": [
+          {
+            "nodeId": "11576",
+            "name": "加密与密钥操作",
+            "children": []
+          },
+          {
+            "nodeId": "11566",
+            "name": "SSL 套接字接口",
+            "children": [
+              {
+                "nodeId": "11565",
+                "name": "SSL 会话与上下文",
+                "children": []
+              },
+              {
+                "nodeId": "11564",
+                "name": "证书信任与主机校验",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "nodeId": "11571",
+        "name": "Servlet 请求与过滤器",
+        "children": [
+          {
+            "nodeId": "11569",
+            "name": "过滤器 API",
+            "children": []
+          },
+          {
+            "nodeId": "11570",
+            "name": "请求响应与 I/O",
+            "children": []
+          },
+          {
+            "nodeId": "11568",
+            "name": "Servlet HTTP",
+            "children": [
+              {
+                "nodeId": "11567",
+                "name": "HttpServletRequest 接口",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "nodeId": "11575",
+        "name": "验证与约束",
+        "children": [
+          {
+            "nodeId": "11574",
+            "name": "约束定义与 SPI",
+            "children": [
+              {
+                "nodeId": "11572",
+                "name": "内置约束注解",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "11573",
+            "name": "验证器与 Validator API",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nodeId": "9674",
+    "name": "Lombok 集成与兼容",
+    "children": [
+      {
+        "nodeId": "9672",
+        "name": "构造器注解处理",
+        "children": []
+      },
+      {
+        "nodeId": "9673",
+        "name": "异常穿透支持",
+        "children": []
+      }
+    ]
+  },
+  {
+    "nodeId": "9965",
+    "name": "对象与JSON工具",
+    "children": [
+      {
+        "nodeId": "9682",
+        "name": "Hutool 集成",
+        "children": [
+          {
+            "nodeId": "9680",
+            "name": "Hutool 核心",
+            "children": [
+              {
+                "nodeId": "9679",
+                "name": "日期时间工具",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "9678",
+            "name": "Hutool HTTP",
+            "children": []
+          },
+          {
+            "nodeId": "9681",
+            "name": "Hutool JSON",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "9664",
+        "name": "第三方集成",
+        "children": [
+          {
+            "nodeId": "11661",
+            "name": "FastJSON2 集成",
+            "children": [
+              {
+                "nodeId": "11659",
+                "name": "类型与门面",
+                "children": []
+              },
+              {
+                "nodeId": "11660",
+                "name": "注解与过滤",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "9653",
+            "name": "Jackson 注解兼容",
+            "children": []
+          },
+          {
+            "nodeId": "9663",
+            "name": "MyBatis-Plus 集成",
+            "children": [
+              {
+                "nodeId": "9652",
+                "name": "框架集成",
+                "children": [
+                  {
+                    "nodeId": "11666",
+                    "name": "注解扩展",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "11665",
+                    "name": "核心条件构造",
+                    "children": [
+                      {
+                        "nodeId": "11664",
+                        "name": "条件构造与表达",
+                        "children": [
+                          {
+                            "nodeId": "11662",
+                            "name": "条件接口定义",
+                            "children": []
+                          },
+                          {
+                            "nodeId": "11663",
+                            "name": "更新条件",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9651",
+                    "name": "服务层扩展",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "9662",
+                "name": "分页与联表",
+                "children": [
+                  {
+                    "nodeId": "9656",
+                    "name": "PageHelper 集成",
+                    "children": [
+                      {
+                        "nodeId": "9655",
+                        "name": "分页协调器",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9654",
+                        "name": "分页结果模型",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9661",
+                    "name": "MPJ 联表",
+                    "children": [
+                      {
+                        "nodeId": "9660",
+                        "name": "查询包装器",
+                        "children": [
+                          {
+                            "nodeId": "9658",
+                            "name": "包装器实现",
+                            "children": [
+                              {
+                                "nodeId": "9657",
+                                "name": "包装器接口",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9659",
+                        "name": "基础支持",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nodeId": "9677",
+    "name": "OkHttp 客户端 通信",
+    "children": [
+      {
+        "nodeId": "9676",
+        "name": "请求与响应",
+        "children": []
+      },
+      {
+        "nodeId": "9675",
+        "name": "消息体与媒体类型",
+        "children": []
+      }
+    ]
+  },
+  {
+    "nodeId": "11658",
+    "name": "外部依赖 org",
+    "children": [
+      {
+        "nodeId": "11616",
+        "name": "Apache 组件",
+        "children": [
+          {
+            "nodeId": "11611",
+            "name": "Apache Commons",
+            "children": [
+              {
+                "nodeId": "11610",
+                "name": "IO 与 Lang3",
+                "children": [
+                  {
+                    "nodeId": "11609",
+                    "name": "文件与流",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "11608",
+                    "name": "字符串与数组",
+                    "children": [
+                      {
+                        "nodeId": "11607",
+                        "name": "正则与数组校验",
+                        "children": [
+                          {
+                            "nodeId": "11606",
+                            "name": "对象与数组操作",
+                            "children": []
+                          },
+                          {
+                            "nodeId": "11605",
+                            "name": "字符串正则",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "11604",
+                        "name": "构建器",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "11603",
+                        "name": "时间处理",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "11602",
+            "name": "HttpComponents",
+            "children": [
+              {
+                "nodeId": "11600",
+                "name": "实体",
+                "children": []
+              },
+              {
+                "nodeId": "11601",
+                "name": "消息与响应",
+                "children": []
+              },
+              {
+                "nodeId": "11598",
+                "name": "请求方法",
+                "children": [
+                  {
+                    "nodeId": "11597",
+                    "name": "请求方法实现",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "11599",
+                "name": "客户端实现",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "11615",
+            "name": "MyBatis 注解",
+            "children": []
+          },
+          {
+            "nodeId": "11596",
+            "name": "POI",
+            "children": [
+              {
+                "nodeId": "11595",
+                "name": "表格模型",
+                "children": [
+                  {
+                    "nodeId": "11590",
+                    "name": "HSSF",
+                    "children": [
+                      {
+                        "nodeId": "11588",
+                        "name": "HSSF 绘图",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "11589",
+                        "name": "HSSF 工作簿",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "11587",
+                    "name": "表格接口",
+                    "children": [
+                      {
+                        "nodeId": "11585",
+                        "name": "用户模型与呈现",
+                        "children": [
+                          {
+                            "nodeId": "11584",
+                            "name": "模型与展现",
+                            "children": [
+                              {
+                                "nodeId": "11583",
+                                "name": "单元格样式",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "11580",
+                                "name": "核心模型与工厂",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "11581",
+                                "name": "数据校验",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "11582",
+                                "name": "绘图与图片",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "11586",
+                        "name": "表格工具",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "nodeId": "11594",
+                "name": "XSSF",
+                "children": [
+                  {
+                    "nodeId": "11593",
+                    "name": "XSSF 子系统",
+                    "children": [
+                      {
+                        "nodeId": "11592",
+                        "name": "XSSF 用户模型",
+                        "children": [
+                          {
+                            "nodeId": "11591",
+                            "name": "XSSF 绘图",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "11614",
+            "name": "Velocity",
+            "children": [
+              {
+                "nodeId": "11612",
+                "name": "Velocity 上下文",
+                "children": []
+              },
+              {
+                "nodeId": "11613",
+                "name": "引擎",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "nodeId": "11657",
+        "name": "Quartz",
+        "children": [
+          {
+            "nodeId": "11656",
+            "name": "作业与调度",
+            "children": [
+              {
+                "nodeId": "11654",
+                "name": "作业执行",
+                "children": []
+              },
+              {
+                "nodeId": "11655",
+                "name": "触发器与 Cron",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "11653",
+            "name": "Quartz 工具",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "11579",
+        "name": "SLF4J",
+        "children": []
+      },
+      {
+        "nodeId": "11652",
+        "name": "Spring",
+        "children": [
+          {
+            "nodeId": "11635",
+            "name": "Redis",
+            "children": []
+          },
+          {
+            "nodeId": "11634",
+            "name": "安全扩展",
+            "children": [
+              {
+                "nodeId": "11633",
+                "name": "安全核心",
+                "children": [
+                  {
+                    "nodeId": "11632",
+                    "name": "安全上下文",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "11618",
+            "name": "Spring 工具",
+            "children": [
+              {
+                "nodeId": "11617",
+                "name": "集合与多值映射",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "11651",
+            "name": "上下文管理",
+            "children": [
+              {
+                "nodeId": "11621",
+                "name": "应用上下文",
+                "children": [
+                  {
+                    "nodeId": "11619",
+                    "name": "应用实现",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "11620",
+                    "name": "国际化消息",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "11648",
+                "name": "AOP 与事务",
+                "children": []
+              },
+              {
+                "nodeId": "11647",
+                "name": "Bean 定义与注解",
+                "children": [
+                  {
+                    "nodeId": "11645",
+                    "name": "Bean 管理",
+                    "children": [
+                      {
+                        "nodeId": "11644",
+                        "name": "Bean 工厂",
+                        "children": [
+                          {
+                            "nodeId": "11642",
+                            "name": "工厂注解处理",
+                            "children": []
+                          },
+                          {
+                            "nodeId": "11643",
+                            "name": "工厂配置",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "11641",
+                    "name": "架构注解",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "11650",
+                "name": "配置与环境抽象",
+                "children": [
+                  {
+                    "nodeId": "11640",
+                    "name": "环境配置抽象",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "11649",
+                "name": "格式化与验证",
+                "children": [
+                  {
+                    "nodeId": "11636",
+                    "name": "验证框架",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "11646",
+            "name": "Web 与 HTTP",
+            "children": [
+              {
+                "nodeId": "11639",
+                "name": "HTTP 抽象与辅助",
+                "children": [
+                  {
+                    "nodeId": "11638",
+                    "name": "头与媒体类型",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "11637",
+                    "name": "响应构建",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "11631",
+                "name": "Web 子系统",
+                "children": [
+                  {
+                    "nodeId": "11629",
+                    "name": "请求上下文",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "11628",
+                    "name": "Web 辅助",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "11630",
+                    "name": "数据绑定与多部分",
+                    "children": [
+                      {
+                        "nodeId": "11627",
+                        "name": "绑定核心",
+                        "children": [
+                          {
+                            "nodeId": "11626",
+                            "name": "绑定注解处理",
+                            "children": [
+                              {
+                                "nodeId": "11625",
+                                "name": "参数绑定注解",
+                                "children": [
+                                  {
+                                    "nodeId": "11623",
+                                    "name": "请求参数绑定",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "nodeId": "11624",
+                                "name": "映射与控制器注解",
+                                "children": [
+                                  {
+                                    "nodeId": "11622",
+                                    "name": "请求映射注解",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nodeId": "9964",
+    "name": "平台后端",
+    "children": [
+      {
+        "nodeId": "9739",
+        "name": "公共工具",
+        "children": [
+          {
+            "nodeId": "9738",
+            "name": "平台工具",
+            "children": [
+              {
+                "nodeId": "9736",
+                "name": "基础工具",
+                "children": [
+                  {
+                    "nodeId": "9725",
+                    "name": "公共库",
+                    "children": [
+                      {
+                        "nodeId": "9723",
+                        "name": "文本处理",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9724",
+                        "name": "API响应与分页",
+                        "children": [
+                          {
+                            "nodeId": "9722",
+                            "name": "领域模型与响应",
+                            "children": [
+                              {
+                                "nodeId": "9721",
+                                "name": "响应封装",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9718",
+                                "name": "领域DTO",
+                                "children": [
+                                  {
+                                    "nodeId": "9717",
+                                    "name": "登录注册DTO",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "nodeId": "9720",
+                                "name": "系统实体与树DTO",
+                                "children": [
+                                  {
+                                    "nodeId": "9719",
+                                    "name": "系统实体",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9716",
+                            "name": "分页参数",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9709",
+                    "name": "工具集",
+                    "children": [
+                      {
+                        "nodeId": "9708",
+                        "name": "ID与签名工具",
+                        "children": [
+                          {
+                            "nodeId": "9701",
+                            "name": "运行时工具",
+                            "children": []
+                          },
+                          {
+                            "nodeId": "9704",
+                            "name": "ID签名工具",
+                            "children": [
+                              {
+                                "nodeId": "9686",
+                                "name": "签名实现",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9692",
+                                "name": "UUID生成",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9698",
+                            "name": "随机工具",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9702",
+                        "name": "文件与Excel",
+                        "children": [
+                          {
+                            "nodeId": "9689",
+                            "name": "文件存储",
+                            "children": [
+                              {
+                                "nodeId": "9687",
+                                "name": "存储工具",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9688",
+                                "name": "图片与文件类型",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9690",
+                            "name": "POI导出",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9707",
+                        "name": "Spring Web支持",
+                        "children": [
+                          {
+                            "nodeId": "9700",
+                            "name": "Bean与反射",
+                            "children": [
+                              {
+                                "nodeId": "9693",
+                                "name": "Bean映射",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9703",
+                            "name": "网络与IP",
+                            "children": [
+                              {
+                                "nodeId": "9695",
+                                "name": "HTTP客户端",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9694",
+                                "name": "IP解析校验",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9706",
+                            "name": "Spring分页工具",
+                            "children": [
+                              {
+                                "nodeId": "9699",
+                                "name": "分页SQL工具",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9697",
+                                "name": "Spring上下文",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9705",
+                            "name": "文本与HTML",
+                            "children": [
+                              {
+                                "nodeId": "9691",
+                                "name": "HTML过滤",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9696",
+                                "name": "文本工具",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "nodeId": "9737",
+                "name": "元数据与注解",
+                "children": [
+                  {
+                    "nodeId": "9715",
+                    "name": "注解定义",
+                    "children": [
+                      {
+                        "nodeId": "9714",
+                        "name": "访问审计注解",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9713",
+                        "name": "数据访问注解",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9711",
+                        "name": "Excel字段注解",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9712",
+                        "name": "请求限流注解",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9734",
+                    "name": "常量",
+                    "children": [
+                      {
+                        "nodeId": "9733",
+                        "name": "平台常量",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9728",
+                    "name": "枚举定义",
+                    "children": [
+                      {
+                        "nodeId": "9726",
+                        "name": "业务枚举",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9727",
+                        "name": "运行时枚举",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9732",
+                    "name": "异常定义",
+                    "children": [
+                      {
+                        "nodeId": "9731",
+                        "name": "通用异常",
+                        "children": [
+                          {
+                            "nodeId": "9730",
+                            "name": "文件异常",
+                            "children": []
+                          },
+                          {
+                            "nodeId": "9729",
+                            "name": "用户异常",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "9735",
+            "name": "XSS防护",
+            "children": [
+              {
+                "nodeId": "9685",
+                "name": "Web过滤器",
+                "children": [
+                  {
+                    "nodeId": "9683",
+                    "name": "JSON重读过滤器",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9684",
+                    "name": "XSS输入过滤器",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "9710",
+                "name": "XSS清洗校验",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "nodeId": "9671",
+        "name": "代码生成",
+        "children": [
+          {
+            "nodeId": "9669",
+            "name": "域模型生成",
+            "children": []
+          },
+          {
+            "nodeId": "9665",
+            "name": "数据映射生成",
+            "children": []
+          },
+          {
+            "nodeId": "9668",
+            "name": "生成服务",
+            "children": [
+              {
+                "nodeId": "9666",
+                "name": "列生成",
+                "children": []
+              },
+              {
+                "nodeId": "9667",
+                "name": "表生成",
+                "children": []
+              }
+            ]
+          },
+          {
+            "nodeId": "9670",
+            "name": "生成工具",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "9818",
+        "name": "定时调度",
+        "children": [
+          {
+            "nodeId": "9817",
+            "name": "Quartz工具",
+            "children": [
+              {
+                "nodeId": "9810",
+                "name": "调度工具",
+                "children": [
+                  {
+                    "nodeId": "9808",
+                    "name": "Quartz作业",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9809",
+                    "name": "Quartz调度工具",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "nodeId": "9816",
+            "name": "调度服务",
+            "children": [
+              {
+                "nodeId": "9814",
+                "name": "调度控制器",
+                "children": []
+              },
+              {
+                "nodeId": "9813",
+                "name": "调度域模型",
+                "children": []
+              },
+              {
+                "nodeId": "9815",
+                "name": "调度数据映射",
+                "children": []
+              },
+              {
+                "nodeId": "9812",
+                "name": "调度接口",
+                "children": [
+                  {
+                    "nodeId": "9811",
+                    "name": "调度实现",
                     "children": []
                   }
                 ]
@@ -584,78 +1487,777 @@
         ]
       },
       {
-        "nodeId": "18534",
-        "name": "自动化测试",
-        "children": []
-      }
-    ]
-  },
-  {
-    "nodeId": "18541",
-    "name": "商品搜索系统",
-    "children": [
-      {
-        "nodeId": "18540",
-        "name": "搜索服务实现",
+        "nodeId": "9963",
+        "name": "系统服务",
         "children": [
           {
-            "nodeId": "18539",
-            "name": "搜索数据访问与索引管理",
-            "children": []
+            "nodeId": "9962",
+            "name": "社区运营分析",
+            "children": [
+              {
+                "nodeId": "9961",
+                "name": "社区分析",
+                "children": [
+                  {
+                    "nodeId": "9960",
+                    "name": "分析模型",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9957",
+                    "name": "分析数据映射",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9959",
+                    "name": "分析服务",
+                    "children": [
+                      {
+                        "nodeId": "9958",
+                        "name": "分析实现",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "nodeId": "9928",
+                "name": "WLX功能",
+                "children": [
+                  {
+                    "nodeId": "9926",
+                    "name": "WLX数据映射",
+                    "children": [
+                      {
+                        "nodeId": "9925",
+                        "name": "激励交易映射",
+                        "children": [
+                          {
+                            "nodeId": "9924",
+                            "name": "内容与服务映射",
+                            "children": [
+                              {
+                                "nodeId": "9921",
+                                "name": "内容与消息映射",
+                                "children": [
+                                  {
+                                    "nodeId": "9913",
+                                    "name": "活动映射",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9914",
+                                    "name": "消息映射",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9912",
+                                    "name": "稿件映射",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9907",
+                                    "name": "圈子映射",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "nodeId": "9922",
+                                "name": "定位与报告映射",
+                                "children": [
+                                  {
+                                    "nodeId": "9908",
+                                    "name": "位置映射",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9915",
+                                    "name": "便民映射",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9916",
+                                    "name": "上报映射",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9920",
+                            "name": "奖励交易映射",
+                            "children": [
+                              {
+                                "nodeId": "9906",
+                                "name": "打卡映射",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9910",
+                                "name": "积分任务映射",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9909",
+                                "name": "抽奖映射",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9911",
+                                "name": "订单映射",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9917",
+                                "name": "投票映射",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9923",
+                        "name": "平台集成映射",
+                        "children": [
+                          {
+                            "nodeId": "9918",
+                            "name": "接口映射",
+                            "children": []
+                          },
+                          {
+                            "nodeId": "9919",
+                            "name": "系统配置映射",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9856",
+                    "name": "WLX服务",
+                    "children": [
+                      {
+                        "nodeId": "9854",
+                        "name": "事件与舆情上报",
+                        "children": [
+                          {
+                            "nodeId": "9840",
+                            "name": "活动议程服务",
+                            "children": []
+                          },
+                          {
+                            "nodeId": "9853",
+                            "name": "身份与舆情服务",
+                            "children": [
+                              {
+                                "nodeId": "9844",
+                                "name": "社区管理服务",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9849",
+                                "name": "上报与积分服务",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9845",
+                                "name": "积分集成服务",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9850",
+                        "name": "便民服务",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9855",
+                        "name": "社交激励服务",
+                        "children": [
+                          {
+                            "nodeId": "9852",
+                            "name": "激励与交易服务",
+                            "children": [
+                              {
+                                "nodeId": "9848",
+                                "name": "电商交易服务",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9839",
+                                "name": "抽奖服务",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9846",
+                                "name": "奖励发放",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9851",
+                            "name": "内容互动服务",
+                            "children": [
+                              {
+                                "nodeId": "9841",
+                                "name": "圈子服务",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9842",
+                                "name": "评论服务",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9847",
+                                "name": "内容管理服务",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9843",
+                                "name": "投票服务",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9838",
+                        "name": "服务实现集",
+                        "children": [
+                          {
+                            "nodeId": "9836",
+                            "name": "参与与激励实现",
+                            "children": [
+                              {
+                                "nodeId": "9832",
+                                "name": "内容与参与实现",
+                                "children": [
+                                  {
+                                    "nodeId": "9826",
+                                    "name": "活动报名实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9823",
+                                    "name": "议程投票实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9819",
+                                    "name": "圈子实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9822",
+                                    "name": "评论与消息实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9829",
+                                    "name": "稿件服务实现",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "nodeId": "9833",
+                                "name": "奖励与商务实现",
+                                "children": [
+                                  {
+                                    "nodeId": "9820",
+                                    "name": "打卡实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9825",
+                                    "name": "积分任务实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9821",
+                                    "name": "抽奖与商务实现",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9837",
+                            "name": "社区与通信实现",
+                            "children": [
+                              {
+                                "nodeId": "9831",
+                                "name": "轮播与通知",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9834",
+                                "name": "社区与上报实现",
+                                "children": [
+                                  {
+                                    "nodeId": "9824",
+                                    "name": "网格管理实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9827",
+                                    "name": "上报与分类实现",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "nodeId": "9835",
+                                "name": "CRUD与便民实现",
+                                "children": [
+                                  {
+                                    "nodeId": "9828",
+                                    "name": "便民实现",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9830",
+                                    "name": "平台CRUD实现",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9868",
+                    "name": "WLX工具",
+                    "children": [
+                      {
+                        "nodeId": "9866",
+                        "name": "签名网关工具",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9867",
+                        "name": "微信手机客户端",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9927",
+                    "name": "WLX领域模型",
+                    "children": [
+                      {
+                        "nodeId": "9905",
+                        "name": "领域与DTO",
+                        "children": [
+                          {
+                            "nodeId": "9904",
+                            "name": "领域模型与合约",
+                            "children": [
+                              {
+                                "nodeId": "9897",
+                                "name": "活动领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9892",
+                                "name": "打卡领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9894",
+                                "name": "电商领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9896",
+                                "name": "社区领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9898",
+                                "name": "内容领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9899",
+                                "name": "便民领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9903",
+                                "name": "领域DTO与VO",
+                                "children": [
+                                  {
+                                    "nodeId": "9888",
+                                    "name": "后台管理DTO",
+                                    "children": [
+                                      {
+                                        "nodeId": "9887",
+                                        "name": "管理员DTO",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9883",
+                                        "name": "议程管理DTO",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9884",
+                                        "name": "评论管理DTO",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9885",
+                                        "name": "抽奖管理DTO",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9886",
+                                        "name": "投票管理DTO",
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "nodeId": "9879",
+                                    "name": "移动视图模型",
+                                    "children": [
+                                      {
+                                        "nodeId": "9869",
+                                        "name": "议程视图模型",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9871",
+                                        "name": "网格用户模型",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9878",
+                                        "name": "参与活动模型",
+                                        "children": [
+                                          {
+                                            "nodeId": "9870",
+                                            "name": "抽奖视图模型",
+                                            "children": []
+                                          },
+                                          {
+                                            "nodeId": "9873",
+                                            "name": "投票视图模型",
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "nodeId": "9872",
+                                        "name": "上报视图模型",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9877",
+                                        "name": "社交消息模型",
+                                        "children": [
+                                          {
+                                            "nodeId": "9874",
+                                            "name": "圈子应用模型",
+                                            "children": []
+                                          },
+                                          {
+                                            "nodeId": "9875",
+                                            "name": "评论应用模型",
+                                            "children": []
+                                          },
+                                          {
+                                            "nodeId": "9876",
+                                            "name": "WLX应用视图模型",
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "nodeId": "9889",
+                                    "name": "图表与统计",
+                                    "children": []
+                                  },
+                                  {
+                                    "nodeId": "9882",
+                                    "name": "通用值对象",
+                                    "children": [
+                                      {
+                                        "nodeId": "9881",
+                                        "name": "认证请求DTO",
+                                        "children": []
+                                      },
+                                      {
+                                        "nodeId": "9880",
+                                        "name": "选择值对象",
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "nodeId": "9893",
+                                "name": "抽奖领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9902",
+                                "name": "持久化实体",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9900",
+                                "name": "上报领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9895",
+                                "name": "社交领域",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9901",
+                                "name": "用户身份领域",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9891",
+                            "name": "领域工具",
+                            "children": [
+                              {
+                                "nodeId": "9890",
+                                "name": "网关事件DTO",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "nodeId": "9865",
+                        "name": "WLX DTO",
+                        "children": [
+                          {
+                            "nodeId": "9864",
+                            "name": "WLX分析DTO",
+                            "children": [
+                              {
+                                "nodeId": "9860",
+                                "name": "聚合明细DTO",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9862",
+                                "name": "事件明细DTO",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9857",
+                                "name": "键值DTO",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9859",
+                                "name": "统计条目DTO",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "nodeId": "9863",
+                            "name": "WLX内容DTO",
+                            "children": [
+                              {
+                                "nodeId": "9861",
+                                "name": "文章DTO",
+                                "children": []
+                              },
+                              {
+                                "nodeId": "9858",
+                                "name": "头条DTO",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           {
-            "nodeId": "18538",
-            "name": "搜索配置集成",
-            "children": []
-          },
-          {
-            "nodeId": "18537",
-            "name": "搜索数据结构与实体",
-            "children": []
-          },
-          {
-            "nodeId": "18536",
-            "name": "搜索业务逻辑与服务接口",
-            "children": []
+            "nodeId": "9956",
+            "name": "系统服务概览",
+            "children": [
+              {
+                "nodeId": "9936",
+                "name": "系统领域模型",
+                "children": [
+                  {
+                    "nodeId": "9935",
+                    "name": "审计配置模型",
+                    "children": [
+                      {
+                        "nodeId": "9931",
+                        "name": "审计与会话",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9932",
+                        "name": "配置与缓存模型",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9934",
+                    "name": "身份与组织模型",
+                    "children": [
+                      {
+                        "nodeId": "9930",
+                        "name": "关联实体",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9933",
+                        "name": "通知与帖子模型",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9929",
+                    "name": "视图对象VO",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "nodeId": "9944",
+                "name": "系统数据映射",
+                "children": [
+                  {
+                    "nodeId": "9940",
+                    "name": "审计日志映射",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9943",
+                    "name": "配置与字典映射",
+                    "children": [
+                      {
+                        "nodeId": "9939",
+                        "name": "字典映射",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9941",
+                        "name": "配置与通知映射",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "nodeId": "9942",
+                    "name": "用户角色部门映射",
+                    "children": [
+                      {
+                        "nodeId": "9938",
+                        "name": "角色权限映射",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9937",
+                        "name": "用户关联映射",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "nodeId": "9955",
+                "name": "系统服务层",
+                "children": [
+                  {
+                    "nodeId": "9954",
+                    "name": "审计日志服务",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9953",
+                    "name": "配置字典通知服务",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9952",
+                    "name": "用户授权接口",
+                    "children": []
+                  },
+                  {
+                    "nodeId": "9951",
+                    "name": "系统服务实现",
+                    "children": [
+                      {
+                        "nodeId": "9947",
+                        "name": "审计实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9945",
+                        "name": "字典管理实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9948",
+                        "name": "组织管理实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9949",
+                        "name": "角色菜单实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9950",
+                        "name": "配置通知实现",
+                        "children": []
+                      },
+                      {
+                        "nodeId": "9946",
+                        "name": "用户管理实现",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "nodeId": "18548",
-    "name": "安全与缓存框架",
-    "children": [
-      {
-        "nodeId": "18547",
-        "name": "缓存异常处理",
-        "children": []
-      },
-      {
-        "nodeId": "18545",
-        "name": "安全认证与权限控制",
-        "children": [
-          {
-            "nodeId": "18543",
-            "name": "动态权限控制",
-            "children": []
-          },
-          {
-            "nodeId": "18544",
-            "name": "安全异常响应",
-            "children": []
-          }
-        ]
-      },
-      {
-        "nodeId": "18546",
-        "name": "安全与缓存配置",
-        "children": []
-      },
-      {
-        "nodeId": "18542",
-        "name": "安全工具与令牌",
-        "children": []
       }
     ]
   }

@@ -118,6 +118,7 @@ def extract_json(text: str) -> dict:
 
 MAX_JSON_RETRIES = 10
 MAX_MERMAID_RETRIES = 5
+MAX_CFG_RETRIES = 3  # generate_cfg 整体的 schema/transient 错误重试次数
 
 def sanitize_mermaid(mermaid_text: str) -> str:
     """清理mermaid文本中不支持的字符（如Java的$内部类分隔符）"""
@@ -134,6 +135,73 @@ async def invoke_and_parse(chain, invoke_args, max_retries=MAX_JSON_RETRIES):
             return parsed
         print(f"[WARN] JSON解析失败，正在重试 ({attempt + 1}/{max_retries})...")
     raise ValueError(f"经过{max_retries}次重试后仍无法从LLM输出中解析JSON")
+
+
+async def invoke_and_parse_strict(chain, invoke_args, required_shape, max_retries=MAX_JSON_RETRIES):
+    """调用LLM chain 并解析JSON，同时校验输出 schema。
+
+    Args:
+        chain: LangChain 可调用链
+        invoke_args: 输入参数
+        required_shape: dict，描述必须存在的键及其期望类型，如 {"lines": list, "reason": str}
+                       指定为 None 表示只要键存在就行，不校验类型
+        max_retries: 总重试次数（包括 JSON 解析失败和 schema 失败两种）
+
+    Returns:
+        符合 schema 的 dict
+    """
+    last_problem = None
+    for attempt in range(max_retries):
+        try:
+            result = await chain.ainvoke(invoke_args)
+        except Exception as e:
+            last_problem = f"LLM 调用抛出 {type(e).__name__}: {e}"
+            print(f"[WARN] {last_problem}，正在重试 ({attempt + 1}/{max_retries})")
+            await asyncio.sleep(min(2 ** attempt, 8))
+            continue
+
+        parsed = extract_json(result)
+        if parsed is False:
+            last_problem = "JSON 解析失败"
+            print(f"[WARN] {last_problem}，正在重试 ({attempt + 1}/{max_retries})")
+            continue
+
+        if not isinstance(parsed, dict):
+            last_problem = f"LLM 返回不是 dict（得到 {type(parsed).__name__}）"
+            print(f"[WARN] {last_problem}，正在重试 ({attempt + 1}/{max_retries})")
+            continue
+
+        missing = [k for k in required_shape if k not in parsed]
+        if missing:
+            last_problem = f"LLM 返回缺少键 {missing}（实际键: {list(parsed.keys())}）"
+            print(f"[WARN] {last_problem}，正在重试 ({attempt + 1}/{max_retries})")
+            continue
+
+        type_errors = []
+        for k, expected in required_shape.items():
+            if expected is not None and not isinstance(parsed[k], expected):
+                type_errors.append(f"{k} 应为 {expected.__name__}，实际为 {type(parsed[k]).__name__}")
+        if type_errors:
+            last_problem = f"类型不符: {'; '.join(type_errors)}"
+            print(f"[WARN] {last_problem}，正在重试 ({attempt + 1}/{max_retries})")
+            continue
+
+        return parsed
+
+    raise ValueError(f"经过 {max_retries} 次重试后仍无法得到符合 schema 的输出。最后一次问题: {last_problem}")
+
+
+def _normalize_mapping_value(v):
+    """把 cfg_map / mapping 的 value 规整为字符串 source_id。
+    LLM 有时返回 ['1234'] / [1234] / 1234，统一转成 '1234'。
+    """
+    if isinstance(v, list):
+        return str(v[0]) if v else ""
+    if isinstance(v, (int, float)):
+        return str(v)
+    if isinstance(v, str):
+        return v
+    return str(v)
 
 
 def extract_class_summary(source_code: str) -> str:
@@ -420,67 +488,125 @@ def chart_app(llm_interface: LLMInterface, neo4j_interface: Neo4jInterface, node
                 )
 
         all_in = "\n".join(node_information)
-        source_id_parsed = await invoke_and_parse(cfg_id_chain, {"source_code": tag_code, "explanation": semantic_explanation})
-        print("source_id:", source_id_parsed)
-        reason = source_id_parsed["reason"]
-        id_list = [] #[{'source_id': '2662', 'lines': ['1-2']}]
-        id_list_map = {} #{'2662': ['1-2']}
-        cfg_lines_map = {} #{'A1': ['1-2']}
 
-        for item in source_id_parsed["lines"]:
-            uu_id = generate_uuid_4digits()
-            id_list.append({"source_id": uu_id, "lines": item})
-            id_list_map[uu_id] = item
+        # 整段 CFG 生成外层重试：应对 LLM 偶发 schema 错误（list/str 而非 dict）、
+        # 网关偶发的流式中断 BadRequestError、以及 KeyError: 'reason' 等可恢复问题
+        last_cfg_error = None
+        for cfg_attempt in range(1, MAX_CFG_RETRIES + 1):
+            try:
+                # 第一次 LLM 调用：source_id 划分 —— 要求返回 {"lines": list, "reason": str}
+                source_id_parsed = await invoke_and_parse_strict(
+                    cfg_id_chain,
+                    {"source_code": tag_code, "explanation": semantic_explanation},
+                    required_shape={"lines": list, "reason": None},
+                )
+                print("source_id:", source_id_parsed)
+                reason = source_id_parsed.get("reason", "") or ""
+                id_list = []  # [{'source_id': '2662', 'lines': ['1-2']}]
+                id_list_map = {}  # {'2662': ['1-2']}
+                cfg_lines_map = {}  # {'A1': ['1-2']}
 
-        cfg_parsed = await invoke_and_parse(cfg_chain, {"source_code": tag_code, "explanation": all_in, "source_id": id_list, "code_block": reason})
-        cfg_parsed['mermaid'] = sanitize_mermaid(cfg_parsed['mermaid'])
-        validate_result = validator.validate_file(f"```mermaid\n\n{cfg_parsed['mermaid']}\n\n```")
-        for _retry in range(MAX_MERMAID_RETRIES):
-            if validate_result["result"]:
-                break
-            print(validate_result)
-            cfg_parsed = await invoke_and_parse(cfg_chain, {"source_code": tag_code, "explanation": all_in + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": id_list, "code_block": reason})
-            cfg_parsed['mermaid'] = sanitize_mermaid(cfg_parsed['mermaid'])
-            validate_result = validator.validate_file(f"```mermaid\n\n{cfg_parsed['mermaid']}\n\n```")
+                for item in source_id_parsed["lines"]:
+                    uu_id = generate_uuid_4digits()
+                    id_list.append({"source_id": uu_id, "lines": item})
+                    id_list_map[uu_id] = item
 
-        cfg_map = cfg_parsed["mapping"] # {'A1': '2662'}
-        for key, value in cfg_map.items():
-            if value in id_list_map:
-                cfg_lines_map[key] = id_list_map[value]
-            else:
-                print(f"[WARN] CFG mapping 中 {key} 对应的 value '{value}' 不在 id_list_map 中，跳过")
-        print("old_id_result:", cfg_lines_map)
-        new_id_parsed = await invoke_and_parse(cfg_id_validate_chain, {"source_code": tag_code, "mermaid": cfg_parsed["mermaid"], "reason": reason, "mapping": cfg_lines_map})
-        print("new_id_result:", new_id_parsed["mapping"], new_id_parsed["reason"])
-        new_map = new_id_parsed["mapping"] # {'A1': ['8-10'], 'B1': ['11-20','80']}
-        new_id_list = []
+                # 第二次 LLM 调用：生成 CFG —— 要求返回 {"mermaid": str, "mapping": dict}
+                cfg_parsed = await invoke_and_parse_strict(
+                    cfg_chain,
+                    {"source_code": tag_code, "explanation": all_in, "source_id": id_list, "code_block": reason},
+                    required_shape={"mermaid": str, "mapping": dict},
+                )
+                cfg_parsed['mermaid'] = sanitize_mermaid(cfg_parsed['mermaid'])
+                validate_result = validator.validate_file(f"```mermaid\n\n{cfg_parsed['mermaid']}\n\n```")
+                for _retry in range(MAX_MERMAID_RETRIES):
+                    if validate_result["result"]:
+                        break
+                    print(validate_result)
+                    cfg_parsed = await invoke_and_parse_strict(
+                        cfg_chain,
+                        {"source_code": tag_code, "explanation": all_in + f"之前存在错误的情况，需要规避{validate_result['errors']}", "source_id": id_list, "code_block": reason},
+                        required_shape={"mermaid": str, "mapping": dict},
+                    )
+                    cfg_parsed['mermaid'] = sanitize_mermaid(cfg_parsed['mermaid'])
+                    validate_result = validator.validate_file(f"```mermaid\n\n{cfg_parsed['mermaid']}\n\n```")
 
-        for key, value in new_map.items():
-            if key not in cfg_map:
-                print(f"[WARN] new_map 中的 key '{key}' 不在 cfg_map 中，跳过")
-                continue
-            uu_id = cfg_map[key]
-            lines = []
-            for item in value:
-                try:
-                    if '-' in str(item):
-                        parts = str(item).split('-')
-                        start, end = int(parts[0]), int(parts[1])
-                        lines.append(f"{start + offset}-{end + offset}")
+                cfg_map = cfg_parsed["mapping"]  # {'A1': '2662'}
+                for key, value in cfg_map.items():
+                    # 防御：LLM 偶尔返回 list/int 而非 str，统一规整
+                    value_norm = _normalize_mapping_value(value)
+                    cfg_map[key] = value_norm  # 回写规整后的值，后续使用一致
+                    if value_norm in id_list_map:
+                        cfg_lines_map[key] = id_list_map[value_norm]
                     else:
-                        lines.append(str(int(item) + offset))
-                except (ValueError, IndexError):
-                    print(f"[WARN] CFG 行号解析失败: key={key}, item='{item}'，跳过")
+                        print(f"[WARN] CFG mapping 中 {key} 对应的 value '{value}' 不在 id_list_map 中，跳过")
+                print("old_id_result:", cfg_lines_map)
+
+                # 第三次 LLM 调用：校验并生成最终行号 —— 要求返回 {"mapping": dict, "reason": str}
+                new_id_parsed = await invoke_and_parse_strict(
+                    cfg_id_validate_chain,
+                    {"source_code": tag_code, "mermaid": cfg_parsed["mermaid"], "reason": reason, "mapping": cfg_lines_map},
+                    required_shape={"mapping": dict, "reason": None},
+                )
+                print("new_id_result:", new_id_parsed["mapping"], new_id_parsed.get("reason", ""))
+                new_map = new_id_parsed["mapping"]  # {'A1': ['8-10'], 'B1': ['11-20','80']}
+                new_id_list = []
+
+                for key, value in new_map.items():
+                    if key not in cfg_map:
+                        print(f"[WARN] new_map 中的 key '{key}' 不在 cfg_map 中，跳过")
+                        continue
+                    uu_id = cfg_map[key]
+                    lines = []
+                    # 防御：LLM 偶尔返回单个字符串而非 list
+                    if isinstance(value, str):
+                        value = [value]
+                    elif not isinstance(value, list):
+                        print(f"[WARN] new_map[{key}] 期望 list 但得到 {type(value).__name__}: {value}，跳过")
+                        continue
+                    for item in value:
+                        try:
+                            if '-' in str(item):
+                                parts = str(item).split('-')
+                                start, end = int(parts[0]), int(parts[1])
+                                lines.append(f"{start + offset}-{end + offset}")
+                            else:
+                                lines.append(str(int(item) + offset))
+                        except (ValueError, IndexError):
+                            print(f"[WARN] CFG 行号解析失败: key={key}, item='{item}'，跳过")
+                            continue
+                    if lines:
+                        new_id_list.append({"source_id": uu_id, "name": file_name, "lines": lines})
+
+                mermaid_path = os.path.join(os.path.dirname(__file__), "cfg_mermaid.md")
+                mermaid_source_info = f"source_code: {source_code},\n code_explanation: {all_in}"
+                return {"chart_type": "代码控制流图", "mermaid_content": cfg_parsed["mermaid"], "mermaid_source_info": mermaid_source_info, "write_path": mermaid_path, 'additional_info': add_table, "mapping": cfg_parsed["mapping"], "id_list": new_id_list}
+
+            except (TypeError, KeyError, AttributeError, ValueError) as e:
+                # TypeError: unhashable type / 'str' has no attribute 'items'
+                # KeyError: 缺键（已尽量用 .get() 避免，但 invoke_and_parse_strict 仍会 raise ValueError）
+                # AttributeError: 对非预期类型调方法
+                # ValueError: invoke_and_parse_strict 的 schema 校验失败
+                last_cfg_error = e
+                print(f"[WARN] CFG 生成失败（第 {cfg_attempt}/{MAX_CFG_RETRIES} 次）: {type(e).__name__}: {e}")
+                if cfg_attempt < MAX_CFG_RETRIES:
+                    await asyncio.sleep(2 ** (cfg_attempt - 1))  # 指数退避：1s, 2s, 4s
                     continue
-            if lines:
-                new_id_list.append({"source_id": uu_id, "name": file_name, "lines": lines})
-        # resultt = json.dumps({"mermaid": json.loads(cfg_result)["mermaid"], "mapping": json.loads(cfg_result)["mapping"], "id_list": new_id_list}, ensure_ascii=False, indent=4)
-        # out_path = os.path.join(os.path.dirname(__file__), "cfg.json")
-        # # with open(out_path, "w", encoding="utf-8") as f:
-        # #     f.write(resultt)
-        mermaid_path = os.path.join(os.path.dirname(__file__), "cfg_mermaid.md")
-        mermaid_source_info = f"source_code: {source_code},\n code_explanation: {all_in}"
-        return {"chart_type":"代码控制流图", "mermaid_content": cfg_parsed["mermaid"], "mermaid_source_info":  mermaid_source_info, "write_path": mermaid_path, 'additional_info': add_table, "mapping": cfg_parsed["mapping"], "id_list": new_id_list}
+                raise
+            except Exception as e:
+                # 其它异常（如 openai.BadRequestError 流式中断、网络错误）也重试
+                err_name = type(e).__name__
+                if err_name in ("BadRequestError", "APIConnectionError", "APITimeoutError",
+                                "RemoteProtocolError", "ReadError", "ConnectError"):
+                    last_cfg_error = e
+                    print(f"[WARN] CFG 生成遇到 transient 错误（第 {cfg_attempt}/{MAX_CFG_RETRIES} 次）: {err_name}: {e}")
+                    if cfg_attempt < MAX_CFG_RETRIES:
+                        await asyncio.sleep(2 ** (cfg_attempt - 1))
+                        continue
+                raise
+
+        # 理论上不会走到这里（成功时 return，失败时 raise），兜底
+        raise last_cfg_error or RuntimeError("CFG 生成失败且未捕获到具体异常")
 
     async def generate_uml(state: ChartState) -> ChartState:
         simplify = extract_class_summary if skeleton else lambda x: x
