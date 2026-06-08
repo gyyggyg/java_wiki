@@ -16,17 +16,37 @@
 其中Block是基于项目目录和文件源码信息划分的模块
 
 实体之间连边表示它们之间的依赖关系，边的类型有：
-- ANNOTATES：表示注解作用于哪个实体, 包括Annotation-[:ANNOTATES]->Method, Annotation-[:ANNOTATES]->Class, Field<-[:ANNOTATES]-Annotation
-- CALLS：表示方法调用, 包括Method-[:CALLS]->Method
+- ANNOTATED_BY：表示实体被哪个注解修饰。**方向是实体指向 Annotation**（不是反过来）。包括 Method-[:ANNOTATED_BY]->Annotation, Class-[:ANNOTATED_BY]->Annotation, Interface-[:ANNOTATED_BY]->Annotation, Field-[:ANNOTATED_BY]->Annotation, Annotation-[:ANNOTATED_BY]->Annotation（最后一种是元注解自引用，如 @Target / @Retention）
+- CALLS：表示方法调用, 包括Method-[:CALLS]->Method。注：CALLS 会尽量穿透到具体实现方法（通过接口调用时，目标通常是 ClassImpl.method 而不是 Interface.method）
 - CONTAINS：表示Package包含哪些文件实体, 包括Package-[:CONTAINS]->File
-- DECLARES：表示实体定义, 包括File-[:DECLARES]->Class, File-[:DECLARES]->Enum, File-[:DECLARES]->Annotation, File-[:DECLARES]->Interface, File-[:DECLARES]->Record, Class-[:DECLARES]->Class, Enum-[:DECLARES]->Field, Class-[:DECLARES]->Field, Enum-[:DECLARES]->Method, Class-[:DECLARES]->Method, Interface-[:DECLARES]->Method, Enum-[:DECLARES]->Enumconstant
+- DECLARES：表示实体定义, 包括File-[:DECLARES]->Class, File-[:DECLARES]->Enum, File-[:DECLARES]->Annotation, File-[:DECLARES]->Interface, File-[:DECLARES]->Record, Class-[:DECLARES]->Class, Enum-[:DECLARES]->Field, Class-[:DECLARES]->Field, Enum-[:DECLARES]->Method, Class-[:DECLARES]->Method, Interface-[:DECLARES]->Method, Enum-[:DECLARES]->EnumConstant
+- DEPENDS_ON：表示字段的依赖注入/类型依赖（典型来源是 @Autowired / @Resource 等注入的字段指向其实现类型）。包括 Field-[:DEPENDS_ON]->Class, Field-[:DEPENDS_ON]->Interface, Field-[:DEPENDS_ON]->Method（极少）。**可用于识别组件之间的组合关系**（如 ServiceA 依赖 ServiceB）
 - DIR_INCLUDE：表示目录之间、目录和文件之间的包含关系, 包括Directory-[:DIR_INCLUDE]->Directory, Directory-[:DIR_INCLUDE]->File
 - EXTENDS：表示继承关系, 包括Class-[:EXTENDS]->Class
 - HAS_TYPE：表示某个字段的类型与某个类、接口或枚举等实体相关, Field-[:HAS_TYPE]->Class, Field-[:HAS_TYPE]->Enum
 - IMPLEMENTS：表示接口实现, 包括Class-[:IMPLEMENTS]->Interface
+- REFERENCES：源码中对其它实体的**符号级弱引用**，主要包括 annotation 参数里的方法引用（如 `@Excel(name=xxx)` 里的 `name` 属性方法）、Javadoc `{@link}`、方法引用 `::`、lambda 捕获等。两端组合多样：Method→Class/Method/Interface/Enum/Annotation、Class→Method/Field、Field→Class/Interface、Enum→Method 等。**⚠️ REFERENCES 不是调用关系**，不能替代 CALLS 做调用链追踪；业务流/场景抽取时应**忽略此边**
 - RETURNS：表示方法返回, 包括Method-[:RETURNS]->Class, Method-[:RETURNS]->Interface
 - USES：表示方法中使用了某个类、接口或枚举等实体，包括Method-[:USES]->Class, Method-[:USES]->Field
 - f2c：表示Block之间的包含关系，包括Block-[:f2c]->Block, Block-[:f2c]->File, Block树根节点是name属性为root的Block节点
+
+### 图状态快速参考（写 Cypher 前请先核对）
+不同项目/不同 pipeline 阶段的 Neo4j 实例可能只含部分边，建议写查询前先跑一下：
+
+```cypher
+MATCH ()-[r]->() RETURN type(r) AS rel, count(*) AS cnt ORDER BY cnt DESC
+MATCH (n) UNWIND labels(n) AS l RETURN l, count(*) ORDER BY count(*) DESC
+```
+
+业务流/场景抽取的常用入口枚举（注意是 `ANNOTATED_BY` 不是 `ANNOTATES`）：
+
+```cypher
+MATCH (c:Class)-[:DECLARES]->(m:Method)-[:ANNOTATED_BY]->(a:Annotation)
+WHERE c.name ENDS WITH 'Controller'
+  AND a.name IN ['GetMapping','PostMapping','PutMapping','DeleteMapping',
+                  'PatchMapping','RequestMapping']
+RETURN c.name, m.name, m.nodeId
+```
 
 ## 节点属性详细说明
 
