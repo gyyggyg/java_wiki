@@ -29,6 +29,7 @@
     python run_all.py --skip-rabbitmq          # 跳过 RabbitMQ 消息流分析
     python run_all.py --run-optional           # 启用步骤8（Block 级可选章节，开销大）
     python run_all.py --only-leaves            # 只执行叶子+混合 Block 生成（需已有 file_leaves.json）
+    python run_all.py --only-extras            # 只并发执行 step5/6/7 专项分析（跳过 1/2/3/4/8）
 
 可选环境变量（.env）:
     SOURCE_ROOT_PATH       Java 源码根目录；启用后 step2 生成扩展章节，--run-optional 时 step8 需要
@@ -318,7 +319,11 @@ async def step5_api_docs(logger: logging.Logger):
 
     # 延迟导入，确保上面的环境变量在模块加载前已生效
     sys.path.insert(0, os.path.join(PROJECT_ROOT, "Api_and_Rabbitmq"))
-    from generate_api_docs import StrictApiDocGenerator  # type: ignore
+    try:
+        from generate_api_docs import StrictApiDocGenerator  # type: ignore
+    except ImportError as e:
+        logger.error(f"导入 generate_api_docs 失败: {e}")
+        return
 
     os.makedirs(API_OUTPUT_DIR, exist_ok=True)
 
@@ -357,7 +362,12 @@ async def step6_backend_interfaces(logger: logging.Logger):
     os.environ.setdefault("NEO4J_PASSWORD", os.environ.get("WIKI_NEO4J_PASSWORD", ""))
 
     sys.path.insert(0, os.path.join(PROJECT_ROOT, "Api_and_Rabbitmq"))
-    from generate_backend_interfaces import BackendInterfaceGenerator  # type: ignore
+    try:
+        from generate_backend_interfaces import BackendInterfaceGenerator  # type: ignore
+    except ImportError as e:
+        logger.error(f"导入 generate_backend_interfaces 失败: {e}")
+        logger.error("请在 wiki 环境中安装缺失依赖：pip install 'ruamel.yaml'")
+        return
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -500,6 +510,9 @@ async def main():
     parser.add_argument("--run-optional", action="store_true",
                         help="启用步骤8（Block 级可选章节，状态机/MQ 等）。默认关闭，因为会对所有 Block 做 LLM 扫描 + Claude CLI 内容生成，代价较高")
     parser.add_argument("--only-leaves", action="store_true", help="只执行步骤4（需已有 file_leaves.json 和 file_block_leaves.json）")
+    parser.add_argument("--only-extras", action="store_true",
+                        help="只并发执行专项步骤 5/6/7（API文档/后端集成清单/RabbitMQ消息流），跳过 1/2/3/4/8。"
+                             "适合 Block 文档已经生成、只想重新跑专项分析的场景")
     args = parser.parse_args()
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -511,7 +524,13 @@ async def main():
     logger.info(f"跳过选项: skip_name={args.skip_name}, skip_root={args.skip_root}, "
                 f"skip_internal={args.skip_internal}, skip_api={args.skip_api}, "
                 f"skip_backend={args.skip_backend}, skip_rabbitmq={args.skip_rabbitmq}, "
-                f"run_optional={args.run_optional}, only_leaves={args.only_leaves}")
+                f"run_optional={args.run_optional}, only_leaves={args.only_leaves}, "
+                f"only_extras={args.only_extras}")
+
+    # --only-extras 与 --only-leaves 互斥，同时指定时报错
+    if args.only_extras and args.only_leaves:
+        logger.error("--only-extras 与 --only-leaves 互斥，不能同时指定")
+        sys.exit(1)
 
     # 初始化连接
     llm = LLMInterface(model_name=args.model, provider=args.provider)
@@ -539,7 +558,7 @@ async def main():
 
     try:
         # 步骤 1: 模块取名
-        if not args.only_leaves and not args.skip_name:
+        if not args.only_leaves and not args.only_extras and not args.skip_name:
             step_start = time.time()
             await step1_module_name(llm, neo4j, logger)
             step_times["步骤1-模块取名"] = time.time() - step_start
@@ -551,7 +570,7 @@ async def main():
                 logger.error("跳过步骤1但 block_new_names.json 不存在，后续步骤可能失败")
 
         # 步骤 2: Root 文档
-        if not args.only_leaves and not args.skip_root:
+        if not args.only_leaves and not args.only_extras and not args.skip_root:
             step_start = time.time()
             await step2_root_doc(llm, neo4j, logger)
             step_times["步骤2-Root文档"] = time.time() - step_start
@@ -560,7 +579,7 @@ async def main():
             logger.info("跳过步骤2（Root文档）")
 
         # 步骤 3: 中间层 Block
-        if not args.only_leaves and not args.skip_internal:
+        if not args.only_leaves and not args.only_extras and not args.skip_internal:
             step_start = time.time()
             await step3_internal_blocks(llm, neo4j, logger)
             step_times["步骤3-中间层Block"] = time.time() - step_start
@@ -571,11 +590,15 @@ async def main():
         # 步骤 4 + 5 + 6 + 7：并发执行（Block 文档、API 文档、后端集成清单、RabbitMQ 消息流相互独立）
         parallel_tasks = []
 
-        # 步骤 4: 叶子 + 混合 Block
+        # 步骤 4: 叶子 + 混合 Block（--only-extras 时跳过）
+        run_step4 = not args.only_extras
         step4_start = time.time()
-        parallel_tasks.append(
-            step4_leaf_and_hybrid(llm, neo4j, logger, skeleton=args.skeleton, max_concurrent=max_concurrent)
-        )
+        if run_step4:
+            parallel_tasks.append(
+                step4_leaf_and_hybrid(llm, neo4j, logger, skeleton=args.skeleton, max_concurrent=max_concurrent)
+            )
+        else:
+            logger.info("跳过步骤4（叶子+混合Block）—— --only-extras 模式")
 
         # 步骤 5: API 文档（与步骤4并发）
         run_api = not args.skip_api and not args.only_leaves
@@ -599,12 +622,13 @@ async def main():
         if run_rabbitmq:
             parallel_tasks.append(step7_rabbitmq_docs(logger))
         else:
-            logger.info("跳过步骤7（RabbitMQ 消息流分析）")
+            logger.info("跳过步骤7(RabbitMQ 消息流分析)")
 
         await asyncio.gather(*parallel_tasks)
 
-        step_times["步骤4-叶子+混合Block"] = time.time() - step4_start
-        logger.info(f"步骤4耗时: {step_times['步骤4-叶子+混合Block']:.1f}s")
+        if run_step4:
+            step_times["步骤4-叶子+混合Block"] = time.time() - step4_start
+            logger.info(f"步骤4耗时: {step_times['步骤4-叶子+混合Block']:.1f}s")
         if run_api:
             step_times["步骤5-API文档"] = time.time() - step5_start
             logger.info(f"步骤5耗时: {step_times['步骤5-API文档']:.1f}s")
@@ -619,7 +643,7 @@ async def main():
         #   - 依赖 step4 的产物（必须串行在 gather 之后）
         #   - 会对所有 Block 做 LLM 扫描 + Claude CLI 内容生成，代价较高
         #   - 需要 SOURCE_ROOT_PATH 和本地 claude CLI
-        run_optional = args.run_optional and not args.only_leaves
+        run_optional = args.run_optional and not args.only_leaves and not args.only_extras
         if run_optional:
             step8_start = time.time()
             await step8_optional_sections(llm, neo4j, logger)

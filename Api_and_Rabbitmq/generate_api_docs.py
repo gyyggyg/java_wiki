@@ -30,7 +30,7 @@ MAX_WORKERS_DB = 3   # Control concurrency for Neo4j queries
 LLM_TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "120"))  # 单次 LLM 调用超时（秒），默认 120
 
 # File path root prefix (neo4j中的路径不包括根目录，此处添加根目录前缀)
-ROOT_PREFIX = os.environ.get("ROOT_PREFIX", "mall")
+ROOT_PREFIX = os.environ.get("", "")
 
 class LLMClient:
     """Handles interaction with Real LLM for grouping and content generation."""
